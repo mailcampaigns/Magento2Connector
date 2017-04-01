@@ -1,0 +1,48 @@
+<?php
+/**
+ * MailCampaigns Connector
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   Magento extension
+ * @package    MailCampaigns
+ * @copyright  Copyright (c) 2016 MailCampaigns. (http://www.mailcampaigns.nl)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php
+
+$objectManager 	                            = \Magento\Framework\App\ObjectManager::getInstance();
+$helper                                     = $objectManager->get('\MailCampaigns\Connector\Helper\Data');
+//$helper 									= $this->helper('MailCampaigns\Connector\Helper\Data');
+
+$mailcampaigns_tracking_code 	= $helper->getScopeConfig('mailcampaignstracking/general/tracking_code');
+
+$api_key 						= $helper->getScopeConfig('mailcampaignsapi/general/api_key');
+$session 						= $objectManager->create('\Magento\Customer\Model\Session')->getData();
+$customer_id					= $objectManager->create('\Magento\Customer\Model\Customer')->getCustomerId();
+
+if ($mailcampaigns_tracking_code == 1)
+{			
+	if ($customer_id > 0)
+	{
+		$customer_data 	= $objectManager->create('Magento\Customer\Model\Customer')->load($customer_id)->getData();
+		$store_id		= $customer_data["store_id"];
+	
+		$postdata = array(
+			'store_id' => $store_id,
+			'customer_id' => $customer_id,
+			'visitor_id' => 0
+		);
+		
+		print '<script type="text/javascript" src="//interface.mailcampaigns.nl/w/'.$api_key.'/'.base64_encode(json_encode($postdata)).'"></script>';
+	}
+	else
+	{
+		print '<script type="text/javascript" src="//interface.mailcampaigns.nl/w/'.$api_key.'"></script>';
+	}
+}

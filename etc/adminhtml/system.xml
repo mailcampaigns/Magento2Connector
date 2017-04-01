@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Location: magento2_root/app/code/Vendorname/Extensionname/etc/adminhtml/system.xml
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="mailcampaigns_tab" translate="label" sortOrder="1000">
+            <label>MailCampaigns</label>
+        </tab>
+        <section id="mailcampaignsapi" translate="label" type="text" sortOrder="100" showInDefault="0" showInWebsite="0" showInStore="1">
+            <label>MailCampaigns Connector™ instellingen</label>
+            <tab>mailcampaigns_tab</tab>
+            <resource>MailCampaigns_Connector::config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+                <label>MailCampaigns Connector™ instellingen</label>
+				<comment>Om een koppeling te kunnen realiseren met MailCampaigns, moeten hieronder de API gegevens worden ingevuld. Deze gegevens kunnen in uw MailCampaigns account gevonden worden, onder Instellingen > Software koppelingen > Magento.</comment>
+                <field id="api_key" translate="label" type="text" sortOrder="20" showInDefault="0" showInWebsite="0" showInStore="1">
+                    <label>API Key</label>
+					<comment>Een 25-karakter string zoals te zien in Instellingen > Software koppelingen > Magento > API Key.</comment>
+                </field>
+				  <field id="api_token" translate="label" type="text" sortOrder="20" showInDefault="0" showInWebsite="0" showInStore="1">
+                    <label>API Token</label>
+					<comment>Een 25-karakter string zoals te zien in Instellingen > Software koppelingen > Magento > API Token.</comment>
+                </field>
+            </group>
+        </section>
+		<section id="mailcampaignsrealtimesync" translate="label" type="text" sortOrder="101" showInDefault="0" showInWebsite="0" showInStore="1">
+            <label>Realtime synchronisatie instellingen</label>
+            <tab>mailcampaigns_tab</tab>
+            <resource>MailCampaigns_Connector::config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+                <label>Realtime synchronisatie instellingen</label>
+				<comment>De MailCampaigns Connector™ kan diverse onderdelen van uw Magento webshop synchroniseren met MailCampaigns. Hieronder kunt u aangeven welke gegevens up-to-date moeten blijven.</comment>
+                <field id="import_customers" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Klanten</label>
+					<comment>Klanten synchroniseren?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="import_mailing_list" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Mailinglijst</label>
+					<comment>Mailinglijst synchroniseren?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="import_products" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Producten</label>
+					<comment>Producten synchroniseren?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="import_orders" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Orders</label>
+					<comment>Orders en bijbehorende producten synchroniseren?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="import_quotes" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Winkelmandjes</label>
+					<comment>Winkelmandjes en bijbehorende producten synchroniseren?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+            </group>
+        </section>
+		<section id="mailcampaignstracking" translate="label" type="text" sortOrder="102" showInDefault="0" showInWebsite="0" showInStore="1">
+            <label>Tracking instellingen</label>
+            <tab>mailcampaigns_tab</tab>
+            <resource>MailCampaigns_Connector::config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+                <label>Tracking instellingen</label>
+				<comment>De MailCampaigns Connector™ kan de pagina bezoeken op uw website naar MailCampaigns loggen om te gebruiken in segmentatie of automatisatie.</comment>
+                <field id="tracking_code" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Pagina's</label>
+					<comment>Alle pagina bezoeken volgen?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="tracking_code_order_success" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Orders</label>
+					<comment>Alle geplaatste orders volgen?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+            </group>
+        </section>
+		<section id="mailcampaignshistoricalsync" translate="label" type="text" sortOrder="103" showInDefault="0" showInWebsite="0" showInStore="1">
+            <label>Bulk import</label>
+            <tab>mailcampaigns_tab</tab>
+            <resource>MailCampaigns_Connector::config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+                <label>Bulk Import</label>
+				<comment>De MailCampaigns Connector™ kan ook met terugwerkende kracht diverse onderdelen van uw Magento webshop importeren in MailCampaigns. Hieronder kunt u aangeven welke gegevens met terugwerkende kracht gesynchroniseerd moeten worden.</comment>
+                <field id="import_customers_history" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Klanten</label>
+					<comment>Klanten importeren?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="import_mailing_list_history" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Mailinglijst</label>
+					<comment>Mailinglijst importeren?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="import_products_history" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Producten</label>
+					<comment>Producten importeren?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="import_order_history" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Orders</label>
+					<comment>Orders en bijbehorende producten importeren?</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+            </group>
+        </section>
+    </system>
+</config>
