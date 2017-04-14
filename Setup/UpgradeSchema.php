@@ -12,7 +12,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                             ModuleContextInterface $context)
 	{
         $setup->startSetup();
-        if (version_compare($context->getVersion(), '2.0.3') < 0) 
+        if (version_compare($context->getVersion(), '2.0.0') < 0) 
 		{
 			/*
             $tableName = $setup->getTable('table_name');

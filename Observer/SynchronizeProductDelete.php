@@ -20,7 +20,7 @@ class SynchronizeProductDelete implements ObserverInterface
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
         Logger $logger
     ) {
-		$this->version 		= '2.0.0';
+		$this->version 		= '2.0.4';
 		$this->logger 		= $logger;
 		$this->helper 		= $dataHelper;
 		$this->mcapi 		= $mcapi;

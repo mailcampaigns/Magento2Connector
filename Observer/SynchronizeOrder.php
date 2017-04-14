@@ -27,7 +27,7 @@ class SynchronizeOrder implements ObserverInterface
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
         Logger $logger
     ) {
-		$this->version 				= '2.0.0';
+		$this->version 				= '2.0.4';
 		$this->resource 				= $Resource;
 		$this->logger 				= $logger;
 		$this->helper 				= $dataHelper;
