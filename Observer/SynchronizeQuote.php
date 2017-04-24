@@ -9,7 +9,6 @@ use Psr\Log\LoggerInterface as Logger;
 class SynchronizeQuote implements ObserverInterface
 {
     protected $logger;
-	protected $version;
 	protected $resource;
 	protected $connection;
 	protected $helper;
@@ -23,7 +22,6 @@ class SynchronizeQuote implements ObserverInterface
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
         Logger $logger
     ) {
-		$this->version 		= '2.0.4';
 		$this->resource 		= $Resource;
 		$this->logger 		= $logger;
 		$this->helper 		= $dataHelper;

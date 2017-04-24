@@ -9,7 +9,6 @@ use Psr\Log\LoggerInterface as Logger;
 class SynchronizeProduct implements ObserverInterface
 {
     protected $logger;
-	protected $version;
 	protected $helper;
 	protected $storemanager;
 	protected $objectmanager;
@@ -24,7 +23,6 @@ class SynchronizeProduct implements ObserverInterface
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
         Logger $logger
     ) {
-		$this->version 				= '2.0.4';
 		$this->logger 				= $logger;
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;

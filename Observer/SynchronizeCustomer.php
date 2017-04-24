@@ -7,7 +7,6 @@ use Magento\Framework\Event\Observer as EventObserver;
 
 class SynchronizeCustomer implements ObserverInterface
 {
-	protected $version;
 	protected $helper;
 	protected $storemanager;
 	protected $objectmanager;

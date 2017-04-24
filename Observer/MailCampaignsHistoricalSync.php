@@ -9,7 +9,6 @@ use Psr\Log\LoggerInterface as Logger;
 class MailCampaignsHistoricalSync implements ObserverInterface
 {
     protected $logger;
-	protected $version;
 	protected $helper;
 	protected $storemanager;
 	protected $mcapi;
@@ -22,7 +21,6 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		\Magento\Framework\App\ResourceConnection $resourceConnection,
         Logger $logger
     ) {
-		$this->version 		= '2.0.4';
 		$this->logger 		= $logger;
 		$this->helper 		= $dataHelper;
 		$this->mcapi 		= $mcapi;

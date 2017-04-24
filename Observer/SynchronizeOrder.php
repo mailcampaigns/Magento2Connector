@@ -9,7 +9,6 @@ use Psr\Log\LoggerInterface as Logger;
 class SynchronizeOrder implements ObserverInterface
 {
     protected $logger;
-	protected $version;
 	protected $resource;
 	protected $connection;
 	protected $helper;
@@ -27,7 +26,6 @@ class SynchronizeOrder implements ObserverInterface
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
         Logger $logger
     ) {
-		$this->version 				= '2.0.4';
 		$this->resource 				= $Resource;
 		$this->logger 				= $logger;
 		$this->helper 				= $dataHelper;
