@@ -63,10 +63,14 @@ class SynchronizeProduct implements ObserverInterface
 			// images
 			$image_id = 1;
 			$product_data[$i]["mc:image_url_main"] = $product->getMediaConfig()->getMediaUrl($product->getData('image'));
-			foreach ($product->getMediaGalleryImages() as $image)
+			$product_images = $product->getMediaGalleryImages();
+			if (sizeof($product_images) > 0)
 			{
-				$product_data[$i]["mc:image_url_".$image_id++.""] = $image->getUrl();
-			} 
+				foreach ($product_images as $image)
+				{
+					$product_data[$i]["mc:image_url_".$image_id++.""] = $image->getUrl();
+				} 
+			}
 
 			// link
 			$product_data[$i]["mc:product_url"] = $product->getProductUrl();

@@ -27,9 +27,6 @@
 	<event name="catalog_product_save_after">
         <observer name="custom_catalog_product_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeProduct"/>
     </event>
-	<event name="catalog_product_attribute_update_before">
-        <observer name="custom_catalog_product_attribute_update_before" instance="MailCampaigns\Connector\Observer\SynchronizeProduct"/>
-    </event>
 	<event name="catalog_product_delete_before">
         <observer name="custom_catalog_product_delete_before" instance="MailCampaigns\Connector\Observer\SynchronizeProductDelete"/>
     </event>

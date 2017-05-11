@@ -170,7 +170,8 @@ class SyncCron {
 					// images
 					$image_id = 1;
 					$product_data[$i]["mc:image_url_main"] = $product->getMediaConfig()->getMediaUrl($product->getData('image'));
-					foreach ($product->getMediaGalleryImages() as $image)
+					$product_images = $product->getMediaGalleryImages();
+					if (sizeof($product_images) > 0)
 					{
 						$product_data[$i]["mc:image_url_".$image_id++.""] = $image->getUrl();
 					} 
