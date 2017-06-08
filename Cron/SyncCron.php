@@ -171,7 +171,7 @@ class SyncCron {
 					$image_id = 1;
 					$product_data[$i]["mc:image_url_main"] = $product->getMediaConfig()->getMediaUrl($product->getData('image'));
 					$product_images = $product->getMediaGalleryImages();
-					if (sizeof($product_images) > 0)
+					if (!empty($product_images) && sizeof($product_images) > 0 && is_array($product_images))
 					{
 						$product_data[$i]["mc:image_url_".$image_id++.""] = $image->getUrl();
 					} 
@@ -184,10 +184,13 @@ class SyncCron {
 					
 					// get related products
 					$related_product_collection = $product->getRelatedProductIds();
-					$related_products[$product->getId()]["store_id"] = $this->APIStoreID;;
-					foreach($related_product_collection as $pdtid)
+					$related_products[$product->getId()]["store_id"] = $this->APIStoreID;
+					if (!empty($related_product_collection) && sizeof($related_product_collection) > 0 && is_array($related_product_collection))
 					{
-						$related_products[$product->getId()]["products"][] = $pdtid;
+						foreach($related_product_collection as $pdtid)
+						{
+							$related_products[$product->getId()]["products"][] = $pdtid;
+						}
 					}
 					
 					$i++;
