@@ -62,6 +62,8 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		/* Orders */
 		$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'sales/order' AND store_id = ".$this->mcapi->APIStoreID."";
 		$this->connection->getConnection()->query($sql);
+		$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'sales/order/products' AND store_id = ".$this->mcapi->APIStoreID."";
+		$this->connection->getConnection()->query($sql);
 		if ($this->mcapi->ImportOrdersHistory == 1)
 		{	
 			$sql = "INSERT INTO `".$tn__mc_api_pages."` SET 
