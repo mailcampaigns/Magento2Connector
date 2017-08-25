@@ -16,9 +16,9 @@
 ?>
 <?php
 
-$objectManager 	                            = \Magento\Framework\App\ObjectManager::getInstance();
-$helper                                     = $objectManager->get('\MailCampaigns\Connector\Helper\Data');
-//$helper 									= $this->helper('MailCampaigns\Connector\Helper\Data');
+$objectManager 	                = \Magento\Framework\App\ObjectManager::getInstance();
+$helper                         = $objectManager->get('\MailCampaigns\Connector\Helper\Data');
+//$helper 						= $this->helper('MailCampaigns\Connector\Helper\Data');
 
 $mailcampaigns_tracking_code 	= $helper->getScopeConfig('mailcampaignstracking/general/tracking_code');
 
@@ -32,17 +32,24 @@ if ($mailcampaigns_tracking_code == 1)
 	{
 		$customer_data 	= $objectManager->create('Magento\Customer\Model\Customer')->load($customer_id)->getData();
 		$store_id		= $customer_data["store_id"];
+	}
 	
-		$postdata = array(
-			'store_id' => $store_id,
-			'customer_id' => $customer_id,
-			'visitor_id' => 0
-		);
-		
-		print '<script type="text/javascript" src="//interface.mailcampaigns.nl/w/'.$api_key.'/'.base64_encode(json_encode($postdata)).'"></script>';
-	}
-	else
+	try 
 	{
-		print '<script type="text/javascript" src="//interface.mailcampaigns.nl/w/'.$api_key.'"></script>';
+		$product = $objectManager->get('Magento\Framework\Registry')->registry('current_product');
+		$product_id = $product->getId();
 	}
+	catch (Exception $e) 
+	{
+		$product_id	= 0;
+	}
+	
+	$postdata = array(
+		'store_id' => (int)$store_id,
+		'customer_id' => (int)$customer_id,
+		'visitor_id' => 0,
+		'product_id' => (int)$product_id
+	);
+	
+	print '<script type="text/javascript" src="//interface.mailcampaigns.nl/w/'.$api_key.'/'.base64_encode(json_encode($postdata)).'"></script>';
 }
