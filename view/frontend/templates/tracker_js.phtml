@@ -37,7 +37,7 @@ if ($mailcampaigns_tracking_code == 1)
 	try 
 	{
 		$product = $objectManager->get('Magento\Framework\Registry')->registry('current_product');
-		$product_id = $product->getId();
+		if (isset($product)) { $product_id = $product->getId(); } else { $product_id	= 0; }
 	}
 	catch (Exception $e) 
 	{
