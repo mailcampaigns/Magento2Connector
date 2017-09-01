@@ -18,8 +18,6 @@
 
 $objectManager 	                = \Magento\Framework\App\ObjectManager::getInstance();
 $helper                         = $objectManager->get('\MailCampaigns\Connector\Helper\Data');
-//$helper 						= $this->helper('MailCampaigns\Connector\Helper\Data');
-
 $mailcampaigns_tracking_code 	= $helper->getScopeConfig('mailcampaignstracking/general/tracking_code');
 
 $api_key 						= $helper->getScopeConfig('mailcampaignsapi/general/api_key');
