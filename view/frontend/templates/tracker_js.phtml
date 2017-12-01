@@ -16,7 +16,7 @@
 ?>
 <?php
 
-$objectManager 	                = \Magento\Framework\App\ObjectManager::getInstance();
+$objectManager 	                = Magento\Framework\App\ObjectManager::getInstance();
 $helper                         = $objectManager->get('\MailCampaigns\Connector\Helper\Data');
 $mailcampaigns_tracking_code 	= $helper->getScopeConfig('mailcampaignstracking/general/tracking_code');
 
@@ -40,7 +40,7 @@ if ($mailcampaigns_tracking_code == 1)
 	try 
 	{
 		$product = $objectManager->get('Magento\Framework\Registry')->registry('current_product');
-		if ($product instanceof \Magento\Catalog\Api\Data\ProductInterface) 
+		if ($product instanceof Magento\Catalog\Api\Data\ProductInterface) 
 		{
 			$product_id = $product->getId(); 
 		} 
