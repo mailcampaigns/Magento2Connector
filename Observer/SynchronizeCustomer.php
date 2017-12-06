@@ -51,11 +51,10 @@ class SynchronizeCustomer implements ObserverInterface
 				$address 		= $this->objectmanager->create('Magento\Customer\Model\Address')->load($customerAddressId);
 				$address_data 	= $address->getData();
 				
-				$country_id 		= $address_data["country_id"];
+				/*$country_id 		= $address_data["country_id"];
 				$country 		= $this->countryinformation->getCountryInfo($country_id);
 				$country_name 	= $country->getFullNameLocale();
-				
-				$address_data["country_name"] = $country_name;
+				$address_data["country_name"] = $country_name;*/
 			}
 			
 			unset($address_data["entity_id"]);

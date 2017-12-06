@@ -29,7 +29,7 @@ class MailCampaignsAPIConfig implements ObserverInterface
 		\Magento\Framework\App\ResourceConnection $Resource,
         Logger $logger
     ) {
-		$this->version 		= '2.0.18';
+		$this->version 		= '2.0.19';
 		$this->logger 		= $logger;
 		$this->helper 		= $dataHelper;
 		$this->mcapi 		= $mcapi;

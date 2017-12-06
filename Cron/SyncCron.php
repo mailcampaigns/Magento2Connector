@@ -85,7 +85,7 @@ class SyncCron {
 							$address 		= $this->objectmanager->create('Magento\Customer\Model\Address')->load($customerAddressId);
 							$address_data 	= $address->getData();
 							
-							$country_id 	= $address_data["country_id"];
+							//$country_id 	= $address_data["country_id"] ?? '';
 							//$country 		= $this->countryinformation->getCountryInfo($country_id);
 							//$country_name 	= $country->getFullNameLocale();
 							//$address_data["country_name"] = $country_name;
