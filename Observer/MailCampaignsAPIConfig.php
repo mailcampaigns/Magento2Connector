@@ -29,7 +29,7 @@ class MailCampaignsAPIConfig implements ObserverInterface
 		\Magento\Framework\App\ResourceConnection $Resource,
         Logger $logger
     ) {
-		$this->version 		= '2.0.19';
+		$this->version 		= '2.0.20';
 		$this->logger 		= $logger;
 		$this->helper 		= $dataHelper;
 		$this->mcapi 		= $mcapi;
@@ -147,7 +147,7 @@ class MailCampaignsAPIConfig implements ObserverInterface
                     ['nullable' => false, 'default' => '0'],
                     'Total pages'
                 )
-                ->setComment('MailCampaigns Queue Table')
+                ->setComment('MailCampaigns Pages Table')
                 ->setOption('type', 'InnoDB')
                 ->setOption('charset', 'utf8');
             $this->connection->createTable($table);

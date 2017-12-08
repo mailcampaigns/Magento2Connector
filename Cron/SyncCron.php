@@ -56,25 +56,25 @@ class SyncCron {
 			$this->mcapi->APIStoreID = $row["store_id"];
 			$this->mcapi->APIKey 	 = $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
 			$this->mcapi->APIToken 	 = $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
-			
-			try
+		
+			if ($row["collection"] == "customer/customer")
 			{
-				if ($row["collection"] == "customer/customer")
+				// one transaction
+				// get all customers
+				$customer_data = array();
+				$customersCollection = $this->objectmanager->create('Magento\Customer\Model\Customer')->getCollection();
+				$customersCollection->addAttributeToSelect('*');				
+				$customersCollection->setPageSize(100);
+				
+				$pages = $customersCollection->getLastPageNumber();
+
+				$customersCollection->setCurPage($currentPage);
+				$customersCollection->load();
+						
+				// Loop trough customers
+				foreach ($customersCollection as $customer)
 				{
-					// one transaction
-					// get all customers
-					$customer_data = array();
-					$customersCollection = $this->objectmanager->create('Magento\Customer\Model\Customer')->getCollection();
-					$customersCollection->addAttributeToSelect('*');				
-					$customersCollection->setPageSize(100);
-					
-					$pages = $customersCollection->getLastPageNumber();
-	
-					$customersCollection->setCurPage($currentPage);
-					$customersCollection->load();
-							
-					// Loop trough customers
-					foreach ($customersCollection as $customer)
+					try
 					{
 						$tmpdata = $customer->getData();
 						
@@ -111,28 +111,35 @@ class SyncCron {
 							$customer_data[] = $tmp_customer_data;		
 						}
 					}
-									
-					// Queue data
-					$this->mcapi->QueueAPICall("update_magento_customers", $customer_data);
-					
-					// Clear collection and free memory
-					$customersCollection->clear();	
-					unset($customer_data);
+					catch (Exception $e) 
+					{
+						
+					}
 				}
-				else
-				if ($row["collection"] == "newsletter/subscriber_collection")
-				{
-					// one transaction
-					// get mailing list for this store
-					$subscriber_data = array();
-					$mailinglistCollection = $this->objectmanager->create('Magento\Newsletter\Model\Subscriber')->getCollection();
-					$mailinglistCollection->setPageSize(100);
-					
-					$pages = $mailinglistCollection->getLastPageNumber();
-					$mailinglistCollection->setCurPage($currentPage);
-					$mailinglistCollection->load();
+								
+				// Queue data
+				$this->mcapi->QueueAPICall("update_magento_customers", $customer_data);
 				
-					foreach($mailinglistCollection->getItems() as $subscriber)
+				// Clear collection and free memory
+				$customersCollection->clear();	
+				unset($customer_data);
+			}
+			else
+			if ($row["collection"] == "newsletter/subscriber_collection")
+			{
+				// one transaction
+				// get mailing list for this store
+				$subscriber_data = array();
+				$mailinglistCollection = $this->objectmanager->create('Magento\Newsletter\Model\Subscriber')->getCollection();
+				$mailinglistCollection->setPageSize(100);
+				
+				$pages = $mailinglistCollection->getLastPageNumber();
+				$mailinglistCollection->setCurPage($currentPage);
+				$mailinglistCollection->load();
+			
+				foreach($mailinglistCollection->getItems() as $subscriber)
+				{
+					try
 					{
 						$tmp = $subscriber->getData();
 						if (!isset($tmp["store_id"]))
@@ -145,30 +152,37 @@ class SyncCron {
 							$subscriber_data[] = $tmp;
 						}
 					}
-					
-					$this->mcapi->QueueAPICall("update_magento_mailing_list", $subscriber_data);
-					
-					//clear collection and free memory
-					$mailinglistCollection->clear();
-					unset($subscriber_data);
-				}	
-				else
-				if ($row["collection"] == "catalog/product")
+					catch (Exception $e) 
+					{
+						
+					}
+				}
+				
+				$this->mcapi->QueueAPICall("update_magento_mailing_list", $subscriber_data);
+				
+				//clear collection and free memory
+				$mailinglistCollection->clear();
+				unset($subscriber_data);
+			}	
+			else
+			if ($row["collection"] == "catalog/product")
+			{
+				// one transaction
+				// loop trough all products for this store
+				$product_data = array(); 
+				$related_products = array();
+				$i = 0;
+
+				$productsCollection = $this->objectmanager->create('Magento\Catalog\Model\Product')->getCollection();
+				$productsCollection->setPageSize(10);
+				$pages = $productsCollection->getLastPageNumber();
+				
+				$productsCollection->setCurPage($currentPage);
+				$productsCollection->load();
+		 
+				foreach ($productsCollection as $product)
 				{
-					// one transaction
-					// loop trough all products for this store
-					$product_data = array(); 
-					$related_products = array();
-					$i = 0;
-	
-					$productsCollection = $this->objectmanager->create('Magento\Catalog\Model\Product')->getCollection();
-					$productsCollection->setPageSize(10);
-					$pages = $productsCollection->getLastPageNumber();
-					
-					$productsCollection->setCurPage($currentPage);
-					$productsCollection->load();
-			 
-					foreach ($productsCollection as $product)
+					try
 					{
 						// Load data
 						$product = $this->objectmanager->create('Magento\Catalog\Model\Product')->load($product->getId());
@@ -211,29 +225,36 @@ class SyncCron {
 						}
 						
 						$i++;
-					}				
-					
-					$response = $this->mcapi->QueueAPICall("update_magento_products", $product_data);			
-					$response = $this->mcapi->QueueAPICall("update_magento_related_products", $related_products);	
-					
-					//clear collection and free memory
-					$productsCollection->clear();
-					
-					unset($related_products);			
-					unset($product_data);	
-				}
-				else
-				if ($row["collection"] == "sales/order")
+					}
+					catch (Exception $e) 
+					{
+						
+					}
+				}				
+				
+				$response = $this->mcapi->QueueAPICall("update_magento_products", $product_data);			
+				$response = $this->mcapi->QueueAPICall("update_magento_related_products", $related_products);	
+				
+				//clear collection and free memory
+				$productsCollection->clear();
+				
+				unset($related_products);			
+				unset($product_data);	
+			}
+			else
+			if ($row["collection"] == "sales/order")
+			{
+				// get all orders
+				$mc_import_data = array();
+				$ordersCollection = $this->objectmanager->create('Magento\Sales\Model\Order')->getCollection();
+				$ordersCollection->setPageSize(50);
+				$pages = $ordersCollection->getLastPageNumber();
+				
+				$ordersCollection->setCurPage($currentPage);
+				$ordersCollection->load();
+				foreach ($ordersCollection as $order)
 				{
-					// get all orders
-					$mc_import_data = array();
-					$ordersCollection = $this->objectmanager->create('Magento\Sales\Model\Order')->getCollection();
-					$ordersCollection->setPageSize(50);
-					$pages = $ordersCollection->getLastPageNumber();
-					
-					$ordersCollection->setCurPage($currentPage);
-					$ordersCollection->load();
-					foreach ($ordersCollection as $order)
+					try
 					{
 						$mc_order_data = (array)$order->getData();
 						
@@ -254,47 +275,54 @@ class SyncCron {
 								);
 						}
 					}
-								
-					$response = $this->mcapi->QueueAPICall("update_magento_multiple_orders", $mc_import_data);
-					unset($mc_import_data);
-					
-					//clear collection and free memory
-					$ordersCollection->clear();
+					catch (Exception $e) 
+					{
+						
+					}
 				}
-				else
-				if ($row["collection"] == "sales/order/products")
+							
+				$response = $this->mcapi->QueueAPICall("update_magento_multiple_orders", $mc_import_data);
+				unset($mc_import_data);
+				
+				//clear collection and free memory
+				$ordersCollection->clear();
+			}
+			else
+			if ($row["collection"] == "sales/order/products")
+			{
+				//tables
+				//$this->tn__mc_api_pages = $this->resource->getTableName('mc_api_pages');
+				//$this->tn__mc_api_queue = $this->resource->getTableName('mc_api_queue');
+				
+				// Get table names
+				$tn__sales_flat_quote 					= $this->resource->getTableName('quote');
+				$tn__sales_flat_order 					= $this->resource->getTableName('sales_order');
+				$tn__sales_flat_order_item 				= $this->resource->getTableName('sales_order_item');
+				$tn__sales_flat_quote_item 				= $this->resource->getTableName('quote_item');
+				$tn__catalog_category_product 			= $this->resource->getTableName('catalog_category_product');
+				$tn__catalog_category_entity_varchar 	= $this->resource->getTableName('catalog_category_entity_varchar');
+				$tn__eav_entity_type 					= $this->resource->getTableName('eav_entity_type');
+				$tn__catalog_category_entity 			= $this->resource->getTableName('catalog_category_entity');
+				
+				$pagesize = 15;
+				
+				// order items
+				$sql        = "SELECT COUNT(*) AS pages FROM `".$tn__sales_flat_order."` AS o INNER JOIN ".$tn__sales_flat_order_item." AS oi ON oi.order_id = o.entity_id WHERE o.store_id = ".$this->mcapi->APIStoreID." OR o.store_id = 0";
+				$pages 		= ceil($this->connection->fetchOne($sql) / $pagesize);
+				
+				$sql        = "SELECT o.entity_id as order_id, o.store_id, oi.product_id as product_id, oi.qty_ordered, oi.price, oi.name, oi.sku, o.customer_id
+				FROM `".$tn__sales_flat_order."` AS o
+				INNER JOIN ".$tn__sales_flat_order_item." AS oi ON oi.order_id = o.entity_id
+				WHERE o.store_id = ".$this->mcapi->APIStoreID." OR o.store_id = 0
+				ORDER BY  `o`.`updated_at` DESC
+				LIMIT ".$pagesize." OFFSET ".(($row["page"]-1) * $pagesize)."
+				";
+								
+				$tmp_rows       = $this->connection->fetchAll($sql);
+				$mc_import_data = array(); $i = 0;
+				foreach ($tmp_rows as $tmp_row)
 				{
-					//tables
-					//$this->tn__mc_api_pages = $this->resource->getTableName('mc_api_pages');
-					//$this->tn__mc_api_queue = $this->resource->getTableName('mc_api_queue');
-					
-					// Get table names
-					$tn__sales_flat_quote 					= $this->resource->getTableName('quote');
-					$tn__sales_flat_order 					= $this->resource->getTableName('sales_order');
-					$tn__sales_flat_order_item 				= $this->resource->getTableName('sales_order_item');
-					$tn__sales_flat_quote_item 				= $this->resource->getTableName('quote_item');
-					$tn__catalog_category_product 			= $this->resource->getTableName('catalog_category_product');
-					$tn__catalog_category_entity_varchar 	= $this->resource->getTableName('catalog_category_entity_varchar');
-					$tn__eav_entity_type 					= $this->resource->getTableName('eav_entity_type');
-					$tn__catalog_category_entity 			= $this->resource->getTableName('catalog_category_entity');
-					
-					$pagesize = 15;
-					
-					// order items
-					$sql        = "SELECT COUNT(*) AS pages FROM `".$tn__sales_flat_order."` AS o INNER JOIN ".$tn__sales_flat_order_item." AS oi ON oi.order_id = o.entity_id WHERE o.store_id = ".$this->mcapi->APIStoreID." OR o.store_id = 0";
-					$pages 		= ceil($this->connection->fetchOne($sql) / $pagesize);
-					
-					$sql        = "SELECT o.entity_id as order_id, o.store_id, oi.product_id as product_id, oi.qty_ordered, oi.price, oi.name, oi.sku, o.customer_id
-					FROM `".$tn__sales_flat_order."` AS o
-					INNER JOIN ".$tn__sales_flat_order_item." AS oi ON oi.order_id = o.entity_id
-					WHERE o.store_id = ".$this->mcapi->APIStoreID." OR o.store_id = 0
-					ORDER BY  `o`.`updated_at` DESC
-					LIMIT ".$pagesize." OFFSET ".(($row["page"]-1) * $pagesize)."
-					";
-									
-					$tmp_rows       = $this->connection->fetchAll($sql);
-					$mc_import_data = array(); $i = 0;
-					foreach ($tmp_rows as $tmp_row)
+					try
 					{
 						foreach ($tmp_row as $key => $value)
 						{
@@ -314,31 +342,37 @@ class SyncCron {
 						
 						$mc_import_data[$i]["categories"] = json_encode($categories);
 						$i++;
-					}	
-					
-					// post items
-					$response = $this->mcapi->QueueAPICall("update_magento_order_products", $mc_import_data);		
-					
-					// clear
-					unset($mc_import_data);				
-				}
+					}
+					catch (Exception $e) 
+					{
+						
+					}
+				}	
 				
-				// Remove job if finished
-				if (($row["page"]+1) > $pages)
-				{
-					$sql = "DELETE FROM `".$this->tn__mc_api_pages."` WHERE id = ".$row["id"]."";
-					$this->connection->query($sql);
-				}
-				else
-				// Update job if not finished
-				{
-					$sql = "UPDATE `".$this->tn__mc_api_pages."` SET page = ".($row["page"]+1).", total = ".(int)$pages.", datetime = ".time()." WHERE id = ".$row["id"]."";
-					$this->connection->query($sql);
-				}
+				// post items
+				$response = $this->mcapi->QueueAPICall("update_magento_order_products", $mc_import_data);		
+				
+				// clear
+				unset($mc_import_data);				
 			}
-			catch (Exception $e) 
-			{
+			
+			// Remove job if finished
+			if (($row["page"]+1) > $pages)
+			{	
+				$sql = "DELETE FROM `".$this->tn__mc_api_pages."` WHERE id = ".$row["id"]."";
+				$this->connection->query($sql);
 				
+				$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 1);
+				$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);	
+			}
+			else
+			// Update job if not finished
+			{		
+				$sql = "UPDATE `".$this->tn__mc_api_pages."` SET page = ".($row["page"]+1).", total = ".(int)$pages.", datetime = ".time()." WHERE id = ".$row["id"]."";
+				$this->connection->query($sql);
+				
+				$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 0);
+				$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);	
 			}
 		}
 			
