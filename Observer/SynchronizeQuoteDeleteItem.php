@@ -36,14 +36,21 @@ class SynchronizeQuoteDeleteItem implements ObserverInterface
 
   		if ($this->mcapi->ImportQuotes == 1)
 		{
-			$quote_data = $observer->getEvent()->getQuoteItem()->getData();
-			$quote_id   = $quote_data["quote_id"];
-			$item_id   	= $quote_data["item_id"];
-			$store_id   = $quote_data["store_id"];
-			
-			// delete abandonded carts quote items
-			$data = array("item_id" => $item_id, "store_id" => $store_id, "quote_id" => $quote_id);
-			$this->mcapi->QueueAPICall("delete_magento_abandonded_cart_product", $data);	
+			try
+			{
+				$quote_data = $observer->getEvent()->getQuoteItem()->getData();
+				$quote_id   = $quote_data["quote_id"];
+				$item_id   	= $quote_data["item_id"];
+				$store_id   = $quote_data["store_id"];
+				
+				// delete abandonded carts quote items
+				$data = array("item_id" => $item_id, "store_id" => $store_id, "quote_id" => $quote_id);
+				$this->mcapi->QueueAPICall("delete_magento_abandonded_cart_product", $data);	
+			}
+			catch (Exception $e) 
+			{
+				
+			}
 		}
     }
 }

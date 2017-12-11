@@ -36,14 +36,21 @@ class SynchronizeMailingEntry implements ObserverInterface
 
   		if ($this->mcapi->ImportMailinglist == 1)
 		{
-			$event = $observer->getEvent();
-			$subscriber = $event->getDataObject();
-			$subscriber_tmp = (array)$subscriber->getData();
-		
-			$subscriber_data = array();
-			$subscriber_data[0] = $subscriber_tmp;	
-					
-			$this->mcapi->QueueAPICall("update_magento_mailing_list", $subscriber_data);
+			try
+			{
+				$event = $observer->getEvent();
+				$subscriber = $event->getDataObject();
+				$subscriber_tmp = (array)$subscriber->getData();
+			
+				$subscriber_data = array();
+				$subscriber_data[0] = $subscriber_tmp;	
+						
+				$this->mcapi->QueueAPICall("update_magento_mailing_list", $subscriber_data);
+			}
+			catch (Exception $e) 
+			{
+				
+			}
 		}
     }
 }

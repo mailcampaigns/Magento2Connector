@@ -39,32 +39,39 @@ class SynchronizeCustomer implements ObserverInterface
 
 		if ($this->mcapi->ImportCustomers == 1)
 		{
-			// Retrieve the customer being updated from the event observer
-			$customer 		= $observer->getEvent()->getCustomer();
-			$customer_data 	= array();
-			$address_data 	= array();
-			
-			$customerAddressId = $customer->getDefaultBilling();
-			
-			if ($customerAddressId)
+			try
 			{
-				$address 		= $this->objectmanager->create('Magento\Customer\Model\Address')->load($customerAddressId);
-				$address_data 	= $address->getData();
+				// Retrieve the customer being updated from the event observer
+				$customer 		= $observer->getEvent()->getCustomer();
+				$customer_data 	= array();
+				$address_data 	= array();
 				
-				/*$country_id 		= $address_data["country_id"];
-				$country 		= $this->countryinformation->getCountryInfo($country_id);
-				$country_name 	= $country->getFullNameLocale();
-				$address_data["country_name"] = $country_name;*/
+				$customerAddressId = $customer->getDefaultBilling();
+				
+				if ($customerAddressId)
+				{
+					$address 		= $this->objectmanager->create('Magento\Customer\Model\Address')->load($customerAddressId);
+					$address_data 	= $address->getData();
+					
+					/*$country_id 		= $address_data["country_id"];
+					$country 		= $this->countryinformation->getCountryInfo($country_id);
+					$country_name 	= $country->getFullNameLocale();
+					$address_data["country_name"] = $country_name;*/
+				}
+				
+				unset($address_data["entity_id"]);
+				unset($address_data["parent_id"]);
+				unset($address_data["is_active"]);
+				unset($address_data["created_at"]);
+				unset($address_data["updated_at"]);
+							
+				$customer_data[0] = array_filter(array_merge($address_data, $customer->getData()), 'is_scalar');	// ommit sub array levels
+				$this->mcapi->QueueAPICall("update_magento_customers", $customer_data);
 			}
-			
-			unset($address_data["entity_id"]);
-			unset($address_data["parent_id"]);
-			unset($address_data["is_active"]);
-			unset($address_data["created_at"]);
-			unset($address_data["updated_at"]);
-						
-			$customer_data[0] = array_filter(array_merge($address_data, $customer->getData()), 'is_scalar');	// ommit sub array levels
-			$this->mcapi->QueueAPICall("update_magento_customers", $customer_data);
+			catch (Exception $e)
+			{
+				
+			}
 		}		
 		
 		return $this;

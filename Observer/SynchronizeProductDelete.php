@@ -36,12 +36,19 @@ class SynchronizeProductDelete implements ObserverInterface
 
   		if ($this->mcapi->ImportProducts == 1)
 		{
-			$product = $observer->getEvent()->getProduct();
-		
-			$product_data = array();
-			$product_data["entity_id"] = $product->getId();			
-		
-			$this->mcapi->QueueAPICall("delete_magento_product", $product_data);
+			try
+			{
+				$product = $observer->getEvent()->getProduct();
+			
+				$product_data = array();
+				$product_data["entity_id"] = $product->getId();			
+			
+				$this->mcapi->QueueAPICall("delete_magento_product", $product_data);
+			}
+			catch (Exception $e) 
+			{
+				
+			}
 		}
     }
 }
