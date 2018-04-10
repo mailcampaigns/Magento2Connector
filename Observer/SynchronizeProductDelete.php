@@ -45,9 +45,13 @@ class SynchronizeProductDelete implements ObserverInterface
 			
 				$this->mcapi->QueueAPICall("delete_magento_product", $product_data);
 			}
-			catch (Exception $e) 
+			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 			{
-				
+				$this->mcapi->DebugCall($e->getMessage());
+			}
+			catch (Exception $e)
+			{
+				$this->mcapi->DebugCall($e->getMessage());
 			}
 		}
     }

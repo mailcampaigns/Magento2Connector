@@ -105,9 +105,13 @@ class SynchronizeQuote implements ObserverInterface
 					$this->mcapi->QueueAPICall("update_magento_abandonded_cart_products", $data);	
 				}
 			}
-			catch (Exception $e) 
+			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 			{
-				
+				$this->mcapi->DebugCall($e->getMessage());
+			}
+			catch (Exception $e)
+			{
+				$this->mcapi->DebugCall($e->getMessage());
 			}
 		}		
     }

@@ -104,8 +104,19 @@ class SynchronizeOrder implements ObserverInterface
 						$categories = array();
 						if ($row["product_id"] > 0)
 						{
-							$product 	= $this->productrepository->getById($row["product_id"]);
-							$categories = $product->getCategoryIds();
+							try
+							{
+								$product 	= $this->productrepository->getById($row["product_id"]);
+								$categories = $product->getCategoryIds();
+							}
+							catch (\Magento\Framework\Exception\NoSuchEntityException $e)
+							{
+								$this->mcapi->DebugCall($e->getMessage());
+							}
+							catch (Exception $e)
+							{
+								$this->mcapi->DebugCall($e->getMessage());
+							}
 						}
 						
 						$mc_import_data[$i]["categories"] = json_encode($categories);
@@ -119,9 +130,13 @@ class SynchronizeOrder implements ObserverInterface
 					}
 				}
 			}
-			catch (Exception $e) 
+			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 			{
-				
+				$this->mcapi->DebugCall($e->getMessage());
+			}
+			catch (Exception $e)
+			{
+				$this->mcapi->DebugCall($e->getMessage());
 			}
 		}
     }

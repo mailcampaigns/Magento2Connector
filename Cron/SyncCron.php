@@ -111,9 +111,13 @@ class SyncCron {
 							$customer_data[] = $tmp_customer_data;		
 						}
 					}
-					catch (Exception $e) 
+					catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 					{
-						
+						$this->mcapi->DebugCall($e->getMessage());
+					}
+					catch (Exception $e)
+					{
+						$this->mcapi->DebugCall($e->getMessage());
 					}
 				}
 								
@@ -124,7 +128,7 @@ class SyncCron {
 				$customersCollection->clear();	
 				unset($customer_data);
 			}
-			else
+
 			if ($row["collection"] == "newsletter/subscriber_collection")
 			{
 				// one transaction
@@ -152,9 +156,13 @@ class SyncCron {
 							$subscriber_data[] = $tmp;
 						}
 					}
-					catch (Exception $e) 
+					catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 					{
-						
+						$this->mcapi->DebugCall($e->getMessage());
+					}
+					catch (Exception $e)
+					{
+						$this->mcapi->DebugCall($e->getMessage());
 					}
 				}
 				
@@ -164,7 +172,7 @@ class SyncCron {
 				$mailinglistCollection->clear();
 				unset($subscriber_data);
 			}	
-			else
+
 			if ($row["collection"] == "catalog/product")
 			{
 				// one transaction
@@ -226,9 +234,13 @@ class SyncCron {
 						
 						$i++;
 					}
-					catch (Exception $e) 
+					catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 					{
-						
+						$this->mcapi->DebugCall($e->getMessage());
+					}
+					catch (Exception $e)
+					{
+						$this->mcapi->DebugCall($e->getMessage());
 					}
 				}				
 				
@@ -241,7 +253,7 @@ class SyncCron {
 				unset($related_products);			
 				unset($product_data);	
 			}
-			else
+
 			if ($row["collection"] == "sales/order")
 			{
 				// get all orders
@@ -275,9 +287,13 @@ class SyncCron {
 								);
 						}
 					}
-					catch (Exception $e) 
+					catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 					{
-						
+						$this->mcapi->DebugCall($e->getMessage());
+					}
+					catch (Exception $e)
+					{
+						$this->mcapi->DebugCall($e->getMessage());
 					}
 				}
 							
@@ -287,7 +303,7 @@ class SyncCron {
 				//clear collection and free memory
 				$ordersCollection->clear();
 			}
-			else
+
 			if ($row["collection"] == "sales/order/products")
 			{
 				//tables
@@ -322,31 +338,35 @@ class SyncCron {
 				$mc_import_data = array(); $i = 0;
 				foreach ($tmp_rows as $tmp_row)
 				{
-					try
+					foreach ($tmp_row as $key => $value)
 					{
-						foreach ($tmp_row as $key => $value)
+						if (!is_numeric($key)) 
 						{
-							if (!is_numeric($key)) 
-							{
-								$mc_import_data[$i][$key] = $value;
-							}
+							$mc_import_data[$i][$key] = $value;
 						}
-		
-						// get categories			
-						$categories = array();
-						if ($tmp_row["product_id"] > 0)
+					}
+	
+					// get categories			
+					$categories = array();
+					if ($tmp_row["product_id"] > 0)
+					{
+						try
 						{
 							$product 	= $this->productrepository->getById($tmp_row["product_id"]);
 							$categories = $product->getCategoryIds();
 						}
-						
-						$mc_import_data[$i]["categories"] = json_encode($categories);
-						$i++;
+						catch (\Magento\Framework\Exception\NoSuchEntityException $e)
+						{
+							$this->mcapi->DebugCall($e->getMessage());
+						}
+						catch (Exception $e)
+						{
+							$this->mcapi->DebugCall($e->getMessage());
+						}
 					}
-					catch (Exception $e) 
-					{
-						
-					}
+					
+					$mc_import_data[$i]["categories"] = json_encode($categories);
+					$i++;
 				}	
 				
 				// post items
@@ -374,6 +394,9 @@ class SyncCron {
 				$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 0);
 				$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);	
 			}
+			
+			// break on timeout 60 seconds
+			if (time() > ($starttime + 60)) break;
 		}
 			
 		return $this;

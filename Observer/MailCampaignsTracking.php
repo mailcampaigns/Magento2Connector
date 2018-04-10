@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface as Logger;
 class MailCampaignsTracking implements ObserverInterface
 {
     protected $logger;
+	protected $version;
 	protected $helper;
 	protected $storemanager;
 	protected $mcapi;

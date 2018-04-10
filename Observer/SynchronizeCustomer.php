@@ -50,13 +50,24 @@ class SynchronizeCustomer implements ObserverInterface
 				
 				if ($customerAddressId)
 				{
-					$address 		= $this->objectmanager->create('Magento\Customer\Model\Address')->load($customerAddressId);
-					$address_data 	= $address->getData();
-					
-					/*$country_id 		= $address_data["country_id"];
-					$country 		= $this->countryinformation->getCountryInfo($country_id);
-					$country_name 	= $country->getFullNameLocale();
-					$address_data["country_name"] = $country_name;*/
+					try
+					{
+						$address 		= $this->objectmanager->create('Magento\Customer\Model\Address')->load($customerAddressId);
+						$address_data 	= $address->getData();
+						
+						/*$country_id 		= $address_data["country_id"];
+						$country 		= $this->countryinformation->getCountryInfo($country_id);
+						$country_name 	= $country->getFullNameLocale();
+						$address_data["country_name"] = $country_name;*/
+					}
+					catch (\Magento\Framework\Exception\NoSuchEntityException $e)
+					{
+						$this->mcapi->DebugCall($e->getMessage());
+					}
+					catch (Exception $e)
+					{
+						$this->mcapi->DebugCall($e->getMessage());
+					}
 				}
 				
 				unset($address_data["entity_id"]);
@@ -68,9 +79,13 @@ class SynchronizeCustomer implements ObserverInterface
 				$customer_data[0] = array_filter(array_merge($address_data, $customer->getData()), 'is_scalar');	// ommit sub array levels
 				$this->mcapi->QueueAPICall("update_magento_customers", $customer_data);
 			}
+			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
+			{
+				$this->mcapi->DebugCall($e->getMessage());
+			}
 			catch (Exception $e)
 			{
-				
+				$this->mcapi->DebugCall($e->getMessage());
 			}
 		}		
 		

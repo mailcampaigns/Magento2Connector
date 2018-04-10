@@ -73,51 +73,92 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 		if ($this->APIKey == "" || $this->APIToken == "") 
 			return false;
 	 
-	 	if ($timeout == 0)
+	 	try 
 		{
-			$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
-				'http' => array(
-					'protocol_version' => 1.1,
-					'method'           => 'POST',
-					'header'           => "Content-type: application/json\r\n".
-										  "Connection: close\r\n" .
-										  "Content-length: " . strlen($body_json) . "\r\n",
-					'content'          => $body_json,
-				),
-			)));
-		}
-		else
-		if ($timeout > 0)
-		{
-			$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
-				'http' => array(
-					'protocol_version' => 1.1,
-					'method'           => 'POST',
-					'header'           => "Content-type: application/json\r\n".
-										  "Connection: close\r\n" .
-										  "Content-length: " . strlen($body_json) . "\r\n",
-					'content'          => $body_json,
-					'timeout'		   => $timeout
-				),
-			)));
+			if ($timeout == 0)
+			{
+				$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+					'http' => array(
+						'protocol_version' => 1.1,
+						'method'           => 'POST',
+						'header'           => "Content-type: application/json\r\n".
+											  "Connection: close\r\n" .
+											  "Content-length: " . strlen($body_json) . "\r\n",
+						'content'          => $body_json,
+					),
+				)));
+			}
+			else
+			if ($timeout > 0)
+			{
+				$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+					'http' => array(
+						'protocol_version' => 1.1,
+						'method'           => 'POST',
+						'header'           => "Content-type: application/json\r\n".
+											  "Connection: close\r\n" .
+											  "Content-length: " . strlen($body_json) . "\r\n",
+						'content'          => $body_json,
+						'timeout'		   => $timeout
+					),
+				)));
+			}
+		} 
+		catch (Exception $e) 
+		{ 
+		
 		}
 								 
 		return json_decode($response, true);
 	}
 
 	function PostCall($json_data)
-	{		
-		$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
-			'http' => array(
-				'protocol_version' => 1.1,
-				'method'           => 'POST',
-				'header'           => "Content-type: application/json\r\n".
-									  "Connection: close\r\n" .
-									  "Content-length: " . strlen($json_data) . "\r\n",
-				'content'          => $json_data,
-				'timeout'		   => 5
-			),
-		)));
+	{	
+		try
+		{	
+			$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+				'http' => array(
+					'protocol_version' => 1.1,
+					'method'           => 'POST',
+					'header'           => "Content-type: application/json\r\n".
+										  "Connection: close\r\n" .
+										  "Content-length: " . strlen($json_data) . "\r\n",
+					'content'          => $json_data,
+					'timeout'		   => 5
+				),
+			)));
+		} 
+		catch (Exception $e) 
+		{ 
+		
+		}
+									 
+		return json_decode($response, true);
+	}
+	
+	
+	function DebugCall($debug_string)
+	{	
+		$debug_string = "".$this->APIKey." - ".date("d/m/Y H:i:s", time())." - " . $debug_string;
+			
+		try
+		{
+			$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/debug',null,stream_context_create(array(
+				'http' => array(
+					'protocol_version' => 1.1,
+					'method'           => 'POST',
+					'header'           => "Content-type: application/json\r\n".
+										  "Connection: close\r\n" .
+										  "Content-length: " . strlen($debug_string) . "\r\n",
+					'content'          => $debug_string,
+					'timeout'		   => 5
+				),
+			)));
+		} 
+		catch (Exception $e) 
+		{ 
+		
+		}
 								 
 		return json_decode($response, true);
 	}

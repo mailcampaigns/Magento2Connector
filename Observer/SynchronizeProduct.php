@@ -97,9 +97,13 @@ class SynchronizeProduct implements ObserverInterface
 				if (sizeof($related_product_collection) > 0)
 					$this->mcapi->QueueAPICall("update_magento_related_products", $related_products);		
 			}
-			catch (Exception $e) 
+			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 			{
-				
+				$this->mcapi->DebugCall($e->getMessage());
+			}
+			catch (Exception $e)
+			{
+				$this->mcapi->DebugCall($e->getMessage());
 			}
 		}
     }
