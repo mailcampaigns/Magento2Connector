@@ -320,7 +320,7 @@ class SyncCron {
 				$tn__eav_entity_type 					= $this->resource->getTableName('eav_entity_type');
 				$tn__catalog_category_entity 			= $this->resource->getTableName('catalog_category_entity');
 				
-				$pagesize = 15;
+				$pagesize = 50;
 				
 				// order items
 				$sql        = "SELECT COUNT(*) AS pages FROM `".$tn__sales_flat_order."` AS o INNER JOIN ".$tn__sales_flat_order_item." AS oi ON oi.order_id = o.entity_id WHERE o.store_id = ".$this->mcapi->APIStoreID." OR o.store_id = 0";
@@ -330,7 +330,7 @@ class SyncCron {
 				FROM `".$tn__sales_flat_order."` AS o
 				INNER JOIN ".$tn__sales_flat_order_item." AS oi ON oi.order_id = o.entity_id
 				WHERE o.store_id = ".$this->mcapi->APIStoreID." OR o.store_id = 0
-				ORDER BY  `o`.`created_at` DESC
+				ORDER BY  `o`.`created_at` ASC
 				LIMIT ".$pagesize." OFFSET ".(($row["page"]-1) * $pagesize)."
 				";
 								
