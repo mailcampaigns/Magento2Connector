@@ -45,7 +45,7 @@ class SynchronizeQuote implements ObserverInterface
   		if ($this->mcapi->ImportQuotes == 1)
 		{		
 			try
-			{
+			{				
 				// Retrieve the quote being updated from the event observer
 				$quote_data = $observer->getEvent()->getQuote()->getData();
 							
@@ -80,6 +80,7 @@ class SynchronizeQuote implements ObserverInterface
 					$this->mcapi->QueueAPICall("update_magento_abandonded_cart_quotes", $data);
 				}
 				
+				/*
 				// abandonded carts quote items
 				$sql        = "SELECT q.entity_id as quote_id, p.product_id, p.store_id, p.item_id, p.qty, p.price
 				FROM `".$tn__sales_flat_quote."` AS q
@@ -104,6 +105,7 @@ class SynchronizeQuote implements ObserverInterface
 				{
 					$this->mcapi->QueueAPICall("update_magento_abandonded_cart_products", $data);	
 				}
+				*/
 			}
 			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 			{
