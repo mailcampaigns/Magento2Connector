@@ -11,6 +11,8 @@ use Magento\Framework\Setup\InstallSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 
+use Magento\Newsletter\Model\SubscriberFactory;
+
 class MailCampaignsAPIConfig implements ObserverInterface
 {
     protected $logger;
@@ -21,35 +23,38 @@ class MailCampaignsAPIConfig implements ObserverInterface
 	protected $mcapi;
 	protected $resource;
 	protected $cron;
+	protected $subscriberfactory;
 
     public function __construct(
 		\MailCampaigns\Connector\Helper\Data $dataHelper,
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcapi,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
 		\Magento\Framework\App\ResourceConnection $Resource,
+		\Magento\Newsletter\Model\SubscriberFactory $SubscriberFactory,
         Logger $logger
     ) {
-		$this->version 		= '2.0.23';
-		$this->logger 		= $logger;
-		$this->helper 		= $dataHelper;
-		$this->mcapi 		= $mcapi;
-		$this->storemanager 	= $storeManager;
-		$this->resource 		= $Resource;
+		$this->version 				= '2.0.25';
+		$this->logger 				= $logger;
+		$this->helper 				= $dataHelper;
+		$this->mcapi 				= $mcapi;
+		$this->storemanager 			= $storeManager;
+		$this->subscriberfactory 	= $SubscriberFactory;
+		$this->resource 				= $Resource;
     }
 
     public function execute(EventObserver $observer)
     {
 		// set vars
 		$this->mcapi->APIWebsiteID 		= $observer->getWebsite();
-      	$this->mcapi->APIStoreID 		= $observer->getStore(); 
+      	$this->mcapi->APIStoreID 		= $observer->getStore();
 		$this->mcapi->APIKey 			= $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
   		$this->mcapi->APIToken 			= $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
-		
+
 		//database connection
 		$this->connection = $this->resource->getConnection(\Magento\Framework\App\ResourceConnection::DEFAULT_CONNECTION);
-		
+
 		$tableName = $this->resource->getTableName('mc_api_queue');
-		if ($this->connection->isTableExists($tableName) != true) 
+		if ($this->connection->isTableExists($tableName) != true)
 		{
             // Create mc_api_queue table
             $table = $this->connection
@@ -92,10 +97,10 @@ class MailCampaignsAPIConfig implements ObserverInterface
                 ->setOption('charset', 'utf8');
             $this->connection->createTable($table);
         }
-		
-		
+
+
         $tableName = $this->resource->getTableName('mc_api_pages');
-        if ($this->connection->isTableExists($tableName) != true) 
+        if ($this->connection->isTableExists($tableName) != true)
 		{
             // Create mc_api_pages table
             $table = $this->connection
@@ -152,15 +157,29 @@ class MailCampaignsAPIConfig implements ObserverInterface
                 ->setOption('charset', 'utf8');
             $this->connection->createTable($table);
         }
-		
+
   		// get multistore settings
 		$config_data 					= array();
 		$config_data 					= $this->storemanager->getStore($this->mcapi->APIStoreID)->getData();
 		$config_data["website_id"]		= $this->mcapi->APIWebsiteID;
 		$config_data["version"] 			= $this->version;
 		$config_data["url"] 				= $_SERVER['SERVER_NAME'];
-		
+
 		// push data to mailcampaigns api
 		$this->mcapi->Call("save_magento_settings", $config_data, 0);
+
+		/*
+		$stores = $this->storemanager->getStores();
+		foreach ($stores as $store)
+		{
+			$mc_import_data = array("store_id" => $store->getStoreId(), "lastupdate" => (time() - 3600));
+			print_r($this->mcapi->Call("get_magento_optin_status", $mc_import_data));
+		}
+
+		//print_r($data);
+		exit();
+		*/
+
+
     }
 }

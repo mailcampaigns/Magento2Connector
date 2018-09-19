@@ -9,13 +9,13 @@ use Psr\Log\LoggerInterface as Logger;
 class SynchronizeOrder implements ObserverInterface
 {
     protected $logger;
-	protected $resource;
-	protected $connection;
-	protected $helper;
-	protected $storemanager;
-	protected $objectmanager;
-	protected $productrepository;
-	protected $mcapi;
+  	protected $resource;
+  	protected $connection;
+  	protected $helper;
+  	protected $storemanager;
+  	protected $objectmanager;
+  	protected $productrepository;
+  	protected $mcapi;
 
     public function __construct(
 		\MailCampaigns\Connector\Helper\Data $dataHelper,
@@ -39,13 +39,13 @@ class SynchronizeOrder implements ObserverInterface
     {
 		//database connection
 		$this->connection = $this->resource->getConnection(\Magento\Framework\App\ResourceConnection::DEFAULT_CONNECTION);
-		
+
 		// set vars
 		$this->mcapi->APIWebsiteID 		= $observer->getWebsite();
-      	$this->mcapi->APIStoreID 		= $observer->getStore(); 
+      	$this->mcapi->APIStoreID 		= $observer->getStore();
 		$this->mcapi->APIKey 			= $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
   		$this->mcapi->APIToken 			= $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
-		$this->mcapi->ImportOrders 		= $this->helper->getConfig('mailcampaignsrealtimesync/general/import_orders',$this->mcapi->APIStoreID);	
+		$this->mcapi->ImportOrders 		= $this->helper->getConfig('mailcampaignsrealtimesync/general/import_orders',$this->mcapi->APIStoreID);
 
   		if ($this->mcapi->ImportOrders == 1)
 		{
@@ -53,27 +53,41 @@ class SynchronizeOrder implements ObserverInterface
 			{
 				// Retrieve the order being updated from the event observer
 				$order = $observer->getEvent()->getOrder();
+        $shipping = $order->getShippingAddress()->getData();
+        // $billing = $order->getBillingAddress()->getData();
 				$mc_order_data = $order;
-				
+
 				if ($mc_order_data["entity_id"] > 0)
 				{
-					$mc_data = array(
+
+          $mc_data = array(
 						"store_id" => $mc_order_data["store_id"],
 						"order_id" => $mc_order_data["entity_id"],
 						"order_name" => $mc_order_data["increment_id"],
 						"order_status" => $mc_order_data["status"],
 						"order_total" => $mc_order_data["grand_total"],
 						"customer_id" => $mc_order_data["customer_id"],
-						"visitor_id" => $mc_order_data["visitor_id"],
+						//"visitor_id" => $mc_order_data["visitor_id"],
 						"quote_id" => $mc_order_data["quote_id"],
-						"customer_email" => $mc_order_data["customer_email"],
+						"email" => $mc_order_data["customer_email"],
+						"firstname" => $mc_order_data["customer_firstname"],
+						"lastname" => $mc_order_data["customer_lastname"],
+						"middlename" => $mc_order_data["customer_middlename"],
+						"dob" => $mc_order_data["customer_dob"],
+						"telephone" => $shipping["telephone"],
+						"street" => $shipping["street"],
+						"postcode" => $shipping["postcode"],
+						"city" => $shipping["city"],
+						"region" => $shipping["region"],
+						"country_id" => $shipping["country_id"],
+						"company" => $shipping["company"],
 						"created_at" => $mc_order_data["created_at"],
 						"updated_at" => $mc_order_data["updated_at"]
-						);
-						
+					);
+
 					$this->mcapi->QueueAPICall("update_magento_orders", $mc_data);
-				
-					
+
+
 					// Get table names
 					$tn__sales_flat_quote 					= $this->resource->getTableName('quote');
 					$tn__sales_flat_order 					= $this->resource->getTableName('sales_order');
@@ -83,15 +97,15 @@ class SynchronizeOrder implements ObserverInterface
 					$tn__catalog_category_entity_varchar 	= $this->resource->getTableName('catalog_category_entity_varchar');
 					$tn__eav_entity_type 					= $this->resource->getTableName('eav_entity_type');
 					$tn__catalog_category_entity 			= $this->resource->getTableName('catalog_category_entity');
-					
+
 					// order items
 					$sql        = "SELECT o.entity_id as order_id, o.store_id, oi.product_id as product_id, oi.qty_ordered, oi.price, oi.name, oi.sku, o.customer_id
 					FROM `".$tn__sales_flat_order."` AS o
 					INNER JOIN `".$tn__sales_flat_order_item."` AS oi ON oi.order_id = o.entity_id
-					WHERE o.entity_id = ".$mc_order_data["entity_id"]." 
+					WHERE o.entity_id = ".$mc_order_data["entity_id"]."
 					ORDER BY  `o`.`updated_at` DESC";
 					$rows       = $this->connection->fetchAll($sql);
-					
+
 					$mc_import_data = array(); $i = 0;
 					foreach ($rows as $row)
 					{
@@ -99,8 +113,8 @@ class SynchronizeOrder implements ObserverInterface
 						{
 							if (!is_numeric($key)) $mc_import_data[$i][$key] = $value;
 						}
-						
-						// get categories			
+
+						// get categories
 						$categories = array();
 						if ($row["product_id"] > 0)
 						{
@@ -118,15 +132,15 @@ class SynchronizeOrder implements ObserverInterface
 								$this->mcapi->DebugCall($e->getMessage());
 							}
 						}
-						
+
 						$mc_import_data[$i]["categories"] = json_encode($categories);
-						
+
 						$i++;
-					}	
-					
+					}
+
 					if ($i > 0)
 					{
-						$response = $this->mcapi->QueueAPICall("update_magento_order_products", $mc_import_data);	
+						$response = $this->mcapi->QueueAPICall("update_magento_order_products", $mc_import_data);
 					}
 				}
 			}
