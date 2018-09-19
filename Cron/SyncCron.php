@@ -293,7 +293,7 @@ class SyncCron {
 								"customer_id" => $mc_order_data["customer_id"],
 								//"visitor_id" => $mc_order_data["visitor_id"],
 								"quote_id" => $mc_order_data["quote_id"],
-								"email" => $mc_order_data["customer_email"],
+								"customer_email" => $mc_order_data["customer_email"],
 								"firstname" => $mc_order_data["customer_firstname"],
 								"lastname" => $mc_order_data["customer_lastname"],
 								"middlename" => $mc_order_data["customer_middlename"],
