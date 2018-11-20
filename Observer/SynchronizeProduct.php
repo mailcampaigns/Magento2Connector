@@ -81,17 +81,16 @@ class SynchronizeProduct implements ObserverInterface
 				// store id
 				$product_data[$i]["store_id"] = $product->getStoreID();
 
-        // product parent id
-        if($product->getId() != "")
-        {
-            $objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
-            $parent_product = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getParentIdsByChild($product->getId());
-            if(isset($parent_product[0]))
-            {
-                $product_data[$i]["parent_id"] = $parent_product[0];
-            }
-        }
-
+				// product parent id
+				if($product->getId() != "")
+				{
+					$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
+					$parent_product = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getParentIdsByChild($product->getId());
+					if(isset($parent_product[0]))
+					{
+						$product_data[$i]["parent_id"] = $parent_product[0];
+					}
+				}
 
 				// get related products
 				$related_product_collection = $product->getRelatedProductIds();
@@ -103,9 +102,23 @@ class SynchronizeProduct implements ObserverInterface
 						$related_products[$product->getId()]["products"][] = $pdtid;
 					}
 				}
+				
+				// Categories
+				$category_data = array();
+				$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
+				foreach ($product->getCategoryIds() as $category_id)
+				{
+					$categories[] = $category_id;
+					$cat = $objectMan->create('Magento\Catalog\Model\Category')->load($category_id);
+					$category_data[$category_id] = $cat->getName();
+				}
+				$product_data[$i]["categories"] = json_encode(array_unique($categories));
+				
+				// Post data
+				if (sizeof($category_data) > 0)
+					$this->mcapi->QueueAPICall("update_magento_categories", $category_data);
 
 				if (sizeof($product_data) > 0)
-
 					$this->mcapi->QueueAPICall("update_magento_products", $product_data);
 
 				if (sizeof($related_product_collection) > 0)

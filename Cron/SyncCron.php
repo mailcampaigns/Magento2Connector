@@ -221,16 +221,27 @@ class SyncCron {
 						// store id
 						$product_data[$i]["store_id"] = $this->mcapi->APIStoreID;
 
-            // product parent id
-            if($product->getId() != "")
-            {
-                $objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
-                $parent_product = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getParentIdsByChild($product->getId());
-                if(isset($parent_product[0]))
-                {
-                    $product_data[$i]["parent_id"] = $parent_product[0];
-                }
-            }
+						// product parent id
+						if($product->getId() != "")
+						{
+							$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
+							$parent_product = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getParentIdsByChild($product->getId());
+							if(isset($parent_product[0]))
+							{
+								$product_data[$i]["parent_id"] = $parent_product[0];
+							}
+						}
+						
+						// Categories
+						$category_data = array();
+						$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
+						foreach ($product->getCategoryIds() as $category_id)
+						{	
+							$categories[] = $category_id;
+							$cat = $objectMan->create('Magento\Catalog\Model\Category')->load($category_id);
+							$category_data[$category_id] = $cat->getName();
+						}
+						$product_data[$i]["categories"] = json_encode(array_unique($categories));
 
 						// get related products
 						$related_product_collection = $product->getRelatedProductIds();
@@ -255,6 +266,7 @@ class SyncCron {
 					}
 				}
 
+				$response = $this->mcapi->QueueAPICall("update_magento_categories", $category_data);
 				$response = $this->mcapi->QueueAPICall("update_magento_products", $product_data);
 				$response = $this->mcapi->QueueAPICall("update_magento_related_products", $related_products);
 
@@ -280,12 +292,12 @@ class SyncCron {
 					try
 					{
 						$mc_order_data = (array)$order->getData();
-            $shipping = (array)$order->getShippingAddress()->getData();
+            			$shipping = (array)$order->getShippingAddress()->getData();
 
 						if ($mc_order_data["store_id"] == $this->mcapi->APIStoreID || $mc_order_data["store_id"] == 0)
 						{
 							$mc_import_data[] = array(
-                "store_id" => $mc_order_data["store_id"],
+                				"store_id" => $mc_order_data["store_id"],
 								"order_id" => $mc_order_data["entity_id"],
 								"order_name" => $mc_order_data["increment_id"],
 								"order_status" => $mc_order_data["status"],
@@ -371,12 +383,19 @@ class SyncCron {
 
 					// get categories
 					$categories = array();
+					$category_data = array();
 					if ($tmp_row["product_id"] > 0)
 					{
 						try
 						{
+							$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
 							$product 	= $this->productrepository->getById($tmp_row["product_id"]);
-							$categories = $product->getCategoryIds();
+							foreach ($product->getCategoryIds() as $category_id)
+							{
+								$categories[] = $category_id;
+								$cat = $objectMan->create('Magento\Catalog\Model\Category')->load($category_id);
+								$category_data[$category_id] = $cat->getName();
+							}
 						}
 						catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 						{
@@ -393,6 +412,7 @@ class SyncCron {
 				}
 
 				// post items
+				$response = $this->mcapi->QueueAPICall("update_magento_categories", $category_data);
 				$response = $this->mcapi->QueueAPICall("update_magento_order_products", $mc_import_data);
 
 				// clear
