@@ -106,6 +106,8 @@ class SynchronizeProduct implements ObserverInterface
 				// Categories
 				$category_data = array();
 				$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
+				//Initialize array, in case a product doesn't have any categories we will still have the array.
+				$categories = [];
 				foreach ($product->getCategoryIds() as $category_id)
 				{
 					$categories[] = $category_id;
