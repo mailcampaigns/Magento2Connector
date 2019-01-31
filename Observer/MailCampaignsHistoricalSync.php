@@ -25,7 +25,7 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		\Magento\Framework\ObjectManagerInterface $objectManager,
 		Logger $logger
     ) {
-		$this->version 				= '2.0.26';
+		$this->version 				= '2.0.27';
 		$this->logger 				= $logger;
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;
@@ -63,12 +63,15 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		$this->mcapi->ImportProductsHistory 		= $this->helper->getConfig('mailcampaignshistoricalsync/general/import_products_history', $this->mcapi->APIStoreID);
 		$this->mcapi->ImportMailinglistHistory 	= $this->helper->getConfig('mailcampaignshistoricalsync/general/import_mailing_list_history', $this->mcapi->APIStoreID);
 		$this->mcapi->ImportOrderProductsHistory = $this->helper->getConfig('mailcampaignshistoricalsync/general/import_order_history', $this->mcapi->APIStoreID);
-
+	
 		/* Customers */
 		$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'customer/customer' AND store_id = ".$this->mcapi->APIStoreID."";
 		$this->resource->getConnection()->query($sql);
 		if ($this->mcapi->ImportCustomersHistory == 1)
 		{
+			// drop tables in mailcampaigns
+			$this->mcapi->Call("reset_magento_tables", array("collection" => "customer/customer"), 0);
+		
 			$sql = "INSERT INTO `".$tn__mc_api_pages."` SET
 					collection = 'customer/customer',
 					datetime = ".time().",
@@ -94,6 +97,10 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		$this->resource->getConnection()->query($sql);
 		if ($this->mcapi->ImportOrdersHistory == 1)
 		{
+			// drop tables in mailcampaigns
+			$this->mcapi->Call("reset_magento_tables", array("collection" => "sales/order"), 0);
+			$this->mcapi->Call("reset_magento_tables", array("collection" => "sales/order/products"), 0);
+			
 			$sql = "INSERT INTO `".$tn__mc_api_pages."` SET
 					collection = 'sales/order',
 					datetime = ".time().",
@@ -132,6 +139,9 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		$this->resource->getConnection()->query($sql);
 		if ($this->mcapi->ImportProductsHistory == 1)
 		{
+			// drop tables in mailcampaigns
+			$this->mcapi->Call("reset_magento_tables", array("collection" => "catalog/product"), 0);
+			
 			$sql = "INSERT INTO `".$tn__mc_api_pages."` SET
 					collection = 'catalog/product',
 					datetime = ".time().",
@@ -154,6 +164,9 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		$this->resource->getConnection()->query($sql);
 		if ($this->mcapi->ImportMailinglistHistory == 1)
 		{
+			// drop tables in mailcampaigns
+			$this->mcapi->Call("reset_magento_tables", array("collection" => "newsletter/subscriber_collection"), 0);
+			
 			$sql = "INSERT INTO `".$tn__mc_api_pages."` SET
 					collection = 'newsletter/subscriber_collection',
 					datetime = ".time().",

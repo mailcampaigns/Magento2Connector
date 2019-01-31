@@ -234,6 +234,7 @@ class SyncCron {
 						
 						// Categories
 						$category_data = array();
+						$categories = array();
 						$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
 						foreach ($product->getCategoryIds() as $category_id)
 						{	

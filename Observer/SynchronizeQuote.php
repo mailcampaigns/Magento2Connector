@@ -77,7 +77,7 @@ class SynchronizeQuote implements ObserverInterface
 				
 				if ($i > 0)
 				{
-					$this->mcapi->QueueAPICall("update_magento_abandonded_cart_quotes", $data);
+					$this->mcapi->DirectOrQueueCall("update_magento_abandonded_cart_quotes", $data);
 				}
 				
 				/*
@@ -103,8 +103,8 @@ class SynchronizeQuote implements ObserverInterface
 				
 				if ($i > 0)
 				{
-					$this->mcapi->QueueAPICall("delete_magento_abandonded_cart_products", $data);
-					$this->mcapi->QueueAPICall("update_magento_abandonded_cart_products", $data);	
+					$this->mcapi->DirectOrQueueCall("delete_magento_abandonded_cart_products", $data);
+					$this->mcapi->DirectOrQueueCall("update_magento_abandonded_cart_products", $data);	
 				}
 				*/
 			}

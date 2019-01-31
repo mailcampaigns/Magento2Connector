@@ -77,7 +77,7 @@ class SynchronizeCustomer implements ObserverInterface
 				unset($address_data["updated_at"]);
 							
 				$customer_data[0] = array_filter(array_merge($address_data, $customer->getData()), 'is_scalar');	// ommit sub array levels
-				$this->mcapi->QueueAPICall("update_magento_customers", $customer_data);
+				$this->mcapi->DirectOrQueueCall("update_magento_customers", $customer_data);
 			}
 			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 			{

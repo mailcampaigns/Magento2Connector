@@ -45,7 +45,7 @@ class SynchronizeQuoteDeleteItem implements ObserverInterface
 				
 				// delete abandonded carts quote items
 				$data = array("item_id" => $item_id, "store_id" => $store_id, "quote_id" => $quote_id);
-				$this->mcapi->QueueAPICall("delete_magento_abandonded_cart_product", $data);	
+				$this->mcapi->DirectOrQueueCall("delete_magento_abandonded_cart_product", $data);	
 			}
 			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 			{

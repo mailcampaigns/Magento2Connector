@@ -61,6 +61,51 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 		));	
 	}
 	
+	function DirectOrQueueCall($api_function, $api_filters, $timeout = 2)
+	{		
+		$body = array();
+		$body["api_key"] 	= $this->APIKey;
+		$body["api_token"] 	= $this->APIToken;
+		$body["method"] 	    = $api_function;
+		$body["filters"]  	= $api_filters;
+		$body_json 			= json_encode($body);
+
+		if ($this->APIKey == "" || $this->APIToken == "")
+			return false;
+
+		try
+		{
+			$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+				'http' => array(
+					'protocol_version' => 1.1,
+					'method'           => 'POST',
+					'header'           => "Content-type: application/json\r\n".
+										  "Connection: close\r\n" .
+										  "Content-length: " . strlen($body_json) . "\r\n",
+					'content'          => $body_json,
+					'timeout'		   => $timeout
+				),
+			)));
+			
+			if ($response === false)
+			{
+				$response = $this->connection->insert($this->tn__mc_api_queue, array(
+					'stream_data'   => $body_json,
+					'datetime'      => time()
+				));
+			}
+		}
+		catch (Exception $e)
+		{
+			$response = $this->connection->insert($this->tn__mc_api_queue, array(
+				'stream_data'   => $body_json,
+				'datetime'      => time()
+			));
+		}
+
+		return json_decode($response, true);
+	}
+	
 	function Call($api_function, $api_filters, $timeout = 5)
 	{		
 		$body = array();
@@ -77,7 +122,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 		{
 			if ($timeout == 0)
 			{
-				$response = file_get_contents('https://dev.api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+				$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
 					'http' => array(
 						'protocol_version' => 1.1,
 						'method'           => 'POST',
@@ -91,7 +136,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 			else
 			if ($timeout > 0)
 			{
-				$response = file_get_contents('https://dev.api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+				$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
 					'http' => array(
 						'protocol_version' => 1.1,
 						'method'           => 'POST',
@@ -116,7 +161,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 	{	
 		try
 		{	
-			$response = file_get_contents('https://dev.api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+			$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
 				'http' => array(
 					'protocol_version' => 1.1,
 					'method'           => 'POST',
@@ -143,7 +188,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 			
 		try
 		{
-			$response = file_get_contents('https://dev.api.mailcampaigns.nl/api/v1.1/debug',null,stream_context_create(array(
+			$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/debug',null,stream_context_create(array(
 				'http' => array(
 					'protocol_version' => 1.1,
 					'method'           => 'POST',

@@ -93,6 +93,7 @@ class SynchronizeProduct implements ObserverInterface
 				}
 
 				// get related products
+				$related_products = array();
 				$related_product_collection = $product->getRelatedProductIds();
 				$related_products[$product->getId()]["store_id"] = $product_data[$i]["store_id"];
 				if (!empty($related_product_collection) && sizeof($related_product_collection) > 0 && is_array($related_product_collection))
@@ -104,7 +105,8 @@ class SynchronizeProduct implements ObserverInterface
 				}
 				
 				// Categories
-				$category_data = array();
+				$category_data = array(); 
+				$categories = array();
 				$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
 				foreach ($product->getCategoryIds() as $category_id)
 				{
