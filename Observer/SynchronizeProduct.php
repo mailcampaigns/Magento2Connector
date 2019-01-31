@@ -108,7 +108,6 @@ class SynchronizeProduct implements ObserverInterface
 				$category_data = array(); 
 				$categories = array();
 				$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
-				$categories = [];
 				foreach ($product->getCategoryIds() as $category_id)
 				{
 					$categories[] = $category_id;
