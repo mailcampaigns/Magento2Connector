@@ -75,7 +75,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 
 		try
 		{
-			$response = file_get_contents('https://dev.api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+			$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
 				'http' => array(
 					'protocol_version' => 1.1,
 					'method'           => 'POST',
@@ -122,7 +122,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 		{
 			if ($timeout == 0)
 			{
-				$response = file_get_contents('https://dev.api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+				$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
 					'http' => array(
 						'protocol_version' => 1.1,
 						'method'           => 'POST',
@@ -136,7 +136,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 			else
 			if ($timeout > 0)
 			{
-				$response = file_get_contents('https://dev.api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+				$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
 					'http' => array(
 						'protocol_version' => 1.1,
 						'method'           => 'POST',
@@ -161,7 +161,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 	{	
 		try
 		{	
-			$response = file_get_contents('https://dev.api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
+			$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/rest',null,stream_context_create(array(
 				'http' => array(
 					'protocol_version' => 1.1,
 					'method'           => 'POST',
@@ -188,7 +188,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 			
 		try
 		{
-			$response = file_get_contents('https://dev.api.mailcampaigns.nl/api/v1.1/debug',null,stream_context_create(array(
+			$response = file_get_contents('https://api.mailcampaigns.nl/api/v1.1/debug',null,stream_context_create(array(
 				'http' => array(
 					'protocol_version' => 1.1,
 					'method'           => 'POST',
