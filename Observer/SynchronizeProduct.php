@@ -13,8 +13,8 @@ class SynchronizeProduct implements ObserverInterface
 	protected $storemanager;
 	protected $objectmanager;
 	protected $productrepository;
+	protected $taxhelper;
 	protected $mcapi;
-
 
     public function __construct(
 		\MailCampaigns\Connector\Helper\Data $dataHelper,
@@ -22,13 +22,15 @@ class SynchronizeProduct implements ObserverInterface
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
 		\Magento\Framework\ObjectManagerInterface $objectManager,
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
-    Logger $logger
+		\Magento\Catalog\Helper\Data $taxHelper,
+    	Logger $logger
     ) {
 		$this->logger 				= $logger;
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;
 		$this->storemanager 			= $storeManager;
 		$this->productrepository	= $productRepository;
+		$this->taxhelper 			= $taxHelper;
 		$this->objectmanager 		= $objectManager;
     }
 
@@ -58,7 +60,13 @@ class SynchronizeProduct implements ObserverInterface
 					$data = $product->getData($attribute->getAttributeCode());
 					if (!is_array($data)) $product_data[$i][$attribute->getAttributeCode()] = $data;
 				}
-
+				
+				// Get Price Incl Tax
+				$product_data[$i]["price"] = $this->taxhelper->getTaxPrice($product, $product_data[$i]["price"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
+				
+				// Get Special Price Incl Tax
+				$product_data[$i]["special_price"] = $this->taxhelper->getTaxPrice($product, $product_data[$i]["special_price"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
+				
 				// get lowest tier price / staffel
 				$lowestTierPrice = $product->getResource()->getAttribute('tier_price')->getValue($product);
 				$product_data[$i]["lowest_tier_price"] = $lowestTierPrice;

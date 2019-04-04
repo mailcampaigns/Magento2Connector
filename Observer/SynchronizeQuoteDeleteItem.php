@@ -11,18 +11,21 @@ class SynchronizeQuoteDeleteItem implements ObserverInterface
     protected $logger;
 	protected $helper;
 	protected $storemanager;
+	protected $taxhelper;
 	protected $mcapi;
 
     public function __construct(
 		\MailCampaigns\Connector\Helper\Data $dataHelper,
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcapi,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
+		\Magento\Catalog\Helper\Data $taxHelper,
         Logger $logger
     ) {
 		$this->logger 		= $logger;
 		$this->helper 		= $dataHelper;
 		$this->mcapi 		= $mcapi;
 		$this->storemanager 	= $storeManager;
+		$this->taxhelper 	= $taxHelper;
     }
 
     public function execute(EventObserver $observer)

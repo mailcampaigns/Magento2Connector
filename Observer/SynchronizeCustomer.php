@@ -12,13 +12,17 @@ class SynchronizeCustomer implements ObserverInterface
 	protected $objectmanager;
 	protected $mcapi;
 	protected $countryinformation;
+	protected $subscriberfactory;
+	protected $subscriber;
 
     public function __construct(
 		\MailCampaigns\Connector\Helper\Data $dataHelper,
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcapi,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
 		\Magento\Framework\ObjectManagerInterface $objectManager,
-		\Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
+		\Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
+		\Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
+		\Magento\Newsletter\Model\Subscriber $Subscriber
     )
 	{
 		$this->helper 				= $dataHelper;
@@ -26,6 +30,8 @@ class SynchronizeCustomer implements ObserverInterface
 		$this->storemanager 			= $storeManager;
 		$this->objectmanager 		= $objectManager;
 		$this->countryinformation	= $countryInformation;
+		$this->subscriberfactory	= $subscriberFactory;
+		$this->subscriber			= $Subscriber;
     }
 
     public function execute(EventObserver $observer)
@@ -35,8 +41,8 @@ class SynchronizeCustomer implements ObserverInterface
       	$this->mcapi->APIStoreID 		= $observer->getStore(); 
 		$this->mcapi->APIKey 			= $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
   		$this->mcapi->APIToken 			= $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
-  		$this->mcapi->ImportCustomers 	= $this->helper->getConfig('mailcampaignsrealtimesync/general/import_customers',$this->mcapi->APIStoreID);	
-
+  		$this->mcapi->ImportCustomers 	= $this->helper->getConfig('mailcampaignsrealtimesync/general/import_customers',$this->mcapi->APIStoreID);
+		
 		if ($this->mcapi->ImportCustomers == 1)
 		{
 			try

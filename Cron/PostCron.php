@@ -29,9 +29,17 @@ class PostCron {
 		//tables
 		$this->tn__mc_api_pages = $this->resource->getTableName('mc_api_pages');
 		$this->tn__mc_api_queue = $this->resource->getTableName('mc_api_queue');
+		
+		// Report queue size
+		$sql        = "SELECT COUNT(*) AS queue_size FROM `".$this->tn__mc_api_queue."`";
+		$rows       = $this->connection->fetchAll($sql);
+		foreach ($rows as $row)
+		{
+			$this->mcapi->DirectOrQueueCall("report_magento_queue_status", array("queue_size" => (int)$row["queue_size"], "datetime" => time()));
+		}
 							
 		// Process one page per each cron
-		$sql        = "SELECT * FROM `".$this->tn__mc_api_queue."` ORDER BY id ASC LIMIT 250";
+		$sql        = "SELECT * FROM `".$this->tn__mc_api_queue."` ORDER BY id ASC LIMIT 1000";
 		$rows       = $this->connection->fetchAll($sql);
 		$starttime 	= time();
 

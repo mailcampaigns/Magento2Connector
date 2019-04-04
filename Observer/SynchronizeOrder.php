@@ -15,6 +15,7 @@ class SynchronizeOrder implements ObserverInterface
   	protected $storemanager;
   	protected $objectmanager;
   	protected $productrepository;
+	protected $taxhelper;
   	protected $mcapi;
 
     public function __construct(
@@ -24,6 +25,7 @@ class SynchronizeOrder implements ObserverInterface
 		\Magento\Framework\ObjectManagerInterface $objectManager,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
+		\Magento\Catalog\Helper\Data $taxHelper,
         Logger $logger
     ) {
 		$this->resource 				= $Resource;
@@ -33,6 +35,7 @@ class SynchronizeOrder implements ObserverInterface
 		$this->storemanager 			= $storeManager;
 		$this->objectmanager 		= $objectManager;
 		$this->productrepository	= $productRepository;
+		$this->taxhelper 			= $taxHelper;
     }
 
     public function execute(EventObserver $observer)
@@ -53,14 +56,13 @@ class SynchronizeOrder implements ObserverInterface
 			{
 				// Retrieve the order being updated from the event observer
 				$order = $observer->getEvent()->getOrder();
-        $shipping = $order->getShippingAddress()->getData();
-        // $billing = $order->getBillingAddress()->getData();
+				$shipping = $order->getShippingAddress()->getData();
+				// $billing = $order->getBillingAddress()->getData();
 				$mc_order_data = $order;
 
 				if ($mc_order_data["entity_id"] > 0)
 				{
-
-          $mc_data = array(
+          			$mc_data = array(
 						"store_id" => $mc_order_data["store_id"],
 						"order_id" => $mc_order_data["entity_id"],
 						"order_name" => $mc_order_data["increment_id"],
@@ -85,7 +87,7 @@ class SynchronizeOrder implements ObserverInterface
 						"updated_at" => $mc_order_data["updated_at"]
 					);
 
-					$this->mcapi->QueueAPICall("update_magento_orders", $mc_data);
+					$this->mcapi->DirectOrQueueCall("update_magento_orders", $mc_data);
 
 
 					// Get table names
@@ -113,7 +115,7 @@ class SynchronizeOrder implements ObserverInterface
 						{
 							if (!is_numeric($key)) $mc_import_data[$i][$key] = $value;
 						}
-
+					
 						// get categories
 						$categories = array();
 						$category_data = array();
@@ -123,6 +125,10 @@ class SynchronizeOrder implements ObserverInterface
 							{
 								$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
 								$product 	= $this->productrepository->getById($row["product_id"]);
+								
+								// Get Price Incl Tax
+								$mc_import_data[$i]["price"] = $this->taxhelper->getTaxPrice($product, $mc_import_data[$i]["price"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
+								
 								foreach ($product->getCategoryIds() as $category_id)
 								{
 									$categories[] = $category_id;
@@ -147,8 +153,8 @@ class SynchronizeOrder implements ObserverInterface
 
 					if ($i > 0)
 					{
-						$response = $this->mcapi->QueueAPICall("update_magento_categories", $category_data);
-						$response = $this->mcapi->QueueAPICall("update_magento_order_products", $mc_import_data);
+						$response = $this->mcapi->DirectOrQueueCall("update_magento_categories", $category_data);
+						$response = $this->mcapi->DirectOrQueueCall("update_magento_order_products", $mc_import_data);
 					}
 				}
 			}

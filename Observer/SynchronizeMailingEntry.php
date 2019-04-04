@@ -45,7 +45,7 @@ class SynchronizeMailingEntry implements ObserverInterface
 				$subscriber_data = array();
 				$subscriber_data[0] = $subscriber_tmp;	
 						
-				$this->mcapi->QueueAPICall("update_magento_mailing_list", $subscriber_data);
+				$this->mcapi->DirectOrQueueCall("update_magento_mailing_list", $subscriber_data);
 			}
 			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 			{

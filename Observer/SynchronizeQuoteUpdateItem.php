@@ -11,18 +11,24 @@ class SynchronizeQuoteUpdateItem implements ObserverInterface
     protected $logger;
 	protected $helper;
 	protected $storemanager;
+	protected $taxhelper;
 	protected $mcapi;
+	protected $productrepository;
 
     public function __construct(
 		\MailCampaigns\Connector\Helper\Data $dataHelper,
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcapi,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
+		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
+		\Magento\Catalog\Helper\Data $taxHelper,
         Logger $logger
     ) {
-		$this->logger 		= $logger;
-		$this->helper 		= $dataHelper;
-		$this->mcapi 		= $mcapi;
-		$this->storemanager 	= $storeManager;
+		$this->logger 				= $logger;
+		$this->helper 				= $dataHelper;
+		$this->mcapi 				= $mcapi;
+		$this->storemanager 			= $storeManager;
+		$this->taxhelper 			= $taxHelper;
+		$this->productrepository	= $productRepository;
     }
 
     public function execute(EventObserver $observer)
@@ -47,6 +53,12 @@ class SynchronizeQuoteUpdateItem implements ObserverInterface
 				$qty			= $quote_data["qty"];
 				$price			= $quote_data["price"];
 				
+				// Get product
+				$product = $this->productrepository->getById($product_id);
+				
+				// Get Price Incl Tax
+				$price = $this->taxhelper->getTaxPrice($product, $price, true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
+								
 				// add abandonded carts quote items
 				if ($item_id > 0)
 				{

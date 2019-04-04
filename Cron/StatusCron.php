@@ -3,6 +3,7 @@
 namespace MailCampaigns\Connector\Cron;
 
 use Magento\Newsletter\Model\SubscriberFactory;
+use Magento\Newsletter\Model\Subscriber;
 
 class StatusCron {
  
@@ -14,6 +15,7 @@ class StatusCron {
 	protected $customerrepository;
 	protected $countryinformation;
 	protected $subscriberfactory;
+	protected $subscriber;
 	protected $mcapi;
 	protected $tn__mc_api_pages;
 	protected $tn__mc_api_queue;
@@ -25,6 +27,7 @@ class StatusCron {
 		\Magento\Framework\ObjectManagerInterface $objectManager,
 		\Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
 		\Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
+		\Magento\Newsletter\Model\Subscriber $Subscriber,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
 		\Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
@@ -37,6 +40,7 @@ class StatusCron {
 		$this->countryinformation	= $countryInformation;
 		$this->productrepository	= $productRepository;
 		$this->subscriberfactory	= $subscriberFactory;
+		$this->subscriber			= $Subscriber;
 		$this->storemanager 			= $storeManager;
     }
  
@@ -52,43 +56,64 @@ class StatusCron {
 			$this->mcapi->APIKey 	 = $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
 			$this->mcapi->APIToken 	 = $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
 			
-			/*
 			try
 			{
-				$mc_import_data = array("store_id" => $this->mcapi->APIStoreID, "lastupdate" => (time() - 3600));
-				$data = json_decode($this->mcapi->Call("get_magento_optin_status", $mc_import_data), false);
+				$mc_import_data = array("store_id" => $this->mcapi->APIStoreID);
+				$jsondata = $this->mcapi->Call("get_magento_updates", $mc_import_data);
+				$data = json_decode($jsondata["message"], true);
 			
+				// Mailinglist entries
 				foreach ($data as $subscriber)
 				{
-					$email 	= $subscriber->email;
-					$status = $subscriber->status;
-					$active = $subscriber->active;
-					
-					$subscriberobject = $this->subscriber->loadByEmail($email);
+					$email 	= $subscriber["E-mail"];
+					$status = $subscriber["status"];
+					$active = $subscriber["active"];
+										
+					$STATUS_SUBSCRIBED = 1;
+					$STATUS_NOT_ACTIVE = 2;
+					$STATUS_UNSUBSCRIBED = 3;
+					$STATUS_UNCONFIRMED = 4;
 					
 					if ($active == 0)
 					{
-						$this->subscriberfactory->create()
-								->setStatus(Subscriber::STATUS_NOT_ACTIVE)
-								->setEmail($email)
-								->save();
+						$status = $STATUS_NOT_ACTIVE;
 					}
 					else
 					if ($status == 0)
 					{
-						$this->subscriberfactory->create()
-								->setStatus(Subscriber::STATUS_UNSUBSCRIBED)
-								->setEmail($email)
-								->save();
+						$status = $STATUS_UNSUBSCRIBED;
 					}
 					else
 					if ($status == 1)
 					{
+						$status = $STATUS_SUBSCRIBED;
+					}
+					
+					$subscriber_object = $this->subscriber->loadByEmail($email);
+					$subscriber_id = $subscriber_object->getId();
+					
+					if ((int)$subscriber_id > 0)
+					{
+						// update
+						$subscriber_object
+							->setStatus($status)
+							->setEmail($email)
+							->save();
+					}
+					else
+					{
+						// add
 						$this->subscriberfactory->create()
-								->setStatus(Subscriber::STATUS_SUBSCRIBED)
-								->setEmail($email)
-								->save();
-					}				
+							->setStatus($status)
+							->setEmail($email)
+							->save();	
+					}	
+				}
+				
+				//  TO DO: Customers
+				foreach ($data as $customer)
+				{
+					
 				}
 			}
 			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
@@ -99,7 +124,6 @@ class StatusCron {
 			{
 				$this->mcapi->DebugCall($e->getMessage());
 			}
-			*/
 		}
 			
 		return $this;

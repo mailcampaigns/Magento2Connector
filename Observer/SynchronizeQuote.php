@@ -13,6 +13,7 @@ class SynchronizeQuote implements ObserverInterface
 	protected $connection;
 	protected $helper;
 	protected $storemanager;
+	protected $taxhelper;
 	protected $mcapi;
 
     public function __construct(
@@ -20,6 +21,7 @@ class SynchronizeQuote implements ObserverInterface
 		\Magento\Framework\App\ResourceConnection $Resource,
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcapi,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
+		\Magento\Catalog\Helper\Data $taxHelper,
         Logger $logger
     ) {
 		$this->resource 		= $Resource;
@@ -27,6 +29,7 @@ class SynchronizeQuote implements ObserverInterface
 		$this->helper 		= $dataHelper;
 		$this->mcapi 		= $mcapi;
 		$this->storemanager 	= $storeManager;
+		$this->taxhelper 	= $taxHelper;
     }
 
     public function execute(EventObserver $observer)
