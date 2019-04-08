@@ -62,6 +62,9 @@ class SynchronizeOrder implements ObserverInterface
 
 				if ($mc_order_data["entity_id"] > 0)
 				{
+					// get price including VAT
+					$mc_order_data["grand_total"] = $this->taxhelper->getTaxPrice($product, $mc_order_data["grand_total"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
+					
           			$mc_data = array(
 						"store_id" => $mc_order_data["store_id"],
 						"order_id" => $mc_order_data["entity_id"],
@@ -88,7 +91,6 @@ class SynchronizeOrder implements ObserverInterface
 					);
 
 					$this->mcapi->DirectOrQueueCall("update_magento_orders", $mc_data);
-
 
 					// Get table names
 					$tn__sales_flat_quote 					= $this->resource->getTableName('quote');

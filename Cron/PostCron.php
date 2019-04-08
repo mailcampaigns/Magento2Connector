@@ -39,7 +39,7 @@ class PostCron {
 		}
 							
 		// Process one page per each cron
-		$sql        = "SELECT * FROM `".$this->tn__mc_api_queue."` ORDER BY id ASC LIMIT 1000";
+		$sql        = "SELECT * FROM `".$this->tn__mc_api_queue."` ORDER BY id ASC LIMIT 2000";
 		$rows       = $this->connection->fetchAll($sql);
 		$starttime 	= time();
 
