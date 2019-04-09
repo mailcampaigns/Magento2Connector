@@ -57,7 +57,7 @@ class SynchronizeQuoteAddItem implements ObserverInterface
 				$product = $this->productrepository->getById($product_id);
 				
 				// Get Price Incl Tax
-				$price = $this->taxhelper->getTaxPrice($product, $price, true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
+				$price = $this->taxhelper->getTaxPrice($product, $price, true, NULL, NULL, NULL, $store_id, NULL, true);
 				
 				// add abandonded carts quote items
 				if ($item_id > 0)

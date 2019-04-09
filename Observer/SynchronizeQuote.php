@@ -76,14 +76,6 @@ class SynchronizeQuote implements ObserverInterface
 						if (!is_numeric($key)) $data[$i][$key] = $value;
 					}	
 					
-					// get price including VAT
-					$data[$i]["grand_total"] = $this->taxhelper->getTaxPrice($product, $data[$i]["grand_total"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
-					$data[$i]["base_grand_total"] = $this->taxhelper->getTaxPrice($product, $data[$i]["base_grand_total"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
-					$data[$i]["subtotal"] = $this->taxhelper->getTaxPrice($product, $data[$i]["subtotal"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
-					$data[$i]["base_subtotal"] = $this->taxhelper->getTaxPrice($product, $data[$i]["base_subtotal"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
-					$data[$i]["subtotal_with_discount"] = $this->taxhelper->getTaxPrice($product, $data[$i]["subtotal_with_discount"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
-					$data[$i]["base_subtotal_with_discount"] = $this->taxhelper->getTaxPrice($product, $data[$i]["base_subtotal_with_discount"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
-					
 					$i++;
 				}
 				
