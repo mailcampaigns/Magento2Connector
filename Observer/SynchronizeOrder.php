@@ -56,10 +56,19 @@ class SynchronizeOrder implements ObserverInterface
 			{
 				// Retrieve the order being updated from the event observer
 				$order = $observer->getEvent()->getOrder();
-				$shipping = $order->getShippingAddress()->getData();
-				// $billing = $order->getBillingAddress()->getData();
+				
+				$address = array();
+				if(is_object($order->getShippingAddress()))
+				{    
+					$address = (array)$order->getShippingAddress()->getData();
+				}    
+				else
+				if(is_object($order->getBillingAddress()))
+				{
+					$address = (array)$order->getBillingAddress()->getData();
+				}
+				
 				$mc_order_data = $order;
-
 				if ($mc_order_data["entity_id"] > 0)
 				{					
           			$mc_data = array(
@@ -76,13 +85,13 @@ class SynchronizeOrder implements ObserverInterface
 						"lastname" => $mc_order_data["customer_lastname"],
 						"middlename" => $mc_order_data["customer_middlename"],
 						"dob" => $mc_order_data["customer_dob"],
-						"telephone" => $shipping["telephone"],
-						"street" => $shipping["street"],
-						"postcode" => $shipping["postcode"],
-						"city" => $shipping["city"],
-						"region" => $shipping["region"],
-						"country_id" => $shipping["country_id"],
-						"company" => $shipping["company"],
+						"telephone" => $address["telephone"],
+						"street" => $address["street"],
+						"postcode" => $address["postcode"],
+						"city" => $address["city"],
+						"region" => $address["region"],
+						"country_id" => $address["country_id"],
+						"company" => $address["company"],
 						"created_at" => $mc_order_data["created_at"],
 						"updated_at" => $mc_order_data["updated_at"]
 					);

@@ -49,6 +49,10 @@ class StatusCron {
 		//database connection
 		$this->connection = $this->resource->getConnection(\Magento\Framework\App\ResourceConnection::DEFAULT_CONNECTION);
 		
+		//tables
+		$this->tn__mc_api_pages = $this->resource->getTableName('mc_api_pages');
+		$this->tn__mc_api_queue = $this->resource->getTableName('mc_api_queue');
+		
 		$stores = $this->storemanager->getStores();
 		foreach ($stores as $store) 
 		{					
@@ -56,73 +60,84 @@ class StatusCron {
 			$this->mcapi->APIKey 	 = $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
 			$this->mcapi->APIToken 	 = $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
 			
-			try
+			if (isset($this->mcapi->APIKey) && isset($this->mcapi->APIToken))
 			{
-				$mc_import_data = array("store_id" => $this->mcapi->APIStoreID);
-				$jsondata = $this->mcapi->Call("get_magento_updates", $mc_import_data);
-				$data = json_decode($jsondata["message"], true);
-			
-				// Mailinglist entries
-				foreach ($data as $subscriber)
+				try
 				{
-					$email 	= $subscriber["E-mail"];
-					$status = $subscriber["status"];
-					$active = $subscriber["active"];
-										
-					$STATUS_SUBSCRIBED = 1;
-					$STATUS_NOT_ACTIVE = 2;
-					$STATUS_UNSUBSCRIBED = 3;
-					$STATUS_UNCONFIRMED = 4;
-					
-					if ($active == 0)
-					{
-						$status = $STATUS_NOT_ACTIVE;
-					}
-					else
-					if ($status == 0)
-					{
-						$status = $STATUS_UNSUBSCRIBED;
-					}
-					else
-					if ($status == 1)
-					{
-						$status = $STATUS_SUBSCRIBED;
-					}
-					
-					$subscriber_object = $this->subscriber->loadByEmail($email);
-					$subscriber_id = $subscriber_object->getId();
-					
-					if ((int)$subscriber_id > 0)
-					{
-						// update
-						$subscriber_object
-							->setStatus($status)
-							->setEmail($email)
-							->save();
-					}
-					else
-					{
-						// add
-						$this->subscriberfactory->create()
-							->setStatus($status)
-							->setEmail($email)
-							->save();	
-					}	
-				}
+					$mc_import_data = array("store_id" => $this->mcapi->APIStoreID);
+					$jsondata = $this->mcapi->Call("get_magento_updates", $mc_import_data);
+					$data = json_decode($jsondata["message"], true);
 				
-				//  TO DO: Customers
-				foreach ($data as $customer)
-				{
+					// Mailinglist entries
+					foreach ($data as $subscriber)
+					{
+						$email 	= $subscriber["E-mail"];
+						$status = $subscriber["status"];
+						$active = $subscriber["active"];
+											
+						$STATUS_SUBSCRIBED = 1;
+						$STATUS_NOT_ACTIVE = 2;
+						$STATUS_UNSUBSCRIBED = 3;
+						$STATUS_UNCONFIRMED = 4;
+						
+						if ($active == 0)
+						{
+							$status = $STATUS_NOT_ACTIVE;
+						}
+						else
+						if ($status == 0)
+						{
+							$status = $STATUS_UNSUBSCRIBED;
+						}
+						else
+						if ($status == 1)
+						{
+							$status = $STATUS_SUBSCRIBED;
+						}
+						
+						$subscriber_object = $this->subscriber->loadByEmail($email);
+						$subscriber_id = $subscriber_object->getId();
+						
+						if ((int)$subscriber_id > 0)
+						{
+							// update
+							$subscriber_object
+								->setStatus($status)
+								->setEmail($email)
+								->save();
+						}
+						else
+						{
+							// add
+							$this->subscriberfactory->create()
+								->setStatus($status)
+								->setEmail($email)
+								->save();	
+						}	
+					}
 					
+					//  TO DO: Customers
+					foreach ($data as $customer)
+					{
+						
+					}
+					
+					// Report queue size
+					$sql        = "SELECT COUNT(*) AS queue_size FROM `".$this->tn__mc_api_queue."`";
+					$rows       = $this->connection->fetchAll($sql);
+					foreach ($rows as $row)
+					{
+						$this->mcapi->DirectOrQueueCall("report_magento_queue_status", array("queue_size" => (int)$row["queue_size"], "datetime" => time()));
+					}
 				}
-			}
-			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
-			{
-				$this->mcapi->DebugCall($e->getMessage());
-			}
-			catch (Exception $e)
-			{
-				$this->mcapi->DebugCall($e->getMessage());
+				catch (\Magento\Framework\Exception\NoSuchEntityException $e)
+				{
+					$this->mcapi->DebugCall($e->getMessage());
+				}
+				catch (Exception $e)
+				{
+					$this->mcapi->DebugCall($e->getMessage());
+				}
 			}
 		}
 			
