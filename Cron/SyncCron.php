@@ -13,6 +13,7 @@ class SyncCron {
 	protected $productrepository;
 	protected $tn__mc_api_pages;
 	protected $tn__mc_api_queue;
+	protected $taxhelper;
 	protected $mcapi;
 
     public function __construct(
@@ -22,6 +23,7 @@ class SyncCron {
 		\Magento\Framework\ObjectManagerInterface $objectManager,
 		\Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
+		\Magento\Catalog\Helper\Data $taxHelper,
 		\Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
     ) {
         $this->resource 				= $Resource;
@@ -31,6 +33,7 @@ class SyncCron {
 		$this->customerrepository 	= $customerRepository;
 		$this->countryinformation	= $countryInformation;
 		$this->productrepository	= $productRepository;
+		$this->taxhelper 			= $taxHelper;
     }
 
     public function execute()
@@ -201,6 +204,12 @@ class SyncCron {
 							$data = $product->getData($attribute->getAttributeCode());
 							if (!is_array($data)) $product_data[$i][$attribute->getAttributeCode()] = $data;
 						}
+						
+						// Get Price Incl Tax
+						$product_data[$i]["price"] = $this->taxhelper->getTaxPrice($product, $product_data[$i]["price"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
+						
+						// Get Special Price Incl Tax
+						$product_data[$i]["special_price"] = $this->taxhelper->getTaxPrice($product, $product_data[$i]["special_price"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
 
 						// get lowest tier price / staffel
 						$lowestTierPrice = $product->getResource()->getAttribute('tier_price')->getValue($product);
