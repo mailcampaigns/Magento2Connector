@@ -196,7 +196,8 @@ class SyncCron {
 					try
 					{
 						// Load data
-						$product = $this->objectmanager->create('Magento\Catalog\Model\Product')->load($product->getId());
+						//$product = $this->objectmanager->create('Magento\Catalog\Model\Product')->load($product->getId());
+						$product = $this->productrepository->getById($product->getId(), false, $this->mcapi->APIStoreID);
 
 						$attributes = $product->getAttributes();
 						foreach ($attributes as $attribute)
@@ -221,7 +222,10 @@ class SyncCron {
 						$product_images = $product->getMediaGalleryImages();
 						if (!empty($product_images) && sizeof($product_images) > 0 && is_array($product_images))
 						{
-							$product_data[$i]["mc:image_url_".$image_id++.""] = $image->getUrl();
+							foreach ($product_images as $image)
+							{
+								$product_data[$i]["mc:image_url_".$image_id++.""] = $image->getUrl();
+							}
 						}
 
 						// link
