@@ -60,20 +60,69 @@ class SynchronizeProduct implements ObserverInterface
 					$data = $product->getData($attribute->getAttributeCode());
 					if (!is_array($data)) $product_data[$i][$attribute->getAttributeCode()] = $data;
 				}
-				
+
+				// product parent & child id
+				if($product->getId() != "")
+				{
+				  $objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
+				  $parent_product_id = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getParentIdsByChild($product->getId());
+				  $the_parent_product = $objectMan->create('Magento\Catalog\Model\Product')->load($parent_product_id);
+				  $child_product_ids = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getChildrenIds($product->getId());
+		
+				  if(isset($parent_product_id[0]))
+				  {
+					$product_data[$i]["parent_id"] = $parent_product_id[0];
+				  }
+				  else {
+					$product_data[$i]["parent_id"] = "";
+				  }
+				}
+
 				// Get Price Incl Tax
 				$product_data[$i]["price"] = $this->taxhelper->getTaxPrice($product, $product_data[$i]["price"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
-				
+
 				// Get Special Price Incl Tax
 				$product_data[$i]["special_price"] = $this->taxhelper->getTaxPrice($product, $product_data[$i]["special_price"], true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
-				
+
 				// get lowest tier price / staffel
 				$lowestTierPrice = $product->getResource()->getAttribute('tier_price')->getValue($product);
 				$product_data[$i]["lowest_tier_price"] = $lowestTierPrice;
 
+				// als price niet bestaat bij configurable dan van child pakken
+				if($product_data[$i]["price"] == NULL && !empty($child_product_ids) && $product_data[$i]["type_id"] == "configurable"){
+				  foreach($child_product_ids[0] as $child_product_id){
+					$the_child_product = $objectMan->create('Magento\Catalog\Model\Product')->load($child_product_id);
+					  $product_data[$i]["price"] = $this->taxhelper->getTaxPrice($the_child_product, $the_child_product->getFinalPrice(), true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
+					  break;
+				  }
+				}
+				
+				// als special_price niet bestaat bij configurable dan van child pakken
+				if($product_data[$i]["special_price"] == NULL && !empty($child_product_ids) && $product_data[$i]["type_id"] == "configurable"){
+				  foreach($child_product_ids[0] as $child_product_id){
+					$the_child_product = $objectMan->create('Magento\Catalog\Model\Product')->load($child_product_id);
+					  $product_data[$i]["special_price"] = $this->taxhelper->getTaxPrice($the_child_product, $the_child_product->getSpecialPrice(), true, NULL, NULL, NULL, $this->mcapi->APIStoreID, NULL, true);
+					  break;
+				  }
+				}
+		
+				// als omschrijving niet bestaat bij simple dan van parent pakken
+				if($product_data[$i]["description"] == "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable"){
+				  $product_data[$i]["description"] = $the_parent_product->getDescription();
+				}
+				if($product_data[$i]["short_description"] == "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable"){
+				  $product_data[$i]["short_description"] = $the_parent_product->getShortDescription();
+				}
+		
 				// images
 				$image_id = 1;
-				$product_data[$i]["mc:image_url_main"] = $product->getMediaConfig()->getMediaUrl($product->getData('image'));
+				if($product->getData('image') != NULL && $product->getData('image') != "no_selection"){
+				  $product_data[$i]["mc:image_url_main"] = $product->getMediaConfig()->getMediaUrl($product->getData('image'));
+				}
+				else{
+				  $product_data[$i]["mc:image_url_main"] = "";
+				}
+				
 				$product_images = $product->getMediaGalleryImages();
 				if (!empty($product_images) && sizeof($product_images) > 0 && is_array($product_images))
 				{
@@ -82,23 +131,42 @@ class SynchronizeProduct implements ObserverInterface
 						$product_data[$i]["mc:image_url_".$image_id++.""] = $image->getUrl();
 					}
 				}
+				
+				//get image from parent if empty and not configurable
+				if($product_data[$i]["mc:image_url_main"] === "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable"){
+				  if($the_parent_product->getData('image') != "no_selection" && $the_parent_product->getData('image') != NULL){
+					$product_data[$i]["mc:image_url_main"] = $the_parent_product->getMediaConfig()->getMediaUrl($the_parent_product->getData('image'));
+				  }
+				  else{
+					$product_data[$i]["mc:image_url_main"] = "";
+				  }
+				}
+		
+				//get image from child if empty and configurable, loops through child products until it finds an image
+				if($product_data[$i]["mc:image_url_main"] == "" && !empty($child_product_ids) && $product_data[$i]["type_id"] == "configurable"){
+				  foreach($child_product_ids[0] as $child_product_id){
+					$the_child_product = $objectMan->create('Magento\Catalog\Model\Product')->load($child_product_id);
+					if($the_child_product->getData('image') != NULL && $the_child_product->getData('image') != "no_selection"){
+					  $product_data[$i]["mc:image_url_main"] = $the_child_product->getMediaConfig()->getMediaUrl($the_child_product->getData('image'));
+					  break;
+					}
+					else{
+					  $product_data[$i]["mc:image_url_main"] = "";
+					}
+				  }
+				}
 
 				// link
 				$product_data[$i]["mc:product_url"] = $product->getProductUrl();
 
+				// Stock Status
+				$product_data[$i]["stock_status"] = $product->getData('quantity_and_stock_status');
+		
+				// Stock quantity
+				$product_data[$i]["quantity"] = $product->getExtensionAttributes()->getStockItem()->getQty();
+
 				// store id
 				$product_data[$i]["store_id"] = $product->getStoreID();
-
-				// product parent id
-				if($product->getId() != "")
-				{
-					$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
-					$parent_product = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getParentIdsByChild($product->getId());
-					if(isset($parent_product[0]))
-					{
-						$product_data[$i]["parent_id"] = $parent_product[0];
-					}
-				}
 
 				// get related products
 				$related_products = array();
@@ -111,9 +179,9 @@ class SynchronizeProduct implements ObserverInterface
 						$related_products[$product->getId()]["products"][] = $pdtid;
 					}
 				}
-				
+
 				// Categories
-				$category_data = array(); 
+				$category_data = array();
 				$categories = array();
 				$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
 				foreach ($product->getCategoryIds() as $category_id)
@@ -123,7 +191,7 @@ class SynchronizeProduct implements ObserverInterface
 					$category_data[$category_id] = $cat->getName();
 				}
 				$product_data[$i]["categories"] = json_encode(array_unique($categories));
-				
+
 				// Post data
 				if (sizeof($category_data) > 0)
 					$this->mcapi->QueueAPICall("update_magento_categories", $category_data);
