@@ -15,21 +15,24 @@ class SynchronizeQuote implements ObserverInterface
 	protected $storemanager;
 	protected $taxhelper;
 	protected $mcapi;
+	protected $objectmanager;
 
     public function __construct(
 		\MailCampaigns\Connector\Helper\Data $dataHelper,
 		\Magento\Framework\App\ResourceConnection $Resource,
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcapi,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
+		\Magento\Framework\ObjectManagerInterface $objectManager,
 		\Magento\Catalog\Helper\Data $taxHelper,
         Logger $logger
     ) {
-		$this->resource 		= $Resource;
-		$this->logger 		= $logger;
-		$this->helper 		= $dataHelper;
-		$this->mcapi 		= $mcapi;
-		$this->storemanager 	= $storeManager;
-		$this->taxhelper 	= $taxHelper;
+		$this->resource 			= $Resource;
+		$this->logger 			= $logger;
+		$this->helper 			= $dataHelper;
+		$this->mcapi 			= $mcapi;
+		$this->storemanager 		= $storeManager;
+		$this->taxhelper 		= $taxHelper;
+		$this->objectmanager	= $objectManager;
     }
 
     public function execute(EventObserver $observer)
@@ -50,7 +53,8 @@ class SynchronizeQuote implements ObserverInterface
 			try
 			{				
 				// Retrieve the quote being updated from the event observer
-				$quote_data = $observer->getEvent()->getQuote()->getData();
+				$quote = $observer->getEvent()->getQuote();
+				$quote_data = $quote->getData();
 							
 				$quote_id = $quote_data["entity_id"];
 				$store_id = $quote_data["store_id"];
@@ -81,36 +85,35 @@ class SynchronizeQuote implements ObserverInterface
 				
 				if ($i > 0)
 				{
-					$this->mcapi->DirectOrQueueCall("update_magento_abandonded_cart_quotes", $data);
+					$this->mcapi->QueueAPICall("update_magento_abandonded_cart_quotes", $data);
 				}
-				
-				/*
-				// abandonded carts quote items
-				$sql        = "SELECT q.entity_id as quote_id, p.product_id, p.store_id, p.item_id, p.qty, p.price
-				FROM `".$tn__sales_flat_quote."` AS q
-				LEFT JOIN `".$tn__sales_flat_order."` AS o ON o.quote_id = q.entity_id
-				INNER JOIN ".$tn__sales_flat_quote_item." AS p ON p.quote_id = q.entity_id
-				WHERE
-				q.entity_id = ".$quote_id."
-				ORDER BY  `q`.`updated_at` DESC";
-				$rows       = $this->connection->fetchAll($sql);
-				
-				$data = array(); $i = 0;
-				foreach ($rows as $row)
-				{
-					foreach ($row as $key => $value)
+								
+				// abandonded carts quote items										
+				$items = $quote->getAllItems();
+				foreach ($items as $item) 
+				{			
+					$quote_data 	= $item->get();
+					
+					$quote_id   	= $quote_data["quote_id"];
+					$item_id   		= $quote_data["item_id"];
+					$store_id   	= $quote_data["store_id"];
+					$product_id 	= $quote_data["product_id"];
+					$qty			= $quote_data["qty"];
+					$price			= $quote_data["price"];
+					
+					// Get product
+					if ($product_id > 0)
 					{
-						if (!is_numeric($key)) $data[$i][$key] = $value;
+						$product = $this->objectmanager->create('Magento\Catalog\Model\Product')->load($product_id);
+						
+						// Get Price Incl Tax
+						$price = $this->taxhelper->getTaxPrice($product, $price, true, NULL, NULL, NULL, $store_id, NULL, true);
+										
+						// add abandonded carts quote items
+						$data = array("item_id" => $item_id, "store_id" => $store_id, "quote_id" => $quote_id, "qty" => $qty, "price" => $price, "product_id" => $product_id);
+						$this->mcapi->QueueAPICall("update_magento_abandonded_cart_products", $data);
 					}
-					$i++;
-				}	
-				
-				if ($i > 0)
-				{
-					$this->mcapi->DirectOrQueueCall("delete_magento_abandonded_cart_products", $data);
-					$this->mcapi->DirectOrQueueCall("update_magento_abandonded_cart_products", $data);	
 				}
-				*/
 			}
 			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 			{

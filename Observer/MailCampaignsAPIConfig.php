@@ -33,7 +33,7 @@ class MailCampaignsAPIConfig implements ObserverInterface
 		\Magento\Newsletter\Model\SubscriberFactory $SubscriberFactory,
         Logger $logger
     ) {
-		$this->version 				= '2.0.33';
+		$this->version 				= '2.0.34';
 		$this->logger 				= $logger;
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;
@@ -41,7 +41,7 @@ class MailCampaignsAPIConfig implements ObserverInterface
 		$this->subscriberfactory 	= $SubscriberFactory;
 		$this->resource 				= $Resource;
     }
-
+	
     public function execute(EventObserver $observer)
     {
 		// set vars
@@ -167,19 +167,5 @@ class MailCampaignsAPIConfig implements ObserverInterface
 
 		// push data to mailcampaigns api
 		$this->mcapi->Call("save_magento_settings", $config_data, 0);
-
-		/*
-		$stores = $this->storemanager->getStores();
-		foreach ($stores as $store)
-		{
-			$mc_import_data = array("store_id" => $store->getStoreId(), "lastupdate" => (time() - 3600));
-			print_r($this->mcapi->Call("get_magento_optin_status", $mc_import_data));
-		}
-
-		//print_r($data);
-		exit();
-		*/
-
-
     }
 }

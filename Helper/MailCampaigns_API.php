@@ -151,7 +151,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 		}
 		catch (Exception $e)
 		{
-
+			$response = false;
 		}
 
 		return json_decode($response, true);
@@ -175,7 +175,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 		}
 		catch (Exception $e)
 		{
-
+			$response = false;
 		}
 
 		return json_decode($response, true);
@@ -202,7 +202,7 @@ class MailCampaigns_API extends \Magento\Framework\App\Helper\AbstractHelper
 		}
 		catch (Exception $e)
 		{
-
+			$response = false;
 		}
 
 		return json_decode($response, true);

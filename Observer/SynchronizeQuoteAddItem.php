@@ -63,7 +63,7 @@ class SynchronizeQuoteAddItem implements ObserverInterface
 				if ($item_id > 0)
 				{
 					$data = array("item_id" => $item_id, "store_id" => $store_id, "quote_id" => $quote_id, "qty" => $qty, "price" => $price, "product_id" => $product_id);
-					$this->mcapi->DirectOrQueueCall("update_magento_abandonded_cart_products", $data);
+					$this->mcapi->QueueAPICall("update_magento_abandonded_cart_products", $data);
 				}
 			}
 			catch (\Magento\Framework\Exception\NoSuchEntityException $e)

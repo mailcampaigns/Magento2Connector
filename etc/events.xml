@@ -39,9 +39,9 @@
 	<event name="sales_quote_product_add_after">
         <observer name="custom_sales_quote_product_add_after" instance="MailCampaigns\Connector\Observer\SynchronizeQuoteAddItem"/>
     </event>
-	<event name="sales_quote_item_qty_set_after">
+	<!--<event name="sales_quote_item_qty_set_after">
         <observer name="custom_sales_quote_item_qty_set_after" instance="MailCampaigns\Connector\Observer\SynchronizeQuoteUpdateItem"/>
-    </event>
+    </event>-->
 	<event name="sales_quote_remove_item">
         <observer name="custom_sales_quote_remove_item" instance="MailCampaigns\Connector\Observer\SynchronizeQuoteDeleteItem"/>
     </event>

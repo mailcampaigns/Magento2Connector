@@ -39,11 +39,12 @@ class PostCron {
 		foreach ($rows as $row)
 		{			
 			// Send it to MailCampaigns API
-			$this->mcapi->PostCall($row["stream_data"]);
-			
-			// Delete queued call
-			$sql = "DELETE FROM `".$this->tn__mc_api_queue."` WHERE id = '".$row["id"]."'";
-			$this->connection->query($sql);
+			if ($this->mcapi->PostCall($row["stream_data"]))
+			{
+				// Delete queued call
+				$sql = "DELETE FROM `".$this->tn__mc_api_queue."` WHERE id = '".$row["id"]."'";
+				$this->connection->query($sql);
+			}
 						
 			// Detect timeout
 			if ((time() - $starttime) > 55)

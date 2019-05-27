@@ -25,7 +25,7 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		\Magento\Framework\ObjectManagerInterface $objectManager,
 		Logger $logger
     ) {
-		$this->version 				= '2.0.33';
+		$this->version 				= '2.0.34';
 		$this->logger 				= $logger;
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;
