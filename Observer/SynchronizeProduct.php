@@ -206,7 +206,7 @@ class SynchronizeProduct implements ObserverInterface
 			{
 				$this->mcapi->DebugCall($e->getMessage());
 			}
-			catch (Exception $e)
+			catch (\Throwable $e)
 			{
 				$this->mcapi->DebugCall($e->getMessage());
 			}
