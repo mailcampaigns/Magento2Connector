@@ -7,28 +7,31 @@ class SyncCron {
  	protected $helper;
 	protected $resource;
 	protected $connection;
+	protected $tn__mc_api_pages;
+	protected $tn__mc_api_queue;
+	protected $mcapi;
+	
 	protected $objectmanager;
 	protected $customerrepository;
 	protected $countryinformation;
 	protected $productrepository;
-	protected $tn__mc_api_pages;
-	protected $tn__mc_api_queue;
 	protected $taxhelper;
-	protected $mcapi;
 
     public function __construct(
-   	\MailCampaigns\Connector\Helper\Data $dataHelper,
+   		\MailCampaigns\Connector\Helper\Data $dataHelper,
 		\Magento\Framework\App\ResourceConnection $Resource,
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcApi,
+		
 		\Magento\Framework\ObjectManagerInterface $objectManager,
 		\Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
+		\Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
-		\Magento\Catalog\Helper\Data $taxHelper,
-		\Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
+		\Magento\Catalog\Helper\Data $taxHelper
     ) {
         $this->resource 				= $Resource;
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcApi;
+		
 		$this->objectmanager 		= $objectManager;
 		$this->customerrepository 	= $customerRepository;
 		$this->countryinformation	= $countryInformation;
@@ -308,7 +311,12 @@ class SyncCron {
 						$product_data[$i]["stock_status"] = $product->getData('quantity_and_stock_status');
 			
 						// Stock quantity
-						$product_data[$i]["quantity"] = $product->getExtensionAttributes()->getStockItem()->getQty();
+						if($product->getExtensionAttributes()->getStockItem() != NULL){
+						  $product_data[$i]["quantity"] = $product->getExtensionAttributes()->getStockItem()->getQty();
+						}
+						else{
+						  $product_data[$i]["quantity"] = NULL;
+						}
 
 						// store id
 						$product_data[$i]["store_id"] = $this->mcapi->APIStoreID;
@@ -326,6 +334,7 @@ class SyncCron {
 						$product_data[$i]["categories"] = json_encode(array_unique($categories));
 
 						// get related products
+						$related_products = array();
 						$related_product_collection = $product->getRelatedProductIds();
 						$related_products[$product->getId()]["store_id"] = $this->mcapi->APIStoreID;
 						if (!empty($related_product_collection) && sizeof($related_product_collection) > 0 && is_array($related_product_collection))
@@ -333,6 +342,30 @@ class SyncCron {
 							foreach($related_product_collection as $pdtid)
 							{
 								$related_products[$product->getId()]["products"][] = $pdtid;
+							}
+						}
+						
+						// get up sell products
+						$upsell_products = array();
+						$upsell_product_collection = $product->getUpSellProducts();
+						if (!empty($upsell_product_collection) && sizeof($upsell_product_collection) > 0 && is_array($upsell_product_collection))
+						{
+							$upsell_products[$product->getId()]["store_id"] = $product_data[$i]["store_id"];
+							foreach($upsell_product_collection as $pdtid)
+							{
+								$upsell_products[$product->getId()]["products"][] = $pdtid;
+							}
+						}
+						
+						// get cross sell products
+						$crosssell_products = array();
+						$crosssell_product_collection = $product->getCrossSellProducts();
+						if (!empty($crosssell_product_collection) && sizeof($crosssell_product_collection) > 0 && is_array($crosssell_product_collection))
+						{
+							$crosssell_products[$product->getId()]["store_id"] = $product_data[$i]["store_id"];
+							foreach($crosssell_product_collection as $pdtid)
+							{
+								$crosssell_products[$product->getId()]["products"][] = $pdtid;
 							}
 						}
 
@@ -350,7 +383,24 @@ class SyncCron {
 
 				$response = $this->mcapi->QueueAPICall("update_magento_categories", $category_data);
 				$response = $this->mcapi->QueueAPICall("update_magento_products", $product_data);
-				$response = $this->mcapi->QueueAPICall("update_magento_related_products", $related_products);
+				
+				if (sizeof($related_products) > 0)
+				{
+					$this->mcapi->QueueAPICall("update_magento_related_products", $related_products);
+					unset($related_products);
+				}
+				
+				if (sizeof($crosssell_products) > 0)
+				{
+					$this->mcapi->$mcAPI->QueueAPICall("update_magento_crosssell_products", $crosssell_products, 0);
+					unset($crosssell_products);
+				}
+				
+				if (sizeof($upsell_products) > 0)
+				{
+					$this->mcapi->$mcAPI->QueueAPICall("update_magento_upsell_products", $upsell_products, 0);
+					unset($upsell_products);
+				}
 
 				//clear collection and free memory
 				$productsCollection->clear();

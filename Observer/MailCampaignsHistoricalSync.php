@@ -4,11 +4,9 @@ namespace MailCampaigns\Connector\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer as EventObserver;
-use Psr\Log\LoggerInterface as Logger;
 
 class MailCampaignsHistoricalSync implements ObserverInterface
 {
-    protected $logger;
 	protected $version;
 	protected $helper;
 	protected $storemanager;
@@ -22,11 +20,9 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcapi,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
 		\Magento\Framework\App\ResourceConnection $resourceConnection,
-		\Magento\Framework\ObjectManagerInterface $objectManager,
-		Logger $logger
+		\Magento\Framework\ObjectManagerInterface $objectManager
     ) {
-		$this->version 				= '2.0.35';
-		$this->logger 				= $logger;
+		$this->version 				= '2.0.36';
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;
 		$this->storemanager 			= $storeManager;

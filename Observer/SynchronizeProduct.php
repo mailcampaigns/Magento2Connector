@@ -68,7 +68,7 @@ class SynchronizeProduct implements ObserverInterface
 				  $parent_product_id = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getParentIdsByChild($product->getId());
 				  $the_parent_product = $objectMan->create('Magento\Catalog\Model\Product')->load($parent_product_id);
 				  $child_product_ids = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getChildrenIds($product->getId());
-		
+
 				  if(isset($parent_product_id[0]))
 				  {
 					$product_data[$i]["parent_id"] = $parent_product_id[0];
@@ -96,7 +96,7 @@ class SynchronizeProduct implements ObserverInterface
 					  break;
 				  }
 				}
-				
+
 				// als special_price niet bestaat bij configurable dan van child pakken
 				if($product_data[$i]["special_price"] == NULL && !empty($child_product_ids) && $product_data[$i]["type_id"] == "configurable"){
 				  foreach($child_product_ids[0] as $child_product_id){
@@ -105,7 +105,7 @@ class SynchronizeProduct implements ObserverInterface
 					  break;
 				  }
 				}
-		
+
 				// als omschrijving niet bestaat bij simple dan van parent pakken
 				if($product_data[$i]["description"] == "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable"){
 				  $product_data[$i]["description"] = $the_parent_product->getDescription();
@@ -113,7 +113,7 @@ class SynchronizeProduct implements ObserverInterface
 				if($product_data[$i]["short_description"] == "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable"){
 				  $product_data[$i]["short_description"] = $the_parent_product->getShortDescription();
 				}
-		
+
 				// images
 				$image_id = 1;
 				if($product->getData('image') != NULL && $product->getData('image') != "no_selection"){
@@ -122,7 +122,7 @@ class SynchronizeProduct implements ObserverInterface
 				else{
 				  $product_data[$i]["mc:image_url_main"] = "";
 				}
-				
+
 				$product_images = $product->getMediaGalleryImages();
 				if (!empty($product_images) && sizeof($product_images) > 0 && is_array($product_images))
 				{
@@ -131,7 +131,7 @@ class SynchronizeProduct implements ObserverInterface
 						$product_data[$i]["mc:image_url_".$image_id++.""] = $image->getUrl();
 					}
 				}
-				
+
 				//get image from parent if empty and not configurable
 				if($product_data[$i]["mc:image_url_main"] === "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable"){
 				  if($the_parent_product->getData('image') != "no_selection" && $the_parent_product->getData('image') != NULL){
@@ -141,7 +141,7 @@ class SynchronizeProduct implements ObserverInterface
 					$product_data[$i]["mc:image_url_main"] = "";
 				  }
 				}
-		
+
 				//get image from child if empty and configurable, loops through child products until it finds an image
 				if($product_data[$i]["mc:image_url_main"] == "" && !empty($child_product_ids) && $product_data[$i]["type_id"] == "configurable"){
 				  foreach($child_product_ids[0] as $child_product_id){
@@ -161,9 +161,14 @@ class SynchronizeProduct implements ObserverInterface
 
 				// Stock Status
 				$product_data[$i]["stock_status"] = $product->getData('quantity_and_stock_status');
-		
+
 				// Stock quantity
-				$product_data[$i]["quantity"] = $product->getExtensionAttributes()->getStockItem()->getQty();
+				if($product->getExtensionAttributes()->getStockItem() != NULL){
+				  $product_data[$i]["quantity"] = $product->getExtensionAttributes()->getStockItem()->getQty();
+				}
+				else{
+				  $product_data[$i]["quantity"] = NULL;
+				}
 
 				// store id
 				$product_data[$i]["store_id"] = $product->getStoreID();
@@ -177,6 +182,30 @@ class SynchronizeProduct implements ObserverInterface
 					foreach($related_product_collection as $pdtid)
 					{
 						$related_products[$product->getId()]["products"][] = $pdtid;
+					}
+				}
+				
+				// get up sell products
+				$upsell_products = array();
+				$upsell_product_collection = $product->getUpSellProducts();
+				if (!empty($upsell_product_collection) && sizeof($upsell_product_collection) > 0 && is_array($upsell_product_collection))
+				{
+					$upsell_products[$product->getId()]["store_id"] = $product_data[$i]["store_id"];
+					foreach($upsell_product_collection as $pdtid)
+					{
+						$upsell_products[$product->getId()]["products"][] = $pdtid;
+					}
+				}
+				
+				// get cross sell products
+				$crosssell_products = array();
+				$crosssell_product_collection = $product->getCrossSellProducts();
+				if (!empty($crosssell_product_collection) && sizeof($crosssell_product_collection) > 0 && is_array($crosssell_product_collection))
+				{
+					$crosssell_products[$product->getId()]["store_id"] = $product_data[$i]["store_id"];
+					foreach($crosssell_product_collection as $pdtid)
+					{
+						$crosssell_products[$product->getId()]["products"][] = $pdtid;
 					}
 				}
 
@@ -199,8 +228,23 @@ class SynchronizeProduct implements ObserverInterface
 				if (sizeof($product_data) > 0)
 					$this->mcapi->QueueAPICall("update_magento_products", $product_data);
 
-				if (sizeof($related_product_collection) > 0)
+				if (sizeof($related_products) > 0)
+				{
 					$this->mcapi->QueueAPICall("update_magento_related_products", $related_products);
+					unset($related_products);
+				}
+					
+				if (sizeof($crosssell_products) > 0)
+				{
+					$this->mcapi->$mcAPI->QueueAPICall("update_magento_crosssell_products", $crosssell_products, 0);
+					unset($crosssell_products);
+				}
+				
+				if (sizeof($upsell_products) > 0)
+				{
+					$this->mcapi->$mcAPI->QueueAPICall("update_magento_upsell_products", $upsell_products, 0);
+					unset($upsell_products);
+				}
 			}
 			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 			{
