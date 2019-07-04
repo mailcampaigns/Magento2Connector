@@ -392,13 +392,13 @@ class SyncCron {
 				
 				if (sizeof($crosssell_products) > 0)
 				{
-					$this->mcapi->$mcAPI->QueueAPICall("update_magento_crosssell_products", $crosssell_products, 0);
+					$this->mcapi->QueueAPICall("update_magento_crosssell_products", $crosssell_products, 0);
 					unset($crosssell_products);
 				}
 				
 				if (sizeof($upsell_products) > 0)
 				{
-					$this->mcapi->$mcAPI->QueueAPICall("update_magento_upsell_products", $upsell_products, 0);
+					$this->mcapi->QueueAPICall("update_magento_upsell_products", $upsell_products, 0);
 					unset($upsell_products);
 				}
 

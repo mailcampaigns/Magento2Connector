@@ -22,7 +22,7 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		\Magento\Framework\App\ResourceConnection $resourceConnection,
 		\Magento\Framework\ObjectManagerInterface $objectManager
     ) {
-		$this->version 				= '2.0.36';
+		$this->version 				= '2.0.37';
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;
 		$this->storemanager 			= $storeManager;

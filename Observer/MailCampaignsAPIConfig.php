@@ -33,7 +33,7 @@ class MailCampaignsAPIConfig implements ObserverInterface
 		\Magento\Newsletter\Model\SubscriberFactory $SubscriberFactory,
         Logger $logger
     ) {
-		$this->version 				= '2.0.36';
+		$this->version 				= '2.0.37';
 		$this->logger 				= $logger;
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;
