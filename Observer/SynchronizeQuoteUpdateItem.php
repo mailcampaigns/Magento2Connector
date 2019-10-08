@@ -33,6 +33,8 @@ class SynchronizeQuoteUpdateItem implements ObserverInterface
 
     public function execute(EventObserver $observer)
     {		
+		/*return;
+		
 		// set vars
 		$this->mcapi->APIWebsiteID 		= $observer->getWebsite();
       	$this->mcapi->APIStoreID 		= $observer->getStore(); 
@@ -75,6 +77,7 @@ class SynchronizeQuoteUpdateItem implements ObserverInterface
 				$this->mcapi->DebugCall($e->getMessage());
 			}
 		}
+		*/
 		
     }
 }

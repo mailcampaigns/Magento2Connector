@@ -29,7 +29,10 @@ class SynchronizeQuoteDeleteItem implements ObserverInterface
     }
 
     public function execute(EventObserver $observer)
-    {		
+    {	
+		/*	
+		return;
+		
 		// set vars
 		$this->mcapi->APIWebsiteID 		= $observer->getWebsite();
       	$this->mcapi->APIStoreID 		= $observer->getStore(); 
@@ -59,5 +62,6 @@ class SynchronizeQuoteDeleteItem implements ObserverInterface
 				$this->mcapi->DebugCall($e->getMessage());
 			}
 		}
+		*/
     }
 }

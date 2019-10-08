@@ -33,16 +33,16 @@
 	<event name="customer_save_after">
         <observer name="custom_customer_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeCustomer"/>
     </event>
-	<event name="sales_quote_save_after">
+	<!--<event name="sales_quote_save_after">
         <observer name="custom_sales_quote_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeQuote"/>
     </event>
 	<event name="sales_quote_product_add_after">
         <observer name="custom_sales_quote_product_add_after" instance="MailCampaigns\Connector\Observer\SynchronizeQuoteAddItem"/>
-    </event>
+    </event>-->
 	<!--<event name="sales_quote_item_qty_set_after">
         <observer name="custom_sales_quote_item_qty_set_after" instance="MailCampaigns\Connector\Observer\SynchronizeQuoteUpdateItem"/>
     </event>-->
-	<event name="sales_quote_remove_item">
+	<!--<event name="sales_quote_remove_item">
         <observer name="custom_sales_quote_remove_item" instance="MailCampaigns\Connector\Observer\SynchronizeQuoteDeleteItem"/>
-    </event>
+    </event>-->
 </config>

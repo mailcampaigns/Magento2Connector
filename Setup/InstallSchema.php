@@ -115,6 +115,43 @@ class InstallSchema implements InstallSchemaInterface
                 ->setOption('charset', 'utf8');
             $installer->getConnection()->createTable($table);
         }
+		
+		$tableName = $installer->getTable('mc_api_status');
+        if ($installer->getConnection()->isTableExists($tableName) != true) {
+            // Create mc_api_pages table
+            $table = $installer->getConnection()
+                ->newTable($tableName)
+                ->addColumn(
+                    'id',
+                    Table::TYPE_INTEGER,
+                    null,
+                    [
+                        'identity' => true,
+                        'unsigned' => true,
+                        'nullable' => false,
+                        'primary' => true
+                    ],
+                    'ID'
+                )
+                ->addColumn(
+                    'datetime',
+                    Table::TYPE_INTEGER,
+                    11,
+                    ['nullable' => false, 'default' => 0],
+                    'Timestamp'
+                )
+                ->addColumn(
+                    'type',
+                    Table::TYPE_TEXT,
+                    100,
+                    ['nullable' => false, 'default' => ''],
+                    'Collection'
+                )
+                ->setComment('MailCampaigns Status Table')
+                ->setOption('type', 'InnoDB')
+                ->setOption('charset', 'utf8');
+            $installer->getConnection()->createTable($table);
+        }
 
         $installer->endSetup();
     }

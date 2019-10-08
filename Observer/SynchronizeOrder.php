@@ -71,30 +71,31 @@ class SynchronizeOrder implements ObserverInterface
 				$mc_order_data = $order;
 				if ($mc_order_data["entity_id"] > 0)
 				{					
-          			$mc_data = array(
-						"store_id" => $mc_order_data["store_id"],
-						"order_id" => $mc_order_data["entity_id"],
-						"order_name" => $mc_order_data["increment_id"],
-						"order_status" => $mc_order_data["status"],
-						"order_total" => $mc_order_data["grand_total"],
-						"customer_id" => $mc_order_data["customer_id"],
-						//"visitor_id" => $mc_order_data["visitor_id"],
-						"quote_id" => $mc_order_data["quote_id"],
-						"customer_email" => $mc_order_data["customer_email"],
-						"firstname" => $mc_order_data["customer_firstname"],
-						"lastname" => $mc_order_data["customer_lastname"],
-						"middlename" => $mc_order_data["customer_middlename"],
-						"dob" => $mc_order_data["customer_dob"],
-						"telephone" => $address["telephone"],
-						"street" => $address["street"],
-						"postcode" => $address["postcode"],
-						"city" => $address["city"],
-						"region" => $address["region"],
-						"country_id" => $address["country_id"],
-						"company" => $address["company"],
-						"created_at" => $mc_order_data["created_at"],
-						"updated_at" => $mc_order_data["updated_at"]
-					);
+					if(isset($mc_order_data["store_id"]))				{ $mc_data["store_id"] =		$mc_order_data["store_id"]				;}
+					if(isset($mc_order_data["entity_id"]))				{ $mc_data["order_id"] =		$mc_order_data["entity_id"]				;}
+					if(isset($mc_order_data["increment_id"]))			{ $mc_data["order_name"] =		$mc_order_data["increment_id"]			;}
+					if(isset($mc_order_data["status"]))					{ $mc_data["order_status"] =	$mc_order_data["status"]				;}
+					if(isset($mc_order_data["grand_total"]))			{ $mc_data["order_total"] =		$mc_order_data["grand_total"]			;}
+					if(isset($mc_order_data["customer_id"]))			{ $mc_data["customer_id"] =		$mc_order_data["customer_id"]			;}
+					if(isset($mc_order_data["quote_id"]))				{ $mc_data["quote_id"] =		$mc_order_data["quote_id"]				;}
+					if(isset($mc_order_data["customer_email"]))			{ $mc_data["customer_email"] =	$mc_order_data["customer_email"]		;}
+					if(isset($mc_order_data["customer_firstname"]))		{ $mc_data["firstname"] =		$mc_order_data["customer_firstname"]	;}
+					if(isset($mc_order_data["customer_lastname"]))		{ $mc_data["lastname"] =		$mc_order_data["customer_lastname"]		;}
+					if(isset($mc_order_data["customer_middlename"]))	{ $mc_data["middlename"] =		$mc_order_data["customer_middlename"]	;}
+					if(isset($mc_order_data["customer_dob"]))			{ $mc_data["dob"] =				$mc_order_data["customer_dob"]			;}
+					if(isset($address["telephone"]))					{ $mc_data["telephone"] =		$address["telephone"]					;}
+					if(isset($address["street"]))						{ $mc_data["street"] =			$address["street"]						;}
+					if(isset($address["postcode"]))						{ $mc_data["postcode"] =		$address["postcode"]					;}
+					if(isset($address["city"]))							{ $mc_data["city"] =			$address["city"]						;}
+					if(isset($address["region"]))						{ $mc_data["region"] =			$address["region"]						;}
+					if(isset($address["country_id"]))					{ $mc_data["country_id"] =		$address["country_id"]					;}
+					if(isset($address["company"]))						{ $mc_data["company"] =			$address["company"]						;}
+					if(isset($mc_order_data["created_at"]))				{ $mc_data["created_at"] =		$mc_order_data["created_at"]			;}
+					if(isset($mc_order_data["updated_at"]))				{ $mc_data["updated_at"] =		$mc_order_data["updated_at"]			;}
+					if(is_object($order->getShippingAmount()))			$mc_data["shipping_amount"] = $order->getShippingAmount();
+					if(is_object($order->getShippingInclTax()))			$mc_data["shipping_amount_incl_tax"] = $order->getShippingInclTax();
+					if(is_object($order->getBaseSubtotalInclTax()))		$mc_data["subtotalInclTaxExclDiscount"] = $order->getBaseSubtotalInclTax();
+					if(is_object($order->getDiscountAmount()))			$mc_data["discount"] = $order->getDiscountAmount();
 
 					$this->mcapi->DirectOrQueueCall("update_magento_orders", $mc_data);
 

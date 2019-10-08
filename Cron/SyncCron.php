@@ -49,7 +49,7 @@ class SyncCron {
 		$this->tn__mc_api_queue = $this->resource->getTableName('mc_api_queue');
 
 		// Process one page per each cron
-		$sql        = "SELECT * FROM `".$this->tn__mc_api_pages."`";
+		$sql        = "SELECT * FROM `".$this->tn__mc_api_pages."` ORDER BY id ASC";
 		$rows       = $this->connection->fetchAll($sql);
 		$starttime 	= time();
 		$pages 		= 0;
@@ -347,7 +347,7 @@ class SyncCron {
 						
 						// get up sell products
 						$upsell_products = array();
-						$upsell_product_collection = $product->getUpSellProducts();
+						$upsell_product_collection = $product->getUpSellProductIds();
 						if (!empty($upsell_product_collection) && sizeof($upsell_product_collection) > 0 && is_array($upsell_product_collection))
 						{
 							$upsell_products[$product->getId()]["store_id"] = $product_data[$i]["store_id"];
@@ -359,7 +359,7 @@ class SyncCron {
 						
 						// get cross sell products
 						$crosssell_products = array();
-						$crosssell_product_collection = $product->getCrossSellProducts();
+						$crosssell_product_collection = $product->getCrossSellProductIds();
 						if (!empty($crosssell_product_collection) && sizeof($crosssell_product_collection) > 0 && is_array($crosssell_product_collection))
 						{
 							$crosssell_products[$product->getId()]["store_id"] = $product_data[$i]["store_id"];
@@ -412,9 +412,11 @@ class SyncCron {
 			if ($row["collection"] == "sales/order")
 			{
 				// get all orders
+				$i = 0;
+				$mc_send_data = array();
 				$mc_import_data = array();
 				$ordersCollection = $this->objectmanager->create('Magento\Sales\Model\Order')->setStoreId($this->mcapi->APIStoreID)->getCollection();
-				$ordersCollection->setPageSize(50);
+				$ordersCollection->setPageSize(100);
 				$pages = $ordersCollection->getLastPageNumber();
 
 				$ordersCollection->setCurPage($currentPage);
@@ -438,31 +440,36 @@ class SyncCron {
 
 						if ($mc_order_data["store_id"] == $this->mcapi->APIStoreID || $mc_order_data["store_id"] == 0)
 						{
-							$mc_import_data[] = array(
-                				"store_id" => $mc_order_data["store_id"],
-								"order_id" => $mc_order_data["entity_id"],
-								"order_name" => $mc_order_data["increment_id"],
-								"order_status" => $mc_order_data["status"],
-								"order_total" => $mc_order_data["grand_total"],
-								"customer_id" => $mc_order_data["customer_id"],
-								//"visitor_id" => $mc_order_data["visitor_id"],
-								"quote_id" => $mc_order_data["quote_id"],
-								"customer_email" => $mc_order_data["customer_email"],
-								"firstname" => $mc_order_data["customer_firstname"],
-								"lastname" => $mc_order_data["customer_lastname"],
-								"middlename" => $mc_order_data["customer_middlename"],
-								"dob" => $mc_order_data["customer_dob"],
-								"telephone" => $address["telephone"],
-								"street" => $address["street"],
-								"postcode" => $address["postcode"],
-								"city" => $address["city"],
-								"region" => $address["region"],
-								"country_id" => $address["country_id"],
-								"company" => $address["company"],
-								"created_at" => $mc_order_data["created_at"],
-								"updated_at" => $mc_order_data["updated_at"]
-								);
+							if(isset($mc_order_data["store_id"]))				{ $mc_data["store_id"] =		$mc_order_data["store_id"]				;}
+							if(isset($mc_order_data["entity_id"]))				{ $mc_data["order_id"] =		$mc_order_data["entity_id"]				;}
+							if(isset($mc_order_data["increment_id"]))			{ $mc_data["order_name"] =		$mc_order_data["increment_id"]			;}
+							if(isset($mc_order_data["status"]))					{ $mc_data["order_status"] =	$mc_order_data["status"]				;}
+							if(isset($mc_order_data["grand_total"]))			{ $mc_data["order_total"] =		$mc_order_data["grand_total"]			;}
+							if(isset($mc_order_data["customer_id"]))			{ $mc_data["customer_id"] =		$mc_order_data["customer_id"]			;}
+							if(isset($mc_order_data["quote_id"]))				{ $mc_data["quote_id"] =		$mc_order_data["quote_id"]				;}
+							if(isset($mc_order_data["customer_email"]))			{ $mc_data["customer_email"] =	$mc_order_data["customer_email"]		;}
+							if(isset($mc_order_data["customer_firstname"]))		{ $mc_data["firstname"] =		$mc_order_data["customer_firstname"]	;}
+							if(isset($mc_order_data["customer_lastname"]))		{ $mc_data["lastname"] =		$mc_order_data["customer_lastname"]		;}
+							if(isset($mc_order_data["customer_middlename"]))	{ $mc_data["middlename"] =		$mc_order_data["customer_middlename"]	;}
+							if(isset($mc_order_data["customer_dob"]))			{ $mc_data["dob"] =				$mc_order_data["customer_dob"]			;}
+							if(isset($address["telephone"]))					{ $mc_data["telephone"] =		$address["telephone"]					;}
+							if(isset($address["street"]))						{ $mc_data["street"] =			$address["street"]						;}
+							if(isset($address["postcode"]))						{ $mc_data["postcode"] =		$address["postcode"]					;}
+							if(isset($address["city"]))							{ $mc_data["city"] =			$address["city"]						;}
+							if(isset($address["region"]))						{ $mc_data["region"] =			$address["region"]						;}
+							if(isset($address["country_id"]))					{ $mc_data["country_id"] =		$address["country_id"]					;}
+							if(isset($address["company"]))						{ $mc_data["company"] =			$address["company"]						;}
+							if(isset($mc_order_data["created_at"]))				{ $mc_data["created_at"] =		$mc_order_data["created_at"]			;}
+							if(isset($mc_order_data["updated_at"]))				{ $mc_data["updated_at"] =		$mc_order_data["updated_at"]			;}
+							if(is_object($order->getShippingAmount()))			$mc_data["shipping_amount"] = $order->getShippingAmount();
+							if(is_object($order->getShippingInclTax()))			$mc_data["shipping_amount_incl_tax"] = $order->getShippingInclTax();
+							if(is_object($order->getBaseSubtotalInclTax()))		$mc_data["subtotalInclTaxExclDiscount"] = $order->getBaseSubtotalInclTax();
+							if(is_object($order->getDiscountAmount()))			$mc_data["discount"] = $order->getDiscountAmount();
+							
+							$mc_send_data[$i][] = $mc_data;
+							$i++;
 						}
+
 					}
 					catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 					{
@@ -474,8 +481,10 @@ class SyncCron {
 					}
 				}
 
-				$response = $this->mcapi->QueueAPICall("update_magento_multiple_orders", $mc_import_data);
+				$response = $this->mcapi->QueueAPICall("update_magento_multiple_orders", $mc_send_data);
 				unset($mc_import_data);
+				unset($mc_data);
+				unset($mc_send_data);
 
 				//clear collection and free memory
 				$ordersCollection->clear();
@@ -497,7 +506,7 @@ class SyncCron {
 				$tn__eav_entity_type 					= $this->resource->getTableName('eav_entity_type');
 				$tn__catalog_category_entity 			= $this->resource->getTableName('catalog_category_entity');
 
-				$pagesize = 50;
+				$pagesize = 250;
 
 				// order items
 				$sql        = "SELECT COUNT(*) AS pages FROM `".$tn__sales_flat_order."` AS o INNER JOIN ".$tn__sales_flat_order_item." AS oi ON oi.order_id = o.entity_id WHERE o.store_id = ".$this->mcapi->APIStoreID." OR o.store_id = 0";

@@ -187,7 +187,7 @@ class SynchronizeProduct implements ObserverInterface
 				
 				// get up sell products
 				$upsell_products = array();
-				$upsell_product_collection = $product->getUpSellProducts();
+				$upsell_product_collection = $product->getUpSellProductIds();
 				if (!empty($upsell_product_collection) && sizeof($upsell_product_collection) > 0 && is_array($upsell_product_collection))
 				{
 					$upsell_products[$product->getId()]["store_id"] = $product_data[$i]["store_id"];
@@ -199,7 +199,7 @@ class SynchronizeProduct implements ObserverInterface
 				
 				// get cross sell products
 				$crosssell_products = array();
-				$crosssell_product_collection = $product->getCrossSellProducts();
+				$crosssell_product_collection = $product->getCrossSellProductIds();
 				if (!empty($crosssell_product_collection) && sizeof($crosssell_product_collection) > 0 && is_array($crosssell_product_collection))
 				{
 					$crosssell_products[$product->getId()]["store_id"] = $product_data[$i]["store_id"];

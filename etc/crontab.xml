@@ -11,5 +11,8 @@
 		<job name="mailcampaigns_statuscron" instance="MailCampaigns\Connector\Cron\StatusCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>
+		<job name="mailcampaigns_quotecron" instance="MailCampaigns\Connector\Cron\QuoteCron" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
     </group>
 </config>

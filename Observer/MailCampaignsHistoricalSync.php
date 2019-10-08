@@ -22,7 +22,7 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		\Magento\Framework\App\ResourceConnection $resourceConnection,
 		\Magento\Framework\ObjectManagerInterface $objectManager
     ) {
-		$this->version 				= '2.0.37';
+		$this->version 				= '2.1.0';
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;
 		$this->storemanager 			= $storeManager;
@@ -61,10 +61,11 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		$this->mcapi->ImportOrderProductsHistory = $this->helper->getConfig('mailcampaignshistoricalsync/general/import_order_history', $this->mcapi->APIStoreID);
 
 		/* Customers */
-		$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'customer/customer' AND store_id = ".$this->mcapi->APIStoreID."";
-		$this->resource->getConnection()->query($sql);
 		if ($this->mcapi->ImportCustomersHistory == 1)
 		{
+			$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'customer/customer' AND store_id = ".$this->mcapi->APIStoreID."";
+			$this->resource->getConnection()->query($sql);
+		
 			// drop tables in mailcampaigns
 			$this->mcapi->Call("reset_magento_tables", array("collection" => "customer/customer"), 0);
 
@@ -87,12 +88,13 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		}
 
 		/* Orders */
-		$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'sales/order' AND store_id = ".$this->mcapi->APIStoreID."";
-		$this->resource->getConnection()->query($sql);
-		$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'sales/order/products' AND store_id = ".$this->mcapi->APIStoreID."";
-		$this->resource->getConnection()->query($sql);
 		if ($this->mcapi->ImportOrdersHistory == 1)
 		{
+			$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'sales/order' AND store_id = ".$this->mcapi->APIStoreID."";
+			$this->resource->getConnection()->query($sql);
+			$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'sales/order/products' AND store_id = ".$this->mcapi->APIStoreID."";
+			$this->resource->getConnection()->query($sql);
+			
 			// drop tables in mailcampaigns
 			$this->mcapi->Call("reset_magento_tables", array("collection" => "sales/order"), 0);
 			$this->mcapi->Call("reset_magento_tables", array("collection" => "sales/order/products"), 0);
@@ -115,13 +117,13 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 
 			// Update progress
 			$ordersCollection = $this->objectmanager->create('Magento\Sales\Model\Order')->setStoreId($this->mcapi->APIStoreID)->getCollection();
-			$ordersCollection->setPageSize(50);
+			$ordersCollection->setPageSize(100);
 			$pages = $ordersCollection->getLastPageNumber();
 
 			$mc_import_data = array("store_id" => $this->mcapi->APIStoreID, "collection" => 'sales/order', "page" => 1, "total" => (int)$pages, "datetime" => time(), "finished" => 0);
 			$this->mcapi->Call("update_magento_progress", $mc_import_data);
 
-			$pagesize = 50;
+			$pagesize = 250;
 			$sql        = "SELECT COUNT(*) AS pages FROM `".$tn__sales_flat_order."` AS o INNER JOIN ".$tn__sales_flat_order_item." AS oi ON oi.order_id = o.entity_id WHERE o.store_id = ".$this->mcapi->APIStoreID." OR o.store_id = 0";
 			$pages 		= ceil($this->connection->fetchOne($sql) / $pagesize);
 			if ($pages == 0) $pages = 1;
@@ -129,12 +131,13 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 			$mc_import_data = array("store_id" => $this->mcapi->APIStoreID, "collection" => 'sales/order/products', "page" => 1, "total" => (int)$pages, "datetime" => time(), "finished" => 0);
 			$this->mcapi->Call("update_magento_progress", $mc_import_data);
 		}
-
+		
 		/* Products */
-		$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'catalog/product' AND store_id = ".$this->mcapi->APIStoreID."";
-		$this->resource->getConnection()->query($sql);
 		if ($this->mcapi->ImportProductsHistory == 1)
 		{
+			$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'catalog/product' AND store_id = ".$this->mcapi->APIStoreID."";
+			$this->resource->getConnection()->query($sql);
+		
 			// drop tables in mailcampaigns
 			$this->mcapi->Call("reset_magento_tables", array("collection" => "catalog/product"), 0);
 
@@ -156,10 +159,11 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		}
 
 		/* Subscribers */
-		$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'newsletter/subscriber_collection' AND store_id = ".$this->mcapi->APIStoreID."";
-		$this->resource->getConnection()->query($sql);
 		if ($this->mcapi->ImportMailinglistHistory == 1)
 		{
+			$sql = "DELETE FROM ".$tn__mc_api_pages." WHERE collection = 'newsletter/subscriber_collection' AND store_id = ".$this->mcapi->APIStoreID."";
+			$this->resource->getConnection()->query($sql);
+		
 			// drop tables in mailcampaigns
 			$this->mcapi->Call("reset_magento_tables", array("collection" => "newsletter/subscriber_collection"), 0);
 
