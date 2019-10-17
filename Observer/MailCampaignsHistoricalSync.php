@@ -59,7 +59,7 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 		$this->mcapi->ImportProductsHistory 		= $this->helper->getConfig('mailcampaignshistoricalsync/general/import_products_history', $this->mcapi->APIStoreID);
 		$this->mcapi->ImportMailinglistHistory 	= $this->helper->getConfig('mailcampaignshistoricalsync/general/import_mailing_list_history', $this->mcapi->APIStoreID);
 		$this->mcapi->ImportOrderProductsHistory = $this->helper->getConfig('mailcampaignshistoricalsync/general/import_order_history', $this->mcapi->APIStoreID);
-
+		
 		/* Customers */
 		if ($this->mcapi->ImportCustomersHistory == 1)
 		{
@@ -80,7 +80,7 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 			// Update progress
 			$customersCollection = $this->objectmanager->create('Magento\Customer\Model\Customer')->setStoreId($this->mcapi->APIStoreID)->getCollection();
 			$customersCollection->addAttributeToSelect('*');
-			$customersCollection->setPageSize(100);
+			$customersCollection->setPageSize($this->helper->getConfig('mailcampaignshistoricalsync/general/import_customers_amount', $this->mcapi->APIStoreID));
 			$pages = $customersCollection->getLastPageNumber();
 
 			$mc_import_data = array("store_id" => $this->mcapi->APIStoreID, "collection" => 'customer/customer', "page" => 1, "total" => (int)$pages, "datetime" => time(), "finished" => 0);
@@ -117,7 +117,7 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 
 			// Update progress
 			$ordersCollection = $this->objectmanager->create('Magento\Sales\Model\Order')->setStoreId($this->mcapi->APIStoreID)->getCollection();
-			$ordersCollection->setPageSize(100);
+			$ordersCollection->setPageSize($this->helper->getConfig('mailcampaignshistoricalsync/general/import_order_amount', $this->mcapi->APIStoreID));
 			$pages = $ordersCollection->getLastPageNumber();
 
 			$mc_import_data = array("store_id" => $this->mcapi->APIStoreID, "collection" => 'sales/order', "page" => 1, "total" => (int)$pages, "datetime" => time(), "finished" => 0);
@@ -151,7 +151,7 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 
 			// Update progress
 			$productsCollection = $this->objectmanager->create('Magento\Catalog\Model\Product')->setStoreId($this->mcapi->APIStoreID)->getCollection();
-			$productsCollection->setPageSize(10);
+			$productsCollection->setPageSize($this->helper->getConfig('mailcampaignshistoricalsync/general/import_products_amount', $this->mcapi->APIStoreID));
 			$pages = $productsCollection->getLastPageNumber();
 
 			$mc_import_data = array("store_id" => $this->mcapi->APIStoreID, "collection" => 'catalog/product', "page" => 1, "total" => (int)$pages, "datetime" => time(), "finished" => 0);
@@ -177,7 +177,7 @@ class MailCampaignsHistoricalSync implements ObserverInterface
 
 			// Update progress
 			$mailinglistCollection = $this->objectmanager->create('Magento\Newsletter\Model\Subscriber')->setStoreId($this->mcapi->APIStoreID)->getCollection();
-			$mailinglistCollection->setPageSize(100);
+			$mailinglistCollection->setPageSize($this->helper->getConfig('mailcampaignshistoricalsync/general/import_mailing_list_amount', $this->mcapi->APIStoreID));
 			$pages = $mailinglistCollection->getLastPageNumber();
 
 			$mc_import_data = array("store_id" => $this->mcapi->APIStoreID, "collection" => 'newsletter/subscriber_collection', "page" => 1, "total" => (int)$pages, "datetime" => time(), "finished" => 0);

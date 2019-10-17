@@ -70,7 +70,7 @@ class SyncCron {
 				$customer_data = array();
 				$customersCollection = $this->objectmanager->create('Magento\Customer\Model\Customer')->setStoreId($this->mcapi->APIStoreID)->getCollection();
 				$customersCollection->addAttributeToSelect('*');
-				$customersCollection->setPageSize(100);
+				$customersCollection->setPageSize($this->helper->getConfig('mailcampaignshistoricalsync/general/import_customers_amount', $this->mcapi->APIStoreID));
 
 				$pages = $customersCollection->getLastPageNumber();
 
@@ -160,7 +160,7 @@ class SyncCron {
 				// get mailing list for this store
 				$subscriber_data = array();
 				$mailinglistCollection = $this->objectmanager->create('Magento\Newsletter\Model\Subscriber')->setStoreId($this->mcapi->APIStoreID)->getCollection();
-				$mailinglistCollection->setPageSize(100);
+				$mailinglistCollection->setPageSize($this->helper->getConfig('mailcampaignshistoricalsync/general/import_mailing_list_amount', $this->mcapi->APIStoreID));
 
 				$pages = $mailinglistCollection->getLastPageNumber();
 				$mailinglistCollection->setCurPage($currentPage);
@@ -226,7 +226,7 @@ class SyncCron {
 				$i = 0;
 
 				$productsCollection = $this->objectmanager->create('Magento\Catalog\Model\Product')->setStoreId($this->mcapi->APIStoreID)->getCollection();
-				$productsCollection->setPageSize(10);
+				$productsCollection->setPageSize($this->helper->getConfig('mailcampaignshistoricalsync/general/import_products_amount', $this->mcapi->APIStoreID));
 				$pages = $productsCollection->getLastPageNumber();
 
 				$productsCollection->setCurPage($currentPage);
@@ -474,7 +474,7 @@ class SyncCron {
 				$mc_send_data = array();
 				$mc_import_data = array();
 				$ordersCollection = $this->objectmanager->create('Magento\Sales\Model\Order')->setStoreId($this->mcapi->APIStoreID)->getCollection();
-				$ordersCollection->setPageSize(100);
+				$ordersCollection->setPageSize($this->helper->getConfig('mailcampaignshistoricalsync/general/import_order_amount', $this->mcapi->APIStoreID));
 				$pages = $ordersCollection->getLastPageNumber();
 
 				$ordersCollection->setCurPage($currentPage);
@@ -583,7 +583,7 @@ class SyncCron {
 				$tn__eav_entity_type 					= $this->resource->getTableName('eav_entity_type');
 				$tn__catalog_category_entity 			= $this->resource->getTableName('catalog_category_entity');
 
-				$pagesize = 250;
+				$pagesize = $this->helper->getConfig('mailcampaignshistoricalsync/general/import_order_products_amount', $this->mcapi->APIStoreID);
 
 				// order items
 				$sql        = "SELECT COUNT(*) AS pages FROM `".$tn__sales_flat_order."` AS o INNER JOIN ".$tn__sales_flat_order_item." AS oi ON oi.order_id = o.entity_id WHERE o.store_id = ".$this->mcapi->APIStoreID." OR o.store_id = 0";

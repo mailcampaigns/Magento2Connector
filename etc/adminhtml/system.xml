@@ -86,26 +86,51 @@
             <group id="general" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
                 <label>Bulk Import</label>
 				<comment>De MailCampaigns Connector™ kan ook met terugwerkende kracht diverse onderdelen van uw Magento webshop importeren in MailCampaigns. Hieronder kunt u aangeven welke gegevens met terugwerkende kracht gesynchroniseerd moeten worden.</comment>
-                <field id="import_customers_history" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+                
+				<field id="import_customers_history" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
 					<label>Klanten</label>
 					<comment>Klanten importeren?</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
+				<field id="import_customers_amount" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Aantal klanten</label>
+					<comment>Aantal klanten per cron</comment>
+				</field>
+				
 				<field id="import_mailing_list_history" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
-					<label>Mailinglijst</label>
-					<comment>Mailinglijst importeren?</comment>
+					<label>Inschrijvers</label>
+					<comment>Inschrijvers importeren?</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
+				<field id="import_mailing_list_amount" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Aantal inschrijvers</label>
+					<comment>Aantal inschrijvers per cron</comment>
+				</field>
+				
 				<field id="import_products_history" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
 					<label>Producten</label>
 					<comment>Producten importeren?</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
+				<field id="import_products_amount" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Aantal producten</label>
+					<comment>Aantal producten per cron</comment>
+				</field>
+				
 				<field id="import_order_history" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
 					<label>Orders</label>
 					<comment>Orders en bijbehorende producten importeren?</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
+				<field id="import_order_amount" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Aantal orders</label>
+					<comment>Aantal orders per cron</comment>
+				</field>
+				<field id="import_order_products_amount" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+					<label>Aantal order producten</label>
+					<comment>Aantal order producten per cron</comment>
+				</field>
+				
             </group>
         </section>
     </system>

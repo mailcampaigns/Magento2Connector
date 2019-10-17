@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+<default>
+	<mailcampaignshistoricalsync>
+		<general>
+			<import_customers_amount>50</import_customers_amount>
+			<import_mailing_list_amount>100</import_mailing_list_amount>
+			<import_products_amount>10</import_products_amount>
+			<import_order_amount>50</import_order_amount>
+			<import_order_products_amount>250</import_order_products_amount>
+		</general>
+	</mailcampaignshistoricalsync>
+</default>
+</config>
