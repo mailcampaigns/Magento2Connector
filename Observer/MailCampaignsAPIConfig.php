@@ -41,7 +41,7 @@ class MailCampaignsAPIConfig implements ObserverInterface
 		\Magento\Catalog\Helper\Data $taxHelper,
         Logger $logger
     ) {
-		$this->version 				= '2.1.0';
+		$this->version 				= '2.1.1';
 		$this->logger 				= $logger;
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;

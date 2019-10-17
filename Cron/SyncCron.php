@@ -133,6 +133,25 @@ class SyncCron {
 				// Clear collection and free memory
 				$customersCollection->clear();
 				unset($customer_data);
+				
+				// Remove job if finished
+				if (($row["page"]+1) > $pages)
+				{
+					$sql = "DELETE FROM `".$this->tn__mc_api_pages."` WHERE id = ".$row["id"]."";
+					$this->connection->query($sql);
+	
+					$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 1);
+					$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
+				}
+				else
+				// Update job if not finished
+				{
+					$sql = "UPDATE `".$this->tn__mc_api_pages."` SET page = ".($row["page"]+1).", total = ".(int)$pages.", datetime = ".time()." WHERE id = ".$row["id"]."";
+					$this->connection->query($sql);
+	
+					$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 0);
+					$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
+				}
 			}
 
 			if ($row["collection"] == "newsletter/subscriber_collection")
@@ -177,6 +196,25 @@ class SyncCron {
 				//clear collection and free memory
 				$mailinglistCollection->clear();
 				unset($subscriber_data);
+				
+				// Remove job if finished
+				if (($row["page"]+1) > $pages)
+				{
+					$sql = "DELETE FROM `".$this->tn__mc_api_pages."` WHERE id = ".$row["id"]."";
+					$this->connection->query($sql);
+	
+					$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 1);
+					$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
+				}
+				else
+				// Update job if not finished
+				{
+					$sql = "UPDATE `".$this->tn__mc_api_pages."` SET page = ".($row["page"]+1).", total = ".(int)$pages.", datetime = ".time()." WHERE id = ".$row["id"]."";
+					$this->connection->query($sql);
+	
+					$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 0);
+					$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
+				}
 			}
 
 			if ($row["collection"] == "catalog/product")
@@ -407,6 +445,26 @@ class SyncCron {
 
 				unset($related_products);
 				unset($product_data);
+				
+				
+				// Remove job if finished
+				if (($row["page"]+1) > $pages)
+				{
+					$sql = "DELETE FROM `".$this->tn__mc_api_pages."` WHERE id = ".$row["id"]."";
+					$this->connection->query($sql);
+	
+					$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 1);
+					$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
+				}
+				else
+				// Update job if not finished
+				{
+					$sql = "UPDATE `".$this->tn__mc_api_pages."` SET page = ".($row["page"]+1).", total = ".(int)$pages.", datetime = ".time()." WHERE id = ".$row["id"]."";
+					$this->connection->query($sql);
+	
+					$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 0);
+					$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
+				}
 			}
 
 			if ($row["collection"] == "sales/order")
@@ -488,6 +546,25 @@ class SyncCron {
 
 				//clear collection and free memory
 				$ordersCollection->clear();
+				
+				// Remove job if finished
+				if (($row["page"]+1) > $pages)
+				{
+					$sql = "DELETE FROM `".$this->tn__mc_api_pages."` WHERE id = ".$row["id"]."";
+					$this->connection->query($sql);
+	
+					$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 1);
+					$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
+				}
+				else
+				// Update job if not finished
+				{
+					$sql = "UPDATE `".$this->tn__mc_api_pages."` SET page = ".($row["page"]+1).", total = ".(int)$pages.", datetime = ".time()." WHERE id = ".$row["id"]."";
+					$this->connection->query($sql);
+	
+					$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 0);
+					$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
+				}
 			}
 
 			if ($row["collection"] == "sales/order/products")
@@ -568,26 +645,27 @@ class SyncCron {
 
 				// clear
 				unset($mc_import_data);
+				
+				// Remove job if finished
+				if (($row["page"]+1) > $pages)
+				{
+					$sql = "DELETE FROM `".$this->tn__mc_api_pages."` WHERE id = ".$row["id"]."";
+					$this->connection->query($sql);
+	
+					$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 1);
+					$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
+				}
+				else
+				// Update job if not finished
+				{
+					$sql = "UPDATE `".$this->tn__mc_api_pages."` SET page = ".($row["page"]+1).", total = ".(int)$pages.", datetime = ".time()." WHERE id = ".$row["id"]."";
+					$this->connection->query($sql);
+	
+					$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 0);
+					$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
+				}
 			}
 
-			// Remove job if finished
-			if (($row["page"]+1) > $pages)
-			{
-				$sql = "DELETE FROM `".$this->tn__mc_api_pages."` WHERE id = ".$row["id"]."";
-				$this->connection->query($sql);
-
-				$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 1);
-				$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
-			}
-			else
-			// Update job if not finished
-			{
-				$sql = "UPDATE `".$this->tn__mc_api_pages."` SET page = ".($row["page"]+1).", total = ".(int)$pages.", datetime = ".time()." WHERE id = ".$row["id"]."";
-				$this->connection->query($sql);
-
-				$mc_import_data = array("store_id" => $row["store_id"], "collection" => $row["collection"], "page" => ($row["page"]+1), "total" => (int)$pages, "datetime" => time(), "finished" => 0);
-				$this->mcapi->QueueAPICall("update_magento_progress", $mc_import_data);
-			}
 
 			// break on timeout 60 seconds
 			if (time() > ($starttime + 60)) break;
