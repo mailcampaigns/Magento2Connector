@@ -97,7 +97,7 @@ class SynchronizeOrder implements ObserverInterface
 					if(is_object($order->getBaseSubtotalInclTax()))		$mc_data["subtotalInclTaxExclDiscount"] = $order->getBaseSubtotalInclTax();
 					if(is_object($order->getDiscountAmount()))			$mc_data["discount"] = $order->getDiscountAmount();
 
-					$this->mcapi->DirectOrQueueCall("update_magento_orders", $mc_data);
+					$this->mcapi->QueueAPICall("update_magento_orders", $mc_data);
 
 					// Get table names
 					$tn__sales_flat_quote 					= $this->resource->getTableName('quote');
@@ -162,8 +162,8 @@ class SynchronizeOrder implements ObserverInterface
 
 					if ($i > 0)
 					{
-						$response = $this->mcapi->DirectOrQueueCall("update_magento_categories", $category_data);
-						$response = $this->mcapi->DirectOrQueueCall("update_magento_order_products", $mc_import_data);
+						$response = $this->mcapi->QueueAPICall("update_magento_categories", $category_data);
+						$response = $this->mcapi->QueueAPICall("update_magento_order_products", $mc_import_data);
 					}
 				}
 			}
