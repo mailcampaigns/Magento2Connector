@@ -251,13 +251,14 @@ class SyncCron {
 						if($product->getId() != "")
 						{
 						  $objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
-						  $parent_product_id = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getParentIdsByChild($product->getId());
+						  $parent_product_ids = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getParentIdsByChild($product->getId());
+						  $parent_product_id = $parent_product_ids[0] ?? null;
 						  $the_parent_product = $objectMan->create('Magento\Catalog\Model\Product')->load($parent_product_id);
 						  $child_product_ids = $objectMan->create('Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable')->getChildrenIds($product->getId());
 			
-						  if(isset($parent_product_id[0]))
+						  if(isset($parent_product_id))
 						  {
-							$product_data[$i]["parent_id"] = $parent_product_id[0];
+							$product_data[$i]["parent_id"] = $parent_product_id;
 						  }
 						  else {
 							$product_data[$i]["parent_id"] = "";
@@ -293,10 +294,10 @@ class SyncCron {
 						}
 			
 						// als omschrijving niet bestaat bij simple dan van parent pakken
-						if($product_data[$i]["description"] == "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable"){
+						if($product_data[$i]["description"] == "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable" && isset($parent_product_id)){
 						  $product_data[$i]["description"] = $the_parent_product->getDescription();
 						}
-						if($product_data[$i]["short_description"] == "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable"){
+						if($product_data[$i]["short_description"] == "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable" && isset($parent_product_id)){
 						  $product_data[$i]["short_description"] = $the_parent_product->getShortDescription();
 						}
 			
@@ -319,7 +320,7 @@ class SyncCron {
 						}
 						
 						//get image from parent if empty and not configurable
-						if($product_data[$i]["mc:image_url_main"] === "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable"){
+						if($product_data[$i]["mc:image_url_main"] === "" && $product_data[$i]["parent_id"] != "" && $product_data[$i]["type_id"] != "configurable" && isset($parent_product_id)){
 						  if($the_parent_product->getData('image') != "no_selection" && $the_parent_product->getData('image') != NULL){
 							$product_data[$i]["mc:image_url_main"] = $the_parent_product->getMediaConfig()->getMediaUrl($the_parent_product->getData('image'));
 						  }

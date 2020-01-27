@@ -14,5 +14,11 @@
 		<job name="mailcampaigns_quotecron" instance="MailCampaigns\Connector\Cron\QuoteCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>
+		<job name="mailcampaigns_ordercron" instance="MailCampaigns\Connector\Cron\OrderCron" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+		<job name="mailcampaigns_productcron" instance="MailCampaigns\Connector\Cron\ProductCron" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
     </group>
 </config>

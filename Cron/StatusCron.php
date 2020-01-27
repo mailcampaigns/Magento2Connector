@@ -121,14 +121,6 @@ class StatusCron {
 					{
 						
 					}
-					
-					// Report queue size
-					$sql        = "SELECT COUNT(*) AS queue_size FROM `".$this->tn__mc_api_queue."`";
-					$rows       = $this->connection->fetchAll($sql);
-					foreach ($rows as $row)
-					{
-						$this->mcapi->DirectOrQueueCall("report_magento_queue_status", array("queue_size" => (int)$row["queue_size"], "datetime" => time()));
-					}
 				}
 				catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 				{

@@ -14,12 +14,14 @@ class SynchronizeQuoteAddItem implements ObserverInterface
 	protected $taxhelper;
 	protected $mcapi;
 	protected $productrepository;
+	protected $quoterepository;
 
     public function __construct(
 		\MailCampaigns\Connector\Helper\Data $dataHelper,
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcapi,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
+		\Magento\Quote\Model\QuoteRepository $quoteRepository,
 		\Magento\Catalog\Helper\Data $taxHelper,
         Logger $logger
     ) {
@@ -28,56 +30,42 @@ class SynchronizeQuoteAddItem implements ObserverInterface
 		$this->mcapi 				= $mcapi;
 		$this->storemanager 			= $storeManager;
 		$this->taxhelper 			= $taxHelper;
+		$this->quoterepository 		= $quoteRepository;
 		$this->productrepository	= $productRepository;
     }
 
     public function execute(EventObserver $observer)
-    {		
-		/*
-		return;
-	
-		// set vars
-		$this->mcapi->APIWebsiteID 		= $observer->getWebsite();
-      	$this->mcapi->APIStoreID 		= $observer->getStore(); 
-		$this->mcapi->APIKey 			= $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
-  		$this->mcapi->APIToken 			= $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
-		$this->mcapi->ImportQuotes 		= $this->helper->getConfig('mailcampaignsrealtimesync/general/import_quotes',$this->mcapi->APIStoreID);	
-		
-  		if ($this->mcapi->ImportQuotes == 1)
-		{
-			try
-			{				
-				$quote_data 		= $observer->getItem();
-				
-				$quote_id   	= $quote_data["quote_id"];
-				$item_id   		= $quote_data["item_id"];
-				$store_id   	= $quote_data["store_id"];
-				$product_id 		= $quote_data["product_id"];
-				$qty			= $quote_data["qty"];
-				$price			= $quote_data["price"];
-				
-				// Get product
-				$product = $this->productrepository->getById($product_id);
-				
-				// Get Price Incl Tax
-				$price = $this->taxhelper->getTaxPrice($product, $price, true, NULL, NULL, NULL, $store_id, NULL, true);
-				
-				// add abandonded carts quote items
-				if ($item_id > 0)
+    {	
+		try
+		{				
+			// Retrieve the quote being updated from the event observer
+			$quote = $observer->getEvent()->getQuote();
+			$quote_data = $quote->getData();
+						
+			$quote_id = $quote_data["entity_id"];
+			$store_id = $quote_data["store_id"];
+			
+			if ($this->helper->getConfig('mailcampaignstracking/general/tracking_quote_session', $store_id) == 1)
+			{
+				$session = $this->objectmanager->get('Magento\Customer\Model\Session');
+				if ((int)$session->getCustomer()->getId() == 0)
 				{
-					$data = array("item_id" => $item_id, "store_id" => $store_id, "quote_id" => $quote_id, "qty" => $qty, "price" => $price, "product_id" => $product_id);
-					$this->mcapi->QueueAPICall("update_magento_abandonded_cart_products", $data);
+					$mc_subscriber_email = $_COOKIE["mc_subscriber_email"];
+					if (isset($quote_data["customer_email"]) && $mc_subscriber_email != "" && $quote_data["customer_email"] == "")
+					{
+						$quote->setCustomerEmail($mc_subscriber_email);
+						$this->quoterepository->save($quote);
+					}
 				}
 			}
-			catch (\Magento\Framework\Exception\NoSuchEntityException $e)
-			{
-				$this->mcapi->DebugCall($e->getMessage());
-			}
-			catch (Exception $e)
-			{
-				$this->mcapi->DebugCall($e->getMessage());
-			}
 		}
-		*/
+		catch (\Magento\Framework\Exception\NoSuchEntityException $e)
+		{
+			$this->mcapi->DebugCall($e->getMessage());
+		}
+		catch (Exception $e)
+		{
+			$this->mcapi->DebugCall($e->getMessage());
+		}	
     }
 }

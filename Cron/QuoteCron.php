@@ -14,6 +14,7 @@ class QuoteCron {
 	protected $quoterepository;
     protected $productrepository;
     protected $taxhelper;
+	protected $quotefactory;
   
     public function __construct(
        	\MailCampaigns\Connector\Helper\Data $dataHelper,
@@ -21,6 +22,7 @@ class QuoteCron {
         \Magento\Newsletter\Model\SubscriberFactory $SubscriberFactory,
         \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
 		\Magento\Quote\Model\QuoteRepository $quoteRepository,
+		\Magento\Quote\Model\QuoteFactory $quoteFactory,
         \Magento\Catalog\Helper\Data $taxHelper,
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcapi
     ) {
@@ -30,6 +32,7 @@ class QuoteCron {
         $this->subscriberfactory 	= $SubscriberFactory;
 		$this->quoterepository 	= $quoteRepository;
         $this->productrepository	= $productRepository;
+		$this->quotefactory		= $quoteFactory;
         $this->taxhelper 		= $taxHelper;
     }
  
@@ -38,7 +41,8 @@ class QuoteCron {
 		//database connection
         $this->connection = $this->resource->getConnection(\Magento\Framework\App\ResourceConnection::DEFAULT_CONNECTION);
 		
-        try{	
+        try
+		{	
             // Get table names
             $tn__sales_flat_quote 		= $this->resource->getTableName('quote');
             $tn__sales_flat_order 		= $this->resource->getTableName('sales_order');
@@ -74,71 +78,72 @@ class QuoteCron {
 			{
 				if ($this->helper->getConfig('mailcampaignsrealtimesync/general/import_quotes', $quote_row["store_id"]))
 				{
-					// Set API
-					$this->mcapi->APIStoreID = $quote_row["store_id"];
-					$this->mcapi->APIKey 	 = $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
-					$this->mcapi->APIToken 	 = $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
-										
-					// get quote
-					$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
-					$quote = $objectMan->create('Magento\Quote\Model\Quote')->load($quote_row["entity_id"]);
-					
-					$quote_data = $quote_row;
-					$quote_data["store_id"] = $quote_row["store_id"];
-					
-					if(is_object($quote->getShippingAddress())) 
+					// If not unknown
+					if ($quote_row["customer_email"] != "" || $quote_row["customer_id"] > 0)
 					{
-						$address = $quote->getShippingAddress();
+						// Set API
+						$this->mcapi->APIStoreID = $quote_row["store_id"];
+						$this->mcapi->APIKey 	 = $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
+						$this->mcapi->APIToken 	 = $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
+											
+						// get quote
+						$objectMan =  \Magento\Framework\App\ObjectManager::getInstance();
+						$quote = $objectMan->create('Magento\Quote\Model\Quote')->load($quote_row["entity_id"]);
 						
-						$quote_data["BaseShippingAmount"] 			= $address->getBaseShippingAmount();
-						$quote_data["BaseShippingDiscountAmount"] 	= $address->getBaseShippingDiscountAmount();
-						$quote_data["BaseShippingHiddenTaxAmount"] 	= $address->getBaseShippingHiddenTaxAmount();
-						$quote_data["BaseShippingInclTax"] 			= $address->getBaseShippingInclTax();
-						$quote_data["BaseShippingTaxAmount"] 		= $address->getBaseShippingTaxAmount();
+						$quote_data = $quote_row;
+						$quote_data["store_id"] = $quote_row["store_id"];
 						
-						$quote_data["ShippingAmount"] 				= $address->getShippingAmount();
-						$quote_data["ShippingDiscountAmount"] 		= $address->getShippingDiscountAmount();
-						$quote_data["ShippingHiddenTaxAmount"] 		= $address->getShippingHiddenTaxAmount();
-						$quote_data["ShippingInclTax"] 				= $address->getShippingInclTax();
-						$quote_data["ShippingTaxAmount"] 			= $address->getShippingTaxAmount();
-					}
-						
-					// vat
-					$quote_data["grand_total_vat"] = $quote_data["grand_total"] - $quote_data["subtotal"];
-					$quote_data["base_grand_total_vat"] = $quote_data["base_grand_total"] - $quote_data["base_subtotal"];
-					$quote_data["grand_total_with_discount_vat"] = $quote_data["grand_total"] - $quote_data["subtotal_with_discount"];
-					$quote_data["base_grand_total_with_discount_vat"] = $quote_data["base_grand_total"] - $quote_data["base_subtotal_with_discount"];				
-					
-					// update quote
-					$this->mcapi->DirectOrQueueCall("update_magento_abandonded_cart_quotes", array($quote_data));
-					
-					// delete products first
-					$this->mcapi->DirectOrQueueCall("delete_magento_abandonded_cart_products", array("quote_id" => $quote_row["entity_id"], "store_id" => $quote_row["store_id"]));
-					
-					// abandonded carts quote items
-					$sql        = "SELECT q.entity_id as quote_id, p.*
-					FROM `".$tn__sales_flat_quote."` AS q
-					INNER JOIN ".$tn__sales_flat_quote_item." AS p ON p.quote_id = q.entity_id
-					WHERE q.entity_id = ".$quote_row["entity_id"]."
-					ORDER BY  `q`.`updated_at` DESC";
-					$rows       = $this->connection->fetchAll($sql);
-					
-					$i = 0;
-					$quote_item_data = array(); 
-					foreach ($rows as $row)
-					{
-						foreach ($row as $key => $value)
+						if(is_object($quote->getShippingAddress())) 
 						{
-							if (!is_numeric($key)) $quote_item_data[$i][$key] = $value;
+							$address = $quote->getShippingAddress();
+							
+							$quote_data["BaseShippingAmount"] 			= $address->getBaseShippingAmount();
+							$quote_data["BaseShippingDiscountAmount"] 	= $address->getBaseShippingDiscountAmount();
+							$quote_data["BaseShippingHiddenTaxAmount"] 	= $address->getBaseShippingHiddenTaxAmount();
+							$quote_data["BaseShippingInclTax"] 			= $address->getBaseShippingInclTax();
+							$quote_data["BaseShippingTaxAmount"] 		= $address->getBaseShippingTaxAmount();
+							
+							$quote_data["ShippingAmount"] 				= $address->getShippingAmount();
+							$quote_data["ShippingDiscountAmount"] 		= $address->getShippingDiscountAmount();
+							$quote_data["ShippingHiddenTaxAmount"] 		= $address->getShippingHiddenTaxAmount();
+							$quote_data["ShippingInclTax"] 				= $address->getShippingInclTax();
+							$quote_data["ShippingTaxAmount"] 			= $address->getShippingTaxAmount();
 						}
+							
+						// vat
+						$quote_data["grand_total_vat"] = $quote_data["grand_total"] - $quote_data["subtotal"];
+						$quote_data["base_grand_total_vat"] = $quote_data["base_grand_total"] - $quote_data["base_subtotal"];
+						$quote_data["grand_total_with_discount_vat"] = $quote_data["grand_total"] - $quote_data["subtotal_with_discount"];
+						$quote_data["base_grand_total_with_discount_vat"] = $quote_data["base_grand_total"] - $quote_data["base_subtotal_with_discount"];				
 						
-						$i++;
-					}
+						// update quote
+						$this->mcapi->DirectOrQueueCall("update_magento_abandonded_cart_quotes", array($quote_data));
+						
+						// delete products first
+						$this->mcapi->DirectOrQueueCall("delete_magento_abandonded_cart_products", array("quote_id" => $quote_row["entity_id"], "store_id" => $quote_row["store_id"]));
+						
+						// update items
+						$quote_object = $this->quotefactory->create()->loadByIdWithoutStore($quote_row["entity_id"]);
+						$items = $quote_object->getAllVisibleItems();
+						
+						$i = 0;
+						$quote_item_data = array();
+						foreach ($items as $item) 
+						{						
+							$getdata = array(); foreach ($item->getData() as $y => $tmp) if (!is_array($tmp) && !is_object($tmp)) { $getdata[$y] = $tmp; };
+							
+							$simpleproduct = $this->productrepository->get($getdata["sku"]);
+							$getdata["image"] = $simpleproduct->getData('image');
+							
+							$quote_item_data[$i] = $getdata;
+							$i++;
+						}
 				
-					if ($i > 0)
-					{
-						// insert products
-						$this->mcapi->DirectOrQueueCall("update_magento_abandonded_cart_products", $quote_item_data);
+						if ($i > 0)
+						{
+							// insert products
+							$this->mcapi->DirectOrQueueCall("update_magento_abandonded_cart_products", $quote_item_data);
+						}
 					}
 				}
 			}

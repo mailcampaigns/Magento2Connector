@@ -16,6 +16,7 @@ class SynchronizeQuote implements ObserverInterface
 	protected $taxhelper;
 	protected $mcapi;
 	protected $objectmanager;
+	protected $quoterepository;
 	protected $productrepository;
 
     public function __construct(
@@ -24,25 +25,24 @@ class SynchronizeQuote implements ObserverInterface
 		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcapi,
 		\Magento\Store\Model\StoreManagerInterface $storeManager,
 		\Magento\Framework\ObjectManagerInterface $objectManager,
+		\Magento\Quote\Model\QuoteRepository $quoteRepository,
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
 		\Magento\Catalog\Helper\Data $taxHelper,
         Logger $logger
     ) {
-		$this->resource 			= $Resource;
-		$this->logger 			= $logger;
-		$this->helper 			= $dataHelper;
-		$this->mcapi 			= $mcapi;
-		$this->storemanager 		= $storeManager;
-		$this->taxhelper 		= $taxHelper;
-		$this->objectmanager	= $objectManager;
+		$this->resource 				= $Resource;
+		$this->logger 				= $logger;
+		$this->helper 				= $dataHelper;
+		$this->mcapi 				= $mcapi;
+		$this->storemanager 			= $storeManager;
+		$this->taxhelper 			= $taxHelper;
+		$this->objectmanager		= $objectManager;
+		$this->quoterepository 		= $quoteRepository;
 		$this->productrepository	= $productRepository;
     }
 
     public function execute(EventObserver $observer)
     {		
-		/*
-		return;
-		
 		//database connection
 		$this->connection = $this->resource->getConnection(\Magento\Framework\App\ResourceConnection::DEFAULT_CONNECTION);
 			
@@ -52,10 +52,10 @@ class SynchronizeQuote implements ObserverInterface
 
 		$this->mcapi->APIKey 			= $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
   		$this->mcapi->APIToken 			= $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
-		$this->mcapi->ImportQuotes 		= $this->helper->getConfig('mailcampaignsrealtimesync/general/import_quotes',$this->mcapi->APIStoreID);	
+		//$this->mcapi->ImportQuotes 		= $this->helper->getConfig('mailcampaignsrealtimesync/general/import_quotes',$this->mcapi->APIStoreID);	
 
-  		if ($this->mcapi->ImportQuotes == 1)
-		{		
+  		//if ($this->mcapi->ImportQuotes == 1)
+		//{		
 			try
 			{				
 				// Retrieve the quote being updated from the event observer
@@ -64,61 +64,18 @@ class SynchronizeQuote implements ObserverInterface
 							
 				$quote_id = $quote_data["entity_id"];
 				$store_id = $quote_data["store_id"];
-							
-				// Get table names
-				$tn__sales_flat_quote 		= $this->resource->getTableName('quote');
-				$tn__sales_flat_order 		= $this->resource->getTableName('sales_order');
-				$tn__sales_flat_quote_item 	= $this->resource->getTableName('quote_item');
 				
-				// abandonded carts quotes
-				$sql        = "SELECT q.*
-				FROM `".$tn__sales_flat_quote."` AS q
-				WHERE
-				q.entity_id = ".$quote_id."
-				ORDER BY  `q`.`updated_at` DESC";
-				
-				$data = array(); $i = 0;
-				$rows       = $this->connection->fetchAll($sql);
-				foreach ($rows as $row)
+				if ($this->helper->getConfig('mailcampaignstracking/general/tracking_quote_session',$this->mcapi->APIStoreID) == 1)
 				{
-					foreach ($row as $key => $value)
+					$session = $this->objectmanager->get('Magento\Customer\Model\Session');
+					if ((int)$session->getCustomer()->getId() == 0 && isset($_COOKIE["mc_subscriber_email"]))
 					{
-						if (!is_numeric($key)) $data[$i][$key] = $value;
-					}	
-					
-					$i++;
-				}
-				
-				if ($i > 0)
-				{
-					$this->mcapi->QueueAPICall("update_magento_abandonded_cart_quotes", $data);
-				}
-					
-				// abandonded carts quote items										
-				$items = $quote->getAllItems();
-				foreach ($items as $item) 
-				{			
-					$quote_data 	= $item->get();
-					
-					$item_id = 0;
-					if(isset($quote_data["quote_id"]))		$quote_id   	= $quote_data["quote_id"];
-					if(isset($quote_data["item_id"]))		$item_id   		= $quote_data["item_id"];
-					if(isset($quote_data["store_id"]))		$store_id   	= $quote_data["store_id"];
-					if(isset($quote_data["product_id"]))		$product_id 		= $quote_data["product_id"];
-					if(isset($quote_data["qty"]))			$qty			= $quote_data["qty"];
-					if(isset($quote_data["price"]))			$price			= $quote_data["price"];
-					
-					// Get product
-					if ($product_id > 0 && $item_id > 0)
-					{
-						$product = $this->objectmanager->create('Magento\Catalog\Model\Product')->load($product_id);
-						
-						// Get Price Incl Tax
-						if (isset($price))	$price = $this->taxhelper->getTaxPrice($product, $price, true, NULL, NULL, NULL, $store_id, NULL, true);
-										
-						// add abandonded carts quote items
-						$data = array("item_id" => $item_id, "store_id" => $store_id, "quote_id" => $quote_id, "qty" => $qty, "price" => $price, "product_id" => $product_id);
-						$this->mcapi->QueueAPICall("update_magento_abandonded_cart_products", $data);
+						$mc_subscriber_email = $_COOKIE["mc_subscriber_email"];
+						if ($mc_subscriber_email != "" && ((isset($quote_data["customer_email"]) && $quote_data["customer_email"] == "") || !isset($quote_data["customer_email"])))
+						{
+							$quote->setCustomerEmail($mc_subscriber_email);
+							$this->quoterepository->save($quote);
+						}
 					}
 				}
 			}
@@ -130,8 +87,6 @@ class SynchronizeQuote implements ObserverInterface
 			{
 				$this->mcapi->DebugCall($e->getMessage());
 			}
-		}	
-		
-		*/	
+		//}	
     }
 }

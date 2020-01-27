@@ -18,24 +18,25 @@
 	<event name="newsletter_subscriber_create_after">
         <observer name="custom_newsletter_subscriber_create_after" instance="MailCampaigns\Connector\Observer\SynchronizeMailingEntry"/>
     </event>
-	<event name="sales_order_place_after">
+	<!--<event name="sales_order_place_after">
         <observer name="custom_sales_order_place_after" instance="MailCampaigns\Connector\Observer\SynchronizeOrder"/>
     </event>
 	<event name="sales_order_save_after">
         <observer name="custom_sales_order_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeOrder"/>
-    </event>
-	<event name="catalog_product_save_after">
+    </event>-->
+	<!--<event name="catalog_product_save_after">
         <observer name="custom_catalog_product_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeProduct"/>
-    </event>
+    </event>-->
 	<event name="catalog_product_delete_before">
         <observer name="custom_catalog_product_delete_before" instance="MailCampaigns\Connector\Observer\SynchronizeProductDelete"/>
     </event>
 	<event name="customer_save_after">
         <observer name="custom_customer_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeCustomer"/>
     </event>
-	<!--<event name="sales_quote_save_after">
+	<event name="sales_quote_save_after">
         <observer name="custom_sales_quote_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeQuote"/>
     </event>
+	<!--
 	<event name="sales_quote_product_add_after">
         <observer name="custom_sales_quote_product_add_after" instance="MailCampaigns\Connector\Observer\SynchronizeQuoteAddItem"/>
     </event>-->

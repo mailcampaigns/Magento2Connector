@@ -28,6 +28,7 @@ class MailCampaignsAPIConfig implements ObserverInterface
 	protected $tn__mc_api_queue;
 	protected $quoterepository;
     protected $productrepository;
+	protected $quotefactory;
 	protected $taxhelper;
 
     public function __construct(
@@ -38,10 +39,11 @@ class MailCampaignsAPIConfig implements ObserverInterface
 		\Magento\Newsletter\Model\SubscriberFactory $SubscriberFactory,
 		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
 		\Magento\Quote\Model\QuoteRepository $quoteRepository,
+		\Magento\Quote\Model\QuoteFactory $quoteFactory,
 		\Magento\Catalog\Helper\Data $taxHelper,
         Logger $logger
     ) {
-		$this->version 				= '2.1.1';
+		$this->version 				= '2.1.2';
 		$this->logger 				= $logger;
 		$this->helper 				= $dataHelper;
 		$this->mcapi 				= $mcapi;
@@ -50,6 +52,7 @@ class MailCampaignsAPIConfig implements ObserverInterface
 		$this->resource 				= $Resource;
 		$this->quoterepository 		= $quoteRepository;
         $this->productrepository	= $productRepository;
+		$this->quotefactory			= $quoteFactory;
         $this->taxhelper 			= $taxHelper;
     }
 	

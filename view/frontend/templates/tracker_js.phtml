@@ -61,5 +61,12 @@ if ($mailcampaigns_tracking_code == 1)
 		'product_id' => (int)$product_id
 	);
 	
-	print '<script type="text/javascript" src="//interface.mailcampaigns.nl/w/'.$api_key.'/'.base64_encode(json_encode($postdata)).'"></script>';
+	print '
+	<script type="text/javascript" src="//interface.mailcampaigns.nl/w/'.$api_key.'/'.base64_encode(json_encode($postdata)).'"></script>
+	<script type="text/javascript">
+	document.cookie = "mc_session_id=" + mc_session_id + "; expires='.date("M d Y H:i:s", time() + (365 * 24 * 3600)).'; path=/";
+	document.cookie = "mc_subscriber_id=" + mc_subscriber_id + "; expires='.date("M d Y H:i:s", time() + (365 * 24 * 3600)).'; path=/";
+	document.cookie = "mc_subscriber_email=" + mc_subscriber_email + "; expires='.date("M d Y H:i:s", time() + (365 * 24 * 3600)).'; path=/";
+	</script>
+	';
 }
