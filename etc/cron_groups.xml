@@ -1,10 +1,4 @@
 <?xml version="1.0"?>
-<!--
-/**
- * path:
- * magento2_location/app/code/Vendorname/Extensionname/etc/cron_groups.xml
- */
--->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/cron_groups.xsd">
     <group id="mailcampaigns">
         <schedule_generate_every>1</schedule_generate_every>

@@ -1,9 +1,4 @@
 <?xml version="1.0"?>
-<!--
-/**
- * Location: magento2_root/app/code/Vendorname/Extensionname/etc/acl.xml
- */
--->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
     <acl>
         <resources>
@@ -11,7 +6,7 @@
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">
                         <resource id="Magento_Config::config">
-                            <resource id="MailCampaigns_Connector::config" title="MailCampaigns Connector Configuratie" sortOrder="50" />
+                            <resource id="MailCampaigns_Magento2Connector::config" title="MailCampaigns Connector Configuratie" sortOrder="50"/>
                         </resource>
                     </resource>
                 </resource>

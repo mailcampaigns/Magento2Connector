@@ -1,54 +1,46 @@
 <?php
-/**
- * MailCampaigns Connector
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
- *
- * @category   Magento extension
- * @package    MailCampaigns
- * @copyright  Copyright (c) 2016 MailCampaigns. (http://www.mailcampaigns.nl)
- * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
-?>
-<?php
 
-$objectManager 	                            = \Magento\Framework\App\ObjectManager::getInstance();
-$helper                                     = $objectManager->get('\MailCampaigns\Connector\Helper\Data');
-//$helper 									= $this->helper('MailCampaigns\Connector\Helper\Data');
+use Magento\Customer\Model\Session;
+use Magento\Framework\App\ObjectManager;
+use Magento\Sales\Model\Order;
+use MailCampaigns\Magento2Connector\Helper\ConfigLoader;
 
-$mailcampaigns_tracking_code_order_success 	= $helper->getScopeConfig('mailcampaignstracking/general/tracking_code_order_success');
+$objectManager = ObjectManager::getInstance();
 
-$api_key 		= $helper->getScopeConfig('mailcampaignsapi/general/api_key');
-$session 		= $objectManager->create('\Magento\Customer\Model\Session')->getData();
-$customer_id	= $objectManager->create('\Magento\Customer\Model\Customer')->getCustomerId();
+// Get configuration.
+$helper = $objectManager->get(ConfigLoader::class);
+$trackingCodeEnabled = $helper->getScopeConfig('mailcampaigns_tracking/general/tracking_code_order_success');
+$apiKey = $helper->getScopeConfig('mailcampaigns_api/general/api_key');
 
-if ($mailcampaigns_tracking_code_order_success == 1 )
-{	
-	$session 			= $objectManager->create('\Magento\Checkout\Model\Session')->getData();
-	$last_real_order_id = $objectManager->create('\Magento\Checkout\Model\Session')->getLastRealOrderId();
-	$order_data 			= $objectManager->create('\Magento\Sales\Model\Order')->loadByIncrementId($last_real_order_id)->getData();
-	
-	$order_id 		= $order_data["entity_id"];
-	$quote_id 		= $order_data["quote_id"];
-	$store_id		= $order_data["store_id"];
-	$customer_id	= $order_data["customer_id"];
+// Get session.
+$session = $objectManager->create(Session::class);
 
-	if ($order_id > 0)
-	{
-		// build post data
-		$postdata = array(
-			'store_id' => $store_id,
-			'customer_id' => $customer_id,
-			'visitor_id' => 0,
-			'quote_id' => $quote_id,
-			'order_id' => $order_id
-		);
-		
-		// call tracking javascript code
-		print '<script type="text/javascript" src="//interface.mailcampaigns.nl/w/'.$api_key.'/'.base64_encode(json_encode($postdata)).'"></script>';	
-	}
+if ($trackingCodeEnabled) {
+    $order = $objectManager->create(Order::class);
+    $orderData = $order->loadByIncrementId($session->getLastRealOrderId())->getData();
+    $orderId = $orderData['entity_id'];
+
+    if ($orderId > 0) {
+        // Build post data.
+        $postData = [
+            'store_id' => $orderData['store_id'],
+            'customer_id' => $orderData['customer_id'],
+            'visitor_id' => 0,
+            'quote_id' => $orderData['quote_id'],
+            'order_id' => $orderId
+        ];
+
+        /** @codingStandardsIgnoreStart */
+        print '
+        <script type=\'text/javascript\'>
+            (function(d,t) {
+            _mctc = {\'onload\': function() { this.mctrkDocumentLoad(); }};
+            var s=d.getElementsByTagName(t)[0], js=d.createElement(t); js.async=1;
+            js.src=\'https://interface.mailcampaigns.nl/w/' . $apiKey . '/' . base64_encode(json_encode($postData)) . '\';
+            s.parentNode.insertBefore(js,s);
+            })(document,\'script\');
+        </script>
+        ';
+        /** @codingStandardsIgnoreEnd */
+    }
 }

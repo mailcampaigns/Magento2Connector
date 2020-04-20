@@ -1,49 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <event name="admin_system_config_changed_section_mailcampaignsapi">
-        <observer name="custom_admin_system_config_changed_section_mailcampaignsapi" instance="MailCampaigns\Connector\Observer\MailCampaignsAPIConfig"/>
+    <event name="admin_system_config_changed_section_mailcampaigns_api">
+        <observer name="custom_admin_system_config_changed_section_mailcampaigns_api" instance="MailCampaigns\Magento2Connector\Observer\Configuration\ApiConfigObserver"/>
     </event>
-	<event name="admin_system_config_changed_section_mailcampaignsrealtimesync">
-        <observer name="custom_admin_system_config_changed_section_mailcampaignsrealtimesync" instance="MailCampaigns\Connector\Observer\MailCampaignsRealtimeSync"/>
+    <event name="admin_system_config_changed_section_mailcampaigns_historical_sync">
+        <observer name="custom_admin_system_config_changed_section_mailcampaigns_customer_historical_sync" instance="MailCampaigns\Magento2Connector\Observer\Configuration\CustomerHistoricalSyncConfigObserver"/>
+        <observer name="custom_admin_system_config_changed_section_mailcampaigns_product_historical_sync" instance="MailCampaigns\Magento2Connector\Observer\Configuration\ProductHistoricalSyncConfigObserver"/>
+        <observer name="custom_admin_system_config_changed_section_mailcampaigns_order_historical_sync" instance="MailCampaigns\Magento2Connector\Observer\Configuration\OrderHistoricalSyncConfigObserver"/>
+        <observer name="custom_admin_system_config_changed_section_mailcampaigns_order_product_historical_sync" instance="MailCampaigns\Magento2Connector\Observer\Configuration\OrderProductHistoricalSyncConfigObserver"/>
+        <observer name="custom_admin_system_config_changed_section_mailcampaigns_mailing_list_historical_sync" instance="MailCampaigns\Magento2Connector\Observer\Configuration\MailingListHistoricalSyncConfigObserver"/>
+        <observer name="custom_admin_system_config_changed_section_mailcampaigns_historical_sync" instance="MailCampaigns\Magento2Connector\Observer\Configuration\ApiConfigObserver"/>
     </event>
-	<event name="admin_system_config_changed_section_mailcampaignstracking">
-        <observer name="custom_admin_system_config_changed_section_mailcampaignstracking" instance="MailCampaigns\Connector\Observer\MailCampaignsTracking"/>
+    <event name="admin_system_config_changed_section_mailcampaigns_realtime_sync">
+        <observer name="custom_admin_system_config_changed_section_mailcampaigns_realtime_sync" instance="MailCampaigns\Magento2Connector\Observer\Configuration\ApiConfigObserver"/>
     </event>
-	<event name="admin_system_config_changed_section_mailcampaignshistoricalsync">
-        <observer name="custom_admin_system_config_changed_section_mailcampaignshistoricalsync" instance="MailCampaigns\Connector\Observer\MailCampaignsHistoricalSync"/>
+    <event name="catalog_product_delete_before">
+        <observer name="custom_catalog_product_delete_before" instance="MailCampaigns\Magento2Connector\Observer\ProductDeletionObserver"/>
     </event>
-	<event name="newsletter_subscriber_save_after">
-        <observer name="custom_newsletter_subscriber_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeMailingEntry"/>
+    <event name="customer_save_after">
+        <observer name="custom_customer_save_after" instance="MailCampaigns\Magento2Connector\Observer\CustomerObserver"/>
     </event>
-	<event name="newsletter_subscriber_create_after">
-        <observer name="custom_newsletter_subscriber_create_after" instance="MailCampaigns\Connector\Observer\SynchronizeMailingEntry"/>
+    <event name="newsletter_subscriber_create_after">
+        <observer name="custom_newsletter_subscriber_create_after" instance="MailCampaigns\Magento2Connector\Observer\SubscriberObserver"/>
     </event>
-	<!--<event name="sales_order_place_after">
-        <observer name="custom_sales_order_place_after" instance="MailCampaigns\Connector\Observer\SynchronizeOrder"/>
+    <event name="newsletter_subscriber_save_after">
+        <observer name="custom_newsletter_subscriber_save_after" instance="MailCampaigns\Magento2Connector\Observer\SubscriberObserver"/>
     </event>
-	<event name="sales_order_save_after">
-        <observer name="custom_sales_order_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeOrder"/>
-    </event>-->
-	<!--<event name="catalog_product_save_after">
-        <observer name="custom_catalog_product_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeProduct"/>
-    </event>-->
-	<event name="catalog_product_delete_before">
-        <observer name="custom_catalog_product_delete_before" instance="MailCampaigns\Connector\Observer\SynchronizeProductDelete"/>
+    <event name="sales_order_save_after">
+        <observer name="custom_sales_order_save_after" instance="MailCampaigns\Magento2Connector\Observer\OrderObserver"/>
     </event>
-	<event name="customer_save_after">
-        <observer name="custom_customer_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeCustomer"/>
+    <event name="sales_quote_save_after">
+        <observer name="custom_sales_quote_save_after" instance="MailCampaigns\Magento2Connector\Observer\QuoteObserver"/>
     </event>
-	<event name="sales_quote_save_after">
-        <observer name="custom_sales_quote_save_after" instance="MailCampaigns\Connector\Observer\SynchronizeQuote"/>
-    </event>
-	<!--
-	<event name="sales_quote_product_add_after">
-        <observer name="custom_sales_quote_product_add_after" instance="MailCampaigns\Connector\Observer\SynchronizeQuoteAddItem"/>
-    </event>-->
-	<!--<event name="sales_quote_item_qty_set_after">
-        <observer name="custom_sales_quote_item_qty_set_after" instance="MailCampaigns\Connector\Observer\SynchronizeQuoteUpdateItem"/>
-    </event>-->
-	<!--<event name="sales_quote_remove_item">
-        <observer name="custom_sales_quote_remove_item" instance="MailCampaigns\Connector\Observer\SynchronizeQuoteDeleteItem"/>
-    </event>-->
 </config>

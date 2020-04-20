@@ -1,0 +1,68 @@
+<?php
+
+use MailCampaigns\Magento2Connector\Block\Adminhtml\System\Config\ModuleVersion;
+
+/**
+ * @var $block ModuleVersion
+ */
+?>
+
+<!-- MailCampaigns Magento2Connector Module Version -->
+<div><?= /* @noEscape */ $block->getModuleVersion() ?></div>
+<!--/ MailCampaigns Magento2Connector Module Version -->
+
+<script>
+    require([
+        'jquery'
+    ], function ($) {
+        $(function () {
+            console.debug('Loaded MailCampaigns Javascript.');
+
+            // Define selectors.
+            const selDevelopmentArea = '#mailcampaigns_api_development';
+            const selEnabledInput = '#mailcampaigns_api_development_logging_enabled';
+            const selLevelRow = '#row_mailcampaigns_api_development_logging_level';
+            const selNotification = '#mailcampaigns_api_info .comment';
+            const selStoreSwitcher = '#store_switcher';
+
+            /*
+            ################################
+            ##     Scope notification     ##
+            ################################
+            */
+
+            // Is the current page a store view?
+            let isStoreView = $(selStoreSwitcher).val() === '1';
+
+            // Show scope notification when not currently in store view.
+            if (!isStoreView) {
+                $(selNotification).show().find('span').show();
+            } else {
+                $('#row_mailcampaigns_api_info_module_version td').css('padding-top', 0);
+            }
+
+            /*
+            ###################################
+            ##   Technical support settings  ##
+            ###################################
+            */
+
+            // Set for initial state.
+            updateVisibility();
+
+            // Gets triggered when user changes the value of `logging enabled` dropdown.
+            $(selDevelopmentArea).on('change', selEnabledInput, function (e) {
+                updateVisibility();
+            })
+
+            /**
+             * Shows or hides logging level input row depending on value of
+             * `logging enabled` field.
+             */
+            function updateVisibility() {
+                let enabled = $(selEnabledInput).val() === '1';
+                $(selLevelRow).toggle(enabled);
+            }
+        });
+    });
+</script>

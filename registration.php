@@ -1,6 +1,5 @@
-<?php 
-\Magento\Framework\Component\ComponentRegistrar::register(
-    \Magento\Framework\Component\ComponentRegistrar::MODULE,
-    'MailCampaigns_Connector',
-    __DIR__
-);
+<?php
+
+use Magento\Framework\Component\ComponentRegistrar;
+
+ComponentRegistrar::register(ComponentRegistrar::MODULE, 'MailCampaigns_Magento2Connector', __DIR__);

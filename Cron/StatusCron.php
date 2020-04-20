@@ -1,138 +1,162 @@
 <?php
 
-namespace MailCampaigns\Connector\Cron;
+namespace MailCampaigns\Magento2Connector\Cron;
 
-use Magento\Newsletter\Model\SubscriberFactory;
+use Exception;
+use Magento\Cron\Model\Schedule;
+use Magento\Newsletter\Model\ResourceModel\Subscriber as SubscriberResourceModel;
 use Magento\Newsletter\Model\Subscriber;
+use Magento\Newsletter\Model\SubscriberFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
+use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+use MailCampaigns\Magento2Connector\Helper\InvalidApiResponseException;
 
-class StatusCron {
- 
- 	protected $helper;
-	protected $resource;
-	protected $connection;
-	protected $objectmanager;
-	protected $storemanager;
-	protected $customerrepository;
-	protected $countryinformation;
-	protected $subscriberfactory;
-	protected $subscriber;
-	protected $mcapi;
-	protected $tn__mc_api_pages;
-	protected $tn__mc_api_queue;
-  
+class StatusCron extends AbstractCron
+{
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
+
+    /**
+     * @var SubscriberResourceModel
+     */
+    protected $subscriberResourceModel;
+
+    /**
+     * @var SubscriberFactory
+     */
+    protected $subscriberFactory;
+
+    /**
+     * @var Subscriber
+     */
+    protected $subscriber;
+
     public function __construct(
-       	\MailCampaigns\Connector\Helper\Data $dataHelper,
-		\Magento\Framework\App\ResourceConnection $Resource,
-		\MailCampaigns\Connector\Helper\MailCampaigns_API $mcApi,
-		\Magento\Framework\ObjectManagerInterface $objectManager,
-		\Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
-		\Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-		\Magento\Newsletter\Model\Subscriber $Subscriber,
-		\Magento\Store\Model\StoreManagerInterface $storeManager,
-		\Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
-		\Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
+        ApiHelperInterface $apiHelper,
+        LogHelperInterface $logHelper,
+        StoreManagerInterface $storeManager,
+        SubscriberResourceModel $subscriberResourceModel,
+        SubscriberFactory $subscriberFactory,
+        Subscriber $subscriber
     ) {
-        $this->resource 				= $Resource;
-		$this->helper 				= $dataHelper;
-		$this->mcapi 				= $mcApi;
-		$this->objectmanager 		= $objectManager;
-		$this->customerrepository 	= $customerRepository;
-		$this->countryinformation	= $countryInformation;
-		$this->productrepository	= $productRepository;
-		$this->subscriberfactory	= $subscriberFactory;
-		$this->subscriber			= $Subscriber;
-		$this->storemanager 			= $storeManager;
+        parent::__construct($apiHelper, $logHelper);
+        $this->storeManager = $storeManager;
+        $this->subscriberResourceModel = $subscriberResourceModel;
+        $this->subscriberFactory = $subscriberFactory;
+        $this->subscriber = $subscriber;
     }
- 
-    public function execute() 
-	{			
-		//database connection
-		$this->connection = $this->resource->getConnection(\Magento\Framework\App\ResourceConnection::DEFAULT_CONNECTION);
-		
-		//tables
-		$this->tn__mc_api_pages = $this->resource->getTableName('mc_api_pages');
-		$this->tn__mc_api_queue = $this->resource->getTableName('mc_api_queue');
-		
-		$stores = $this->storemanager->getStores();
-		foreach ($stores as $store) 
-		{					
-			$this->mcapi->APIStoreID = $store->getStoreId();
-			$this->mcapi->APIKey 	 = $this->helper->getConfig('mailcampaignsapi/general/api_key', $this->mcapi->APIStoreID);
-			$this->mcapi->APIToken 	 = $this->helper->getConfig('mailcampaignsapi/general/api_token', $this->mcapi->APIStoreID);
-			
-			if (isset($this->mcapi->APIKey) && isset($this->mcapi->APIToken))
-			{
-				try
-				{
-					$mc_import_data = array("store_id" => $this->mcapi->APIStoreID);
-					$jsondata = $this->mcapi->Call("get_magento_updates", $mc_import_data);
-					$data = json_decode($jsondata["message"], true);
-				
-					// Mailinglist entries
-					foreach ($data as $subscriber)
-					{
-						$email 	= $subscriber["E-mail"];
-						$status = $subscriber["status"];
-						$active = $subscriber["active"];
-											
-						$STATUS_SUBSCRIBED = 1;
-						$STATUS_NOT_ACTIVE = 2;
-						$STATUS_UNSUBSCRIBED = 3;
-						$STATUS_UNCONFIRMED = 4;
-						
-						if ($active == 0)
-						{
-							$status = $STATUS_NOT_ACTIVE;
-						}
-						else
-						if ($status == 0)
-						{
-							$status = $STATUS_UNSUBSCRIBED;
-						}
-						else
-						if ($status == 1)
-						{
-							$status = $STATUS_SUBSCRIBED;
-						}
-						
-						$subscriber_object = $this->subscriber->loadByEmail($email);
-						$subscriber_id = $subscriber_object->getId();
-						
-						if ((int)$subscriber_id > 0)
-						{
-							// update
-							$subscriber_object
-								->setStatus($status)
-								->setEmail($email)
-								->save();
-						}
-						else
-						{
-							// add
-							$this->subscriberfactory->create()
-								->setStatus($status)
-								->setEmail($email)
-								->save();	
-						}	
-					}
-					
-					//  TO DO: Customers
-					foreach ($data as $customer)
-					{
-						
-					}
-				}
-				catch (\Magento\Framework\Exception\NoSuchEntityException $e)
-				{
-					$this->mcapi->DebugCall($e->getMessage());
-				}
-				catch (Exception $e)
-				{
-					$this->mcapi->DebugCall($e->getMessage());
-				}
-			}
-		}
-			
-		return $this;
+
+    /**
+     * @inheritDoc
+     */
+    public function execute(Schedule $schedule): void
+    {
+        try {
+            $stores = $this->storeManager->getStores();
+
+            foreach ($stores as $store) {
+                $response = $this->apiHelper->getUpdates($store->getId());
+
+                // Make sure the data is valid.
+                $this->validateApiResponse($response);
+
+                // Get the array containing subscriber data from response.
+                $updates = json_decode($response['message'], true);
+
+                // Stop here if there are no updates to process at this moment.
+                if (/*(is_string($updates) && $updates = '[]') || */count($updates) < 1) {
+                    continue;
+                }
+
+                // Add log entry for debugging purposes.
+                $this->logUpdate($store->getId(), $updates);
+
+                foreach ($updates as $update) {
+                    // Gather the needed data to create or update a subscriber.
+                    $email = $update['E-mail'];
+                    $status = $this->mapStatus($update);
+
+                    // Load the subscriber object (model) by email address.
+                    $subscriber = $this->subscriber->loadByEmail($email);
+
+                    // Create a new subscriber first if none was found.
+                    if (false === ($subscriber->getId() > 1)) {
+                        $subscriber = $this->subscriberFactory->create();
+                    }
+
+                    // Set the received values and save the subscriber.
+                    $subscriber
+                        ->setStatus($status)
+                        ->setEmail($email);
+
+                    $this->subscriberResourceModel->save($subscriber);
+                }
+            }
+        } catch (Exception $e) {
+            // Log and re-throw the exception.
+            $this->logger->addException($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * Adds a log entry describing the update.
+     *
+     * @param int $storeId
+     * @param array $update
+     * @return $this
+     */
+    protected function logUpdate(int $storeId, array $update): self
+    {
+        $logMsg = sprintf(
+            'Received status update for %d subscriber(s) (store #%d).',
+            count($update),
+            $storeId
+        );
+
+        $this->logger->addDebug($logMsg, ['update_data' => $update]);
+
+        return $this;
+    }
+
+    /**
+     * Maps MailCampaigns to Magento subscriber status.
+     *
+     * @param array $update
+     * @return int
+     */
+    protected function mapStatus(array $update): int
+    {
+        $active = (int)$update['active'];
+        $status = (int)$update['status'];
+
+        // Map status.
+        if ($active === 0) {
+            return Subscriber::STATUS_NOT_ACTIVE;
+        } elseif ($status === 0) {
+            return Subscriber::STATUS_UNSUBSCRIBED;
+        } elseif ($status === 1) {
+            return Subscriber::STATUS_SUBSCRIBED;
+        }
+
+        return 0;
+    }
+
+    /**
+     * @param $update
+     * @return $this
+     * @throws Exception
+     */
+    protected function validateApiResponse($update): self
+    {
+        if (!is_array($update) || !isset($update['success']) || !$update['success'] === '1'
+            || !isset($update['message']) || !is_string($update['message'])) {
+            throw new InvalidApiResponseException('Invalid Api response!');
+        }
+
+        return $this;
     }
 }

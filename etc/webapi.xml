@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/subscribers/subscribe" method="POST">
+        <service class="MailCampaigns\Magento2Connector\Api\SubscriberManagementInterface" method="subscribe"/>
+        <resources>
+            <resource ref="Magento_Backend::admin"/>
+        </resources>
+    </route>
+    <route url="/V1/subscribers/search" method="POST">
+        <service class="MailCampaigns\Magento2Connector\Api\SubscriberManagementInterface" method="search"/>
+        <resources>
+            <resource ref="Magento_Backend::admin"/>
+        </resources>
+    </route>
+    <route url="/V1/development/logs" method="GET">
+        <service class="MailCampaigns\Magento2Connector\Api\LogReaderInterface" method="read"/>
+        <resources>
+            <resource ref="Magento_Backend::admin"/>
+        </resources>
+    </route>
+</routes>

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
     <router id="standard">
-        <route id="connector" frontName="connector">
-            <module name="MailCampaigns_Connector"/>
+        <route id="mailcampaigns" frontName="mailcampaigns">
+            <module name="MailCampaigns_Magento2Connector"/>
         </route>
     </router>
 </config>

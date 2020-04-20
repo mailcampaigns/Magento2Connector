@@ -1,23 +1,25 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="mailcampaigns">
-        
-	    <job name="mailcampaigns_synccron" instance="MailCampaigns\Connector\Cron\SyncCron" method="execute">
+        <job name="mailcampaigns_historical_sync_cron" instance="MailCampaigns\Magento2Connector\Cron\HistoricalSyncCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>
-		<job name="mailcampaigns_postcron" instance="MailCampaigns\Connector\Cron\PostCron" method="execute">
+        <job name="mailcampaigns_post_cron" instance="MailCampaigns\Magento2Connector\Cron\PostCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>
-		<job name="mailcampaigns_statuscron" instance="MailCampaigns\Connector\Cron\StatusCron" method="execute">
+        <job name="mailcampaigns_status_cron" instance="MailCampaigns\Magento2Connector\Cron\StatusCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>
-		<job name="mailcampaigns_quotecron" instance="MailCampaigns\Connector\Cron\QuoteCron" method="execute">
+        <job name="mailcampaigns_quote_cron" instance="MailCampaigns\Magento2Connector\Cron\QuoteCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>
-		<job name="mailcampaigns_ordercron" instance="MailCampaigns\Connector\Cron\OrderCron" method="execute">
+        <job name="mailcampaigns_order_cron" instance="MailCampaigns\Magento2Connector\Cron\OrderCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>
-		<job name="mailcampaigns_productcron" instance="MailCampaigns\Connector\Cron\ProductCron" method="execute">
+        <job name="mailcampaigns_product_cron" instance="MailCampaigns\Magento2Connector\Cron\ProductCron" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+        <job name="mailcampaigns_log_rotation_cron" instance="MailCampaigns\Magento2Connector\Cron\LogRotationCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>
     </group>
