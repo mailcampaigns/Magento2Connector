@@ -20,10 +20,9 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
 {
     /**
      * MailCampaigns API base Uri.
-     * @todo change to live url
      * @var string
      */
-    protected const API_BASE_URI = 'https://bert-api.dev.mailcampaigns.nl/api/v1.1/rest';
+    protected const API_BASE_URI = 'https://api.mailcampaigns.nl/api/v1.1/rest';
 
     /**
      * @var int
