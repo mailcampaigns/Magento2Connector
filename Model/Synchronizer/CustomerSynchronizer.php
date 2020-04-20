@@ -90,8 +90,6 @@ class CustomerSynchronizer extends AbstractSynchronizer implements CustomerSynch
     protected function mapCustomer(Customer $customer): array
     {
         $data = array_merge($this->mapAddress($customer), $customer->getData());
-
-        // ommit sub array levels todo: ?
         $data = array_filter($data, 'is_scalar');
 
         return $data;

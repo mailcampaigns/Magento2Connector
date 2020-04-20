@@ -89,13 +89,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             $pageSize
         );
 
-        // Filter on store(s), always include store with id 0. todo: clean up
-//        $storeIds = [0];
-//        if (null !== $page->getStoreId() && !in_array($page->getStoreId(), $storeIds)) {
-//            $storeIds[] = $page->getStoreId();
-//        }
-//        $collection->addFieldToFilter('store_id', $storeIds);
-
         $pageCount = $collection->getLastPageNumber();
 
         // Note: the 'm' prefix is short for 'mapped'.
@@ -132,7 +125,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
 
     /**
      * Maps given product's data to prepare the synchronization.
-     * todo: not completed refactoring yet
      *
      * Note: the 'm' var prefix is short for 'mapped'.
      *
@@ -197,7 +189,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             true
         );
 
-        // get lowest tier price / staffel todo: is this the correct one? not lowest maybe?
+        // get lowest tier price / staffel
         $mProduct['lowest_tier_price'] = $product->getTierPrice();
 
         // als price niet bestaat bij configurable dan van child pakken
@@ -249,12 +241,10 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             // als omschrijving niet bestaat bij simple dan van parent pakken
             if ($mProduct['description'] == '' && $mProduct['parent_id']
                 && $mProduct['type_id'] != 'configurable' && isset($parentProductId)) {
-                // $parentProduct->getDescription() todo: does not exist? using 'name' for now.
                 $mProduct['description'] = $parentProduct->getName();
             }
             if ($mProduct['short_description'] == '' && $mProduct['parent_id']
                 && $mProduct['type_id'] != 'configurable' && isset($parentProductId)) {
-                // $parentProduct->getShortDescription() todo: does not exist? using 'name' for now.
                 $mProduct['short_description'] = $parentProduct->getName();
             }
         }

@@ -1,16 +1,20 @@
 <?php
 
 use Magento\Customer\Model\Session;
+use Magento\Framework\App\Config;
 use Magento\Framework\App\ObjectManager;
 use Magento\Sales\Model\Order;
-use MailCampaigns\Magento2Connector\Helper\ConfigLoader;
+use Magento\Store\Model\ScopeInterface;
 
 $objectManager = ObjectManager::getInstance();
 
+/** @var Config $config */
+$config = $objectManager->get(Config::class);
+
 // Get configuration.
-$helper = $objectManager->get(ConfigLoader::class);
-$trackingCodeEnabled = $helper->getScopeConfig('mailcampaigns_tracking/general/tracking_code_order_success');
-$apiKey = $helper->getScopeConfig('mailcampaigns_api/general/api_key');
+$trackingCodeEnabled = $config->getValue('mailcampaigns_tracking/general/tracking_code_order_success',
+        ScopeInterface::SCOPE_STORE) === '1';
+$apiKey = $config->getValue('mailcampaigns_api/general/api_key', ScopeInterface::SCOPE_STORE);
 
 // Get session.
 $session = $objectManager->create(Session::class);

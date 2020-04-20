@@ -83,7 +83,7 @@ class OrderSynchronizer extends AbstractSynchronizer implements OrderSynchronize
         $collection = $this->orderCollectionFactory->create()
             ->setPage($page->getPage() - 1, $pageSize);
 
-        // Filter on store(s), always include store with id 0. todo: clean up
+        // Filter on store(s), always include store with id 0.
         $storeIds = [0];
         if (null !== $page->getStoreId() && !in_array($page->getStoreId(), $storeIds)) {
             $storeIds[] = $page->getStoreId();

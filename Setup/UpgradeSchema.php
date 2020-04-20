@@ -29,8 +29,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
         try {
             $setup->startSetup();
 
-            // todo: when upgrading to 2.2.0, convert config vars to renamed ones
-
             $setup->endSetup();
         } catch (Exception $e) {
             // Log and re-throw the exception.
