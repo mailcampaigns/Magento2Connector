@@ -57,7 +57,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
 
         // Send the mapped data to the Api.
         $this->post(
-            $d['product'],
+            $d['products'],
             $d['related_products'],
             $d['cross_sell_products'],
             $d['up_sell_products'],
