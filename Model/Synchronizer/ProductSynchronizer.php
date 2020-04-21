@@ -102,21 +102,16 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         foreach ($collection as $product) {
             $d = $this->mapData($product);
 
-            $mProducts[] = $d['products'];
-            $mRelatedProducts[] = $d['related_products'];
-            $mCrossSellProducts[] = $d['cross_sell_products'];
-            $mUpSellProducts[] = $d['up_sell_products'];
-            $mCategories[] = $d['categories'];
+            $mProducts = array_merge($mProducts, $d['products']);
+            $mRelatedProducts = array_merge($mRelatedProducts, $d['related_products']);
+            $mCrossSellProducts = array_merge($mCrossSellProducts, $d['cross_sell_products']);
+            $mUpSellProducts = array_merge($mUpSellProducts, $d['up_sell_products']);
+            $mCategories = array_merge($mCategories, $d['categories']);
         }
 
         // Send all the mapped data to the Api.
-        $this->post(
-            array_merge(...$mProducts),
-            array_merge(...$mRelatedProducts),
-            array_merge(...$mCrossSellProducts),
-            array_merge(...$mUpSellProducts),
-            array_merge(...$mCategories)
-        );
+        $this->post($mProducts, $mRelatedProducts, $mCrossSellProducts, $mUpSellProducts,
+            $mCategories);
 
         $this->updateHistoricalSyncProgress($page, $pageCount);
 
