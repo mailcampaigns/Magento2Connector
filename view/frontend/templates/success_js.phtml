@@ -22,7 +22,7 @@ $session = $objectManager->create(Session::class);
 if ($trackingCodeEnabled) {
     $order = $objectManager->create(Order::class);
     $orderData = $order->loadByIncrementId($session->getLastRealOrderId())->getData();
-    $orderId = $orderData['entity_id'];
+    $orderId = isset($orderData['entity_id']) ? (int)$orderData['entity_id'] : 0;
 
     if ($orderId > 0) {
         // Build post data.
