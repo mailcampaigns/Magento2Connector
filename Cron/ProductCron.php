@@ -46,13 +46,21 @@ class ProductCron extends AbstractCron
 
             $this->apiStatusHelper->updateStatus(ApiStatus::TYPE_PRODUCT_CRON);
 
-            $products = $this->collectionFactory->create()
-                ->addFieldToFilter(['updated_at', 'created_at'], [['gteq' => $syncStartStr],
-                    ['gteq' => $syncStartStr]])
+            $productsUpdated = $this->collectionFactory->create()
+                ->addFieldToFilter('updated_at', ['gteq' => $syncStartStr])
                 ->setOrder('updated_at', Collection::SORT_ORDER_DESC);
 
             /** @var Product $product */
-            foreach ($products as $product) {
+            foreach ($productsUpdated as $product) {
+                $this->synchronizer->synchronize($product, $product->getStoreId());
+            }
+
+            $productsNew = $this->collectionFactory->create()
+                ->addFieldToFilter('created_at', ['gteq' => $syncStartStr])
+                ->setOrder('created_at', Collection::SORT_ORDER_DESC);
+
+            /** @var Product $product */
+            foreach ($productsNew as $product) {
                 $this->synchronizer->synchronize($product, $product->getStoreId());
             }
         } catch (Exception $e) {
