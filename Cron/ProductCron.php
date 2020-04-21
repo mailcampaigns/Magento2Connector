@@ -47,6 +47,7 @@ class ProductCron extends AbstractCron
             $this->apiStatusHelper->updateStatus(ApiStatus::TYPE_PRODUCT_CRON);
 
             $productsUpdated = $this->collectionFactory->create()
+                ->addFieldToSelect('*')
                 ->addFieldToFilter('updated_at', ['gteq' => $syncStartStr])
                 ->setOrder('updated_at', Collection::SORT_ORDER_DESC);
 
@@ -56,6 +57,7 @@ class ProductCron extends AbstractCron
             }
 
             $productsNew = $this->collectionFactory->create()
+                ->addFieldToSelect('*')
                 ->addFieldToFilter('created_at', ['gteq' => $syncStartStr])
                 ->setOrder('created_at', Collection::SORT_ORDER_DESC);
 
