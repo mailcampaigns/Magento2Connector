@@ -40,12 +40,11 @@ class LogReader implements LogReaderInterface
         $nowDt = new DateTime;
 
         // Set start of the period to filter on.
-        $start = $start ? DateTime::createFromFormat('Y-m-d H:i:s', "{$start} 00:00:00")
+        $start = $start ? DateTime::createFromFormat('Y-m-d H:i:s', $start)
             : (clone $nowDt)->sub(new DateInterval('P1M'));
 
         // Set end of the period to filter on.
-        $end = $end ? DateTime::createFromFormat('Y-m-d H:i:s', "{$end} 23:59:59")
-            : $nowDt;
+        $end = $end ? DateTime::createFromFormat('Y-m-d H:i:s', $end) : $nowDt;
 
         // Validate date range, config and log file.
         $this->validate($start, $end);
@@ -63,6 +62,8 @@ class LogReader implements LogReaderInterface
             'current_logging_level' => $this->logHelper->getCurrentLoggingLevel(),
             'total_line_count' => $totalLineCount,
             'line_count' => count($linesFiltered),
+            'datetime_start' => $start->format(DateTime::COOKIE),
+            'datetime_end' => $end->format(DateTime::COOKIE),
             'data' => $linesFiltered
         ]);
 

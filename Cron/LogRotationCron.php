@@ -68,7 +68,7 @@ class LogRotationCron extends AbstractCron
 
         $this->logger->addDebug('Current log file size: ' . $hFileSize);
 
-        $log = $this->logReader->read($this->startRangeDt->format('Y-m-d'))[0];
+        $log = $this->logReader->read($this->startRangeDt->format('Y-m-d H:i:s'))[0];
         $cntDiff = $log['total_line_count'] - $log['line_count'];
 
         if ($cntDiff > 0) {

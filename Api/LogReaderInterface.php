@@ -5,10 +5,10 @@ namespace MailCampaigns\Magento2Connector\Api;
 interface LogReaderInterface
 {
     /**
-     * Returns log entries for the specified date range (if supplied, the whole
-     * log will be returned otherwise).
+     * Returns log entries for the specified datetime range (if supplied, the whole
+     * log will be returned otherwise with a max of one month).
      *
-     * Note: The date strings must be given in this format: YYYY-MM-DD
+     * Note: The datetime strings must be given in this format: YYYY-MM-DD HH:II:SS
      *
      * @param string|null $start The start date of the range (optional).
      * @param string|null $end The end date of the range (optional).
