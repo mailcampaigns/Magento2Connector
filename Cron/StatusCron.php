@@ -69,58 +69,53 @@ class StatusCron {
 					$data = json_decode($jsondata["message"], true);
 				
 					// Mailinglist entries
-					foreach ($data as $subscriber)
-					{
-						$email 	= $subscriber["E-mail"];
-						$status = $subscriber["status"];
-						$active = $subscriber["active"];
-											
-						$STATUS_SUBSCRIBED = 1;
-						$STATUS_NOT_ACTIVE = 2;
-						$STATUS_UNSUBSCRIBED = 3;
-						$STATUS_UNCONFIRMED = 4;
-						
-						if ($active == 0)
-						{
-							$status = $STATUS_NOT_ACTIVE;
-						}
-						else
-						if ($status == 0)
-						{
-							$status = $STATUS_UNSUBSCRIBED;
-						}
-						else
-						if ($status == 1)
-						{
-							$status = $STATUS_SUBSCRIBED;
-						}
-						
-						$subscriber_object = $this->subscriber->loadByEmail($email);
-						$subscriber_id = $subscriber_object->getId();
-						
-						if ((int)$subscriber_id > 0)
-						{
-							// update
-							$subscriber_object
-								->setStatus($status)
-								->setEmail($email)
-								->save();
-						}
-						else
-						{
-							// add
-							$this->subscriberfactory->create()
-								->setStatus($status)
-								->setEmail($email)
-								->save();	
-						}	
-					}
-					
-					//  TO DO: Customers
-					foreach ($data as $customer)
-					{
-						
-					}
+                    if (is_array($data)) {
+                        foreach ($data as $subscriber) {
+                            $email 	= $subscriber["E-mail"];
+                            $status = $subscriber["status"];
+                            $active = $subscriber["active"];
+
+                            $STATUS_SUBSCRIBED = 1;
+                            $STATUS_NOT_ACTIVE = 2;
+                            $STATUS_UNSUBSCRIBED = 3;
+                            $STATUS_UNCONFIRMED = 4;
+
+                            if ($active == 0)
+                            {
+                                $status = $STATUS_NOT_ACTIVE;
+                            }
+                            else
+                                if ($status == 0)
+                                {
+                                    $status = $STATUS_UNSUBSCRIBED;
+                                }
+                                else
+                                    if ($status == 1)
+                                    {
+                                        $status = $STATUS_SUBSCRIBED;
+                                    }
+
+                            $subscriber_object = $this->subscriber->loadByEmail($email);
+                            $subscriber_id = $subscriber_object->getId();
+
+                            if ((int)$subscriber_id > 0)
+                            {
+                                // update
+                                $subscriber_object
+                                    ->setStatus($status)
+                                    ->setEmail($email)
+                                    ->save();
+                            }
+                            else
+                            {
+                                // add
+                                $this->subscriberfactory->create()
+                                    ->setStatus($status)
+                                    ->setEmail($email)
+                                    ->save();
+                            }
+                        }
+                    }
 				}
 				catch (\Magento\Framework\Exception\NoSuchEntityException $e)
 				{
