@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
-    <module name="MailCampaigns_Magento2Connector" setup_version="2.2.0">
+    <module name="MailCampaigns_Magento2Connector" setup_version="2.2.0-RC1">
         <sequence>Magento_Newsletter</sequence>
     </module>
 </config>
