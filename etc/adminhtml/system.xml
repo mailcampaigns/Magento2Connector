@@ -10,7 +10,7 @@
             <label>MailCampaigns</label>
         </tab>
         <section id="mailcampaignsapi" translate="label" type="text" sortOrder="100" showInDefault="0" showInWebsite="0" showInStore="1">
-            <label>MailCampaigns Connector™ 2.1.4 instellingen</label>
+            <label>MailCampaigns Connector™ 2.1.5 instellingen</label>
             <tab>mailcampaigns_tab</tab>
             <resource>MailCampaigns_Connector::config</resource>
             <group id="general" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">

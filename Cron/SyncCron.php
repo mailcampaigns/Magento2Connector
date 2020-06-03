@@ -420,21 +420,24 @@ class SyncCron {
 					}
 				}
 
-				$response = $this->mcapi->QueueAPICall("update_magento_categories", $category_data);
+				if (sizeof($category_data) > 0) {
+					$response = $this->mcapi->QueueAPICall("update_magento_categories", $category_data);
+				}
+
 				$response = $this->mcapi->QueueAPICall("update_magento_products", $product_data);
-				
+
 				if (sizeof($related_products) > 0)
 				{
 					$this->mcapi->QueueAPICall("update_magento_related_products", $related_products);
 					unset($related_products);
 				}
-				
+
 				if (sizeof($crosssell_products) > 0)
 				{
 					$this->mcapi->QueueAPICall("update_magento_crosssell_products", $crosssell_products, 0);
 					unset($crosssell_products);
 				}
-				
+
 				if (sizeof($upsell_products) > 0)
 				{
 					$this->mcapi->QueueAPICall("update_magento_upsell_products", $upsell_products, 0);
@@ -641,7 +644,10 @@ class SyncCron {
 				}
 
 				// post items
-				$response = $this->mcapi->QueueAPICall("update_magento_categories", $category_data);
+				if (isset($category_data)) {
+					$response = $this->mcapi->QueueAPICall("update_magento_categories", $category_data);
+				}
+
 				$response = $this->mcapi->QueueAPICall("update_magento_order_products", $mc_import_data);
 
 				// clear

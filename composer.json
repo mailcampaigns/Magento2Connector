@@ -3,7 +3,7 @@
   "license": "proprietary",
   "description": "Magento 2 MailCampaigns Connector",
   "type": "magento2-module",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "minimum-stability": "alpha",
   "require": {
     "php": "~5.6.5|>=7.0.0",
