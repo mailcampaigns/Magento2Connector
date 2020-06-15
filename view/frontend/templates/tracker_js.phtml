@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php
 
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Customer\Model\Customer;
@@ -7,57 +7,99 @@ use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Registry;
 use Magento\Store\Model\ScopeInterface;
 
+// todo: use block
 $objectManager = ObjectManager::getInstance();
 
 /** @var Config $config */
 $config = $objectManager->get(Config::class);
 
 // Get configuration.
-$trackingCodeEnabled = $config->getValue('mailcampaigns_tracking/general/tracking_code',
-        ScopeInterface::SCOPE_STORE) === '1';
+$cnfIsEnabledPath = 'mailcampaigns_tracking/general/tracking_code';
+$trackingCodeEnabled = $config->getValue($cnfIsEnabledPath, ScopeInterface::SCOPE_STORE) === '1';
 $apiKey = $config->getValue('mailcampaigns_api/general/api_key', ScopeInterface::SCOPE_STORE);
 
+// Only add the tracking script when enabled in config.
 if ($trackingCodeEnabled) {
     $customer = $objectManager->create(Customer::class);
     $storeId = 0;
-    $customerId = 0;
-    $productId = 0;
 
+    // Get the store id from customer if possible.
     if ($customer->getId() > 0) {
-        $storeId = $customer->getStoreId();
-        $customerId = $customer->getId();
+        $storeId = (int)$customer->getStoreId();
     }
 
-    $product = $objectManager->get(Registry::class)->registry('current_product');
+?>
+    <script>
+        window.addEventListener('load', function () {
+            var d = document;
+            var t = 'script';
+            var apiKey = '<?=$apiKey?>';
+            var storeId = <?=$storeId?>;
+            var productId = null;
+            var customerId = null;
+            var mageCacheStorage = window.localStorage.getItem('mage-cache-storage');
+            var recentlyViewedProductStorage = window.localStorage.getItem('recently_viewed_product');
+            var sectionData = null;
 
-    if ($product instanceof ProductInterface) {
-        $productId = $product->getId();
-    }
+            // Try to get the customer id from local storage.
+            if (mageCacheStorage) {
+                var mageCacheStorageDecoded = JSON.parse(mageCacheStorage);
 
-    // Build post data.
-    $postData = [
-        'store_id' => (int)$storeId,
-        'customer_id' => (int)$customerId,
-        'visitor_id' => 0,
-        'product_id' => (int)$productId
-    ];
+                if (typeof mageCacheStorageDecoded['customer-id'] !== 'undefined') {
+                    sectionData = mageCacheStorageDecoded['customer-id'];
 
-    // Create cookie expiration datetime string (~ a year).
-    $cookieExpires = date('M d Y H:i:s', time() + 365 * 24 * 60 * 60);
+                    if (typeof sectionData['customerId'] !== 'undefined') {
+                        customerId = sectionData['customerId'];
+                    }
+                }
+            }
 
-    /** @codingStandardsIgnoreStart */
-    print '
-	<script type=\'text/javascript\'>
-        (function(d,t) {
-        _mctc = {\'onload\': function() { this.mctrkDocumentLoad(); }};
-        var s=d.getElementsByTagName(t)[0], js=d.createElement(t); js.async=1;
-        js.src=\'https://interface.mailcampaigns.nl/w/' . $apiKey . '/' . base64_encode(json_encode($postData)) . '\';
-        s.parentNode.insertBefore(js,s);
-        if (typeof mc_session_id !== "undefined") { document.cookie = "mc_session_id=" + mc_session_id + "; expires=' . $cookieExpires . '; path=/"; }
-        if (typeof mc_subscriber_id !== "undefined") {  document.cookie = "mc_subscriber_id=" + mc_subscriber_id + "; expires=' . $cookieExpires . '; path=/"; }
-        if (typeof mc_subscriber_email !== "undefined") { document.cookie = "mc_subscriber_email=" + mc_subscriber_email + "; expires=' . $cookieExpires . '; path=/"; }
-        })(document,\'script\');
-	</script>
-	';
-    /** @codingStandardsIgnoreEnd */
+            // Try to get the recently viewed product id from local storage.
+            if (recentlyViewedProductStorage) {
+                var recentlyViewedProductStorageDecoded = JSON.parse(recentlyViewedProductStorage);
+
+                if (typeof recentlyViewedProductStorageDecoded === 'object') {
+                    var props = Object.getOwnPropertyNames(recentlyViewedProductStorageDecoded);
+
+                    if (typeof props[0] !== 'undefined') {
+                        productId = props[0];
+                    }
+                }
+            }
+
+            // Build the request data.
+            var reqData = btoa(JSON.stringify({
+                store_id: storeId,
+                product_id: productId,
+                customer_id: customerId,
+                visitor_id: 0
+            }));
+
+            // Create a new javascript element.
+            var js = d.createElement(t);
+            js.async = 1;
+            js.src = `https://interface.mailcampaigns.nl/w/${apiKey}/${reqData}`;
+
+            // Add element to the DOM.
+            var s = d.getElementsByTagName(t)[0];
+            s.parentNode.insertBefore(js, s);
+
+            // Set cookie expiration date (~ a year).
+            var cookieExp = new Date(Date.now() + 365 * 24 * 3600 * 1000).toString();
+
+            // Save values received from the MailCampaigns server.
+            if (typeof mc_session_id !== 'undefined') {
+                d.cookie = `mc_session_id=${mc_session_id}; expires=${cookieExp}; path=/`
+            }
+
+            if (typeof mc_subscriber_id !== 'undefined') {
+                d.cookie = `mc_subscriber_id=${mc_session_id}; expires=${cookieExp}; path=/`
+            }
+
+            if (typeof mc_subscriber_email !== 'undefined') {
+                d.cookie = `mc_subscriber_email=${mc_session_id}; expires=${cookieExp}; path=/`
+            }
+        });
+    </script>
+<?php
 }

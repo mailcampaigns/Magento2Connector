@@ -36,15 +36,22 @@ if ($trackingCodeEnabled) {
 
         /** @codingStandardsIgnoreStart */
         print '
-        <script type=\'text/javascript\'>
-            (function(d,t) {
-            _mctc = {\'onload\': function() { this.mctrkDocumentLoad(); }};
-            var s=d.getElementsByTagName(t)[0], js=d.createElement(t); js.async=1;
-            js.src=\'https://interface.mailcampaigns.nl/w/' . $apiKey . '/' . base64_encode(json_encode($postData)) . '\';
-            s.parentNode.insertBefore(js,s);
-            })(document,\'script\');
-        </script>
-        ';
+<script>
+    (function (d, t) {
+        _mctc = {
+            "onload": function () {
+                this.mctrkDocumentLoad();
+            }
+        };
+
+        var s = d.getElementsByTagName(t)[0], js = d.createElement(t);
+
+        js.async = 1;
+        js.src = "https://interface.mailcampaigns.nl/w/' . $apiKey . '/' . base64_encode(json_encode($postData)) . '";
+        s.parentNode.insertBefore(js, s);
+    })(document, "script");
+</script>
+';
         /** @codingStandardsIgnoreEnd */
     }
 }
