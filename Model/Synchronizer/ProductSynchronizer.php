@@ -119,6 +119,17 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
     }
 
     /**
+     * @param AbstractModel $model
+     * @param int|null $storeId
+     * @return $this
+     */
+    public function debug(AbstractModel $model, ?int $storeId = null): self
+    {
+        print_r($this->mapData($model, $storeId));
+        return $this;
+    }
+
+    /**
      * Maps given product's data to prepare the synchronization.
      *
      * Note: the 'm' var prefix is short for 'mapped'.

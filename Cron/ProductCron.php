@@ -46,6 +46,7 @@ class ProductCron extends AbstractCron
 
             $this->apiStatusHelper->updateStatus(ApiStatus::TYPE_PRODUCT_CRON);
 
+            // Synchronize updated products.
             $productsUpdated = $this->collectionFactory->create()
                 ->addFieldToSelect('*')
                 ->addFieldToFilter('updated_at', ['gteq' => $syncStartStr])
@@ -53,21 +54,31 @@ class ProductCron extends AbstractCron
 
             /** @var Product $product */
             foreach ($productsUpdated as $product) {
-                $this->synchronizer->synchronize($product, $product->getStoreId());
+                $storeIds = $product->getStoreIds();
+
+                foreach ($storeIds as $storeId) {
+                    $this->synchronizer->synchronize($product, $storeId);
+                }
             }
 
+            // Synchronize new products.
             $productsNew = $this->collectionFactory->create()
-                ->addFieldToSelect('*')
-                ->addFieldToFilter('created_at', ['gteq' => $syncStartStr])
-                ->setOrder('created_at', Collection::SORT_ORDER_DESC);
+                    ->addFieldToSelect('*')
+                    ->addFieldToFilter('created_at', ['gteq' => $syncStartStr])
+                    ->setOrder('created_at', Collection::SORT_ORDER_DESC);
 
             /** @var Product $product */
             foreach ($productsNew as $product) {
-                $this->synchronizer->synchronize($product, $product->getStoreId());
+                $storeIds = $product->getStoreIds();
+
+                foreach ($storeIds as $storeId) {
+                    $this->synchronizer->synchronize($product, $storeId);
+                }
             }
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);
+
             throw $e;
         }
     }
