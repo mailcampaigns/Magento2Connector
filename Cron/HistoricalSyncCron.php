@@ -11,6 +11,7 @@ use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\OrderSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\SubscriberSynchronizerInterface;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 use MailCampaigns\Magento2Connector\Model\ApiPage;
 use MailCampaigns\Magento2Connector\Model\Logger;
 
@@ -94,6 +95,9 @@ class HistoricalSyncCron extends AbstractCron
             } while (!$this->hasTimedOut() && $pages->count() > 0);
 
             $this->logger->addDebug('Historical sync cron stopping..');
+        } catch (ApiCredentialsNotSetException $e) {
+            // Just add a debug message to the filelog.
+            $this->logger->addDebug($e->getMessage());
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);

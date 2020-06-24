@@ -6,6 +6,7 @@ use Exception;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\Event\Observer as EventObserver;
 use Magento\Store\Model\ScopeInterface;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
 class ProductDeletionObserver extends AbstractObserver
 {
@@ -32,6 +33,9 @@ class ProductDeletionObserver extends AbstractObserver
             }
 
             $this->apiHelper->deleteProduct($product, $product->getStoreId());
+        } catch (ApiCredentialsNotSetException $e) {
+            // Just add a debug message to the filelog.
+            $this->logger->addDebug($e->getMessage());
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);

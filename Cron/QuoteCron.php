@@ -8,6 +8,7 @@ use Magento\Quote\Model\Quote;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\QuoteSynchronizerInterface;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 use MailCampaigns\Magento2Connector\Model\ApiStatus;
 use MailCampaigns\Magento2Connector\Model\ResourceModel;
 
@@ -53,6 +54,9 @@ class QuoteCron extends AbstractCron
             foreach ($quotes as $quote) {
                 $this->synchronizer->synchronize($quote, $quote->getStoreId());
             }
+        } catch (ApiCredentialsNotSetException $e) {
+            // Just add a debug message to the filelog.
+            $this->logger->addDebug($e->getMessage());
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);

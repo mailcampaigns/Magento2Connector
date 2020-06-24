@@ -4,16 +4,19 @@ namespace MailCampaigns\Magento2Connector\Api;
 
 use Magento\Catalog\Model\Product;
 use Magento\Framework\Data\Collection\AbstractDb;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
 interface ApiHelperInterface
 {
     /**
      * @return $this
+     * @throws ApiCredentialsNotSetException
      */
     public function processQueue(): self;
 
     /**
      * @return $this
+     * @throws ApiCredentialsNotSetException
      */
     public function reportQueueStatus(): self;
 
@@ -21,6 +24,7 @@ interface ApiHelperInterface
      * @param int $storeId
      * @param string $websiteId
      * @return $this
+     * @throws ApiCredentialsNotSetException
      */
     public function saveSettings(int $storeId, string $websiteId): self;
 
@@ -30,6 +34,7 @@ interface ApiHelperInterface
      * @param AbstractDb $collection
      * @param string|null $pageSizeCnfPath
      * @return $this
+     * @throws ApiCredentialsNotSetException
      */
     public function initHistoricalSync(
         string $collectionName,
@@ -42,6 +47,7 @@ interface ApiHelperInterface
      * @param array $data
      * @param int|null $storeId
      * @return $this
+     * @throws ApiCredentialsNotSetException
      */
     public function updateCustomers(array $data, ?int $storeId = null): self;
 

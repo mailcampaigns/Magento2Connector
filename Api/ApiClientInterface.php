@@ -3,6 +3,7 @@
 namespace MailCampaigns\Magento2Connector\Api;
 
 use Exception;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
 interface ApiClientInterface
 {
@@ -23,7 +24,7 @@ interface ApiClientInterface
      * @param bool $isQueueable When true, will add to queue when not successful.
      * @param int|null $timeout Custom request timeout in seconds (optional).
      * @return array The returned data from the Api.
-     * @throws Exception
+     * @throws Exception|ApiCredentialsNotSetException
      */
     public function call(
         string $function,
@@ -39,6 +40,7 @@ interface ApiClientInterface
      * @param array $content The Api request data (body).
      * @param string|void $function Must be supplied only if not present in $content.
      * @return $this
+     * @throws ApiCredentialsNotSetException
      */
     public function queue(array $content, ?string $function = null): self;
 
@@ -47,6 +49,7 @@ interface ApiClientInterface
      *
      * @param ApiQueueInterface $apiQueue
      * @return $this
+     * @throws ApiCredentialsNotSetException
      */
     public function processQueuedCall(ApiQueueInterface $apiQueue): self;
 }

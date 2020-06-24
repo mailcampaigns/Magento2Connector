@@ -10,6 +10,7 @@ use Magento\Newsletter\Model\SubscriberFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 use MailCampaigns\Magento2Connector\Helper\InvalidApiResponseException;
 
 class StatusCron extends AbstractCron
@@ -95,6 +96,9 @@ class StatusCron extends AbstractCron
                     $this->subscriberResourceModel->save($subscriber);
                 }
             }
+        } catch (ApiCredentialsNotSetException $e) {
+            // Just add a debug message to the filelog.
+            $this->logger->addDebug($e->getMessage());
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);

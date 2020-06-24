@@ -50,7 +50,7 @@ class CustomerId implements SectionSourceInterface
                 $this->logger->debug('Customer id not set in session.');
                 return [];
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);
             throw $e;

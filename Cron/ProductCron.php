@@ -10,6 +10,7 @@ use Magento\Framework\Data\Collection;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 use MailCampaigns\Magento2Connector\Model\ApiStatus;
 
 class ProductCron extends AbstractCron
@@ -63,9 +64,9 @@ class ProductCron extends AbstractCron
 
             // Synchronize new products.
             $productsNew = $this->collectionFactory->create()
-                    ->addFieldToSelect('*')
-                    ->addFieldToFilter('created_at', ['gteq' => $syncStartStr])
-                    ->setOrder('created_at', Collection::SORT_ORDER_DESC);
+                ->addFieldToSelect('*')
+                ->addFieldToFilter('created_at', ['gteq' => $syncStartStr])
+                ->setOrder('created_at', Collection::SORT_ORDER_DESC);
 
             /** @var Product $product */
             foreach ($productsNew as $product) {
@@ -75,6 +76,9 @@ class ProductCron extends AbstractCron
                     $this->synchronizer->synchronize($product, $storeId);
                 }
             }
+        } catch (ApiCredentialsNotSetException $e) {
+            // Just add a debug message to the filelog.
+            $this->logger->addDebug($e->getMessage());
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);

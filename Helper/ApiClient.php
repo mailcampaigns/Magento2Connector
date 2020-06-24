@@ -182,6 +182,9 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
 
             // Make the Api call.
             $this->call($callData['method'], $callData['filters'], false);
+        } catch (ApiCredentialsNotSetException $e) {
+            // Re-throw this exception.
+            throw $e;
         } catch (Exception $e) {
             // Mark the queued call erroneous and persist so it won't be tried
             // again over and over.
@@ -194,12 +197,8 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
             return $this;
         }
 
-        $this->_logger->addDebug(
-            'Successfully processed queued call, removing from queue..',
-            [
-            'stream_data' => $apiQueue->getStreamData()
-            ]
-        );
+        $this->_logger->addDebug('Successfully processed queued call, removing from queue..',
+            ['stream_data' => $apiQueue->getStreamData()]);
 
         // The call can be removed from the queue now.
         $this->queueHelper->removeFromQueue($apiQueue);
@@ -210,6 +209,7 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
     /**
      * @param array $content
      * @return $this
+     * @throws ApiCredentialsNotSetException
      */
     protected function addCredentials(array &$content)
     {
@@ -218,11 +218,16 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
             ScopeInterface::SCOPE_STORE,
             $this->getStoreId()
         );
+
         $apiToken = $this->scopeConfig->getValue(
             'mailcampaigns_api/general/api_token',
             ScopeInterface::SCOPE_STORE,
             $this->getStoreId()
         );
+
+        if (!$apiKey || !$apiToken) {
+            throw new ApiCredentialsNotSetException('API credentials not set (correctly).');
+        }
 
         $content['api_key'] = $apiKey;
         $content['api_token'] = $apiToken;

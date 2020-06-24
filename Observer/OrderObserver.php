@@ -10,6 +10,7 @@ use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\OrderSynchronizerInterface;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
 class OrderObserver extends AbstractObserver
 {
@@ -45,6 +46,9 @@ class OrderObserver extends AbstractObserver
             $order = $observer->getEvent()->getDataByKey('order');
 
             $this->orderSynchronizer->synchronize($order, $storeId);
+        } catch (ApiCredentialsNotSetException $e) {
+            // Just add a debug message to the filelog.
+            $this->logger->addDebug($e->getMessage());
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);

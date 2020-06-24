@@ -10,6 +10,7 @@ use Magento\Framework\Message;
 use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
 class ProductHistoricalSyncConfigObserver extends AbstractHistoricalSyncConfigObserver
 {
@@ -54,6 +55,9 @@ class ProductHistoricalSyncConfigObserver extends AbstractHistoricalSyncConfigOb
             );
 
             $this->messageManager->addNoticeMessage('De bulk import van product gegevens wordt gestart.');
+        } catch (ApiCredentialsNotSetException $e) {
+            // Just add a debug message to the filelog.
+            $this->logger->addDebug($e->getMessage());
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);

@@ -10,6 +10,7 @@ use Magento\Framework\Message;
 use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
 class OrderProductHistoricalSyncConfigObserver extends AbstractHistoricalSyncConfigObserver
 {
@@ -52,6 +53,9 @@ class OrderProductHistoricalSyncConfigObserver extends AbstractHistoricalSyncCon
                 $collection,
                 $pageSizeCnfPath
             );
+        } catch (ApiCredentialsNotSetException $e) {
+            // Just add a debug message to the filelog.
+            $this->logger->addDebug($e->getMessage());
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);

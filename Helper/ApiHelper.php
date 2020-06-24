@@ -175,13 +175,13 @@ class ApiHelper extends AbstractHelper implements ApiHelperInterface
         AbstractDb $collection,
         ?string $pageSizeCnfPath = null
     ): ApiHelperInterface {
-        // Delete from pages table.
-        $this->pageHelper->deleteByCollectionName($collectionName, $storeId);
-
         // Delete remote data.
         $this->client->setStoreId($storeId)->call('reset_magento_tables', [
             'collection' => $collectionName
         ]);
+
+        // Delete from pages table.
+        $this->pageHelper->deleteByCollectionName($collectionName, $storeId);
 
         if (null !== $pageSizeCnfPath) {
             $pageSize = (int)$this->scopeConfig->getValue(

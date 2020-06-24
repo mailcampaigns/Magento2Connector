@@ -18,6 +18,7 @@ use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\SynchronizerInterface;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
 class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchronizerInterface
 {
@@ -115,17 +116,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
 
         $this->updateHistoricalSyncProgress($page, $pageCount);
 
-        return $this;
-    }
-
-    /**
-     * @param AbstractModel $model
-     * @param int|null $storeId
-     * @return $this
-     */
-    public function debug(AbstractModel $model, ?int $storeId = null): self
-    {
-        print_r($this->mapData($model, $storeId));
         return $this;
     }
 
@@ -389,7 +379,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
      * @param array $upSellProducts
      * @param array $categories
      * @return $this
-     * @throws Exception
+     * @throws Exception|ApiCredentialsNotSetException
      */
     protected function post(
         array $products,
