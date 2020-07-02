@@ -7,15 +7,16 @@ use InvalidArgumentException;
 use Magento\Catalog\Helper\Data as TaxHelper;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+use MailCampaigns\Magento2Connector\Api\ProductSynchronizerHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\SynchronizerInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
@@ -28,20 +29,21 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
     protected $taxHelper;
 
     /**
-     * @var CollectionFactory
+     * @var ProductSynchronizerHelperInterface
      */
-    protected $collectionFactory;
+    protected $synchronizerHelper;
 
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
         LogHelperInterface $logHelper,
         TaxHelper $taxHelper,
-        CollectionFactory $collectionFactory
+        ProductSynchronizerHelperInterface $synchronizerHelper
     ) {
         parent::__construct($scopeConfig, $apiHelper, $logHelper);
+
         $this->taxHelper = $taxHelper;
-        $this->collectionFactory = $collectionFactory;
+        $this->synchronizerHelper = $synchronizerHelper;
     }
 
     /**
@@ -70,6 +72,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
 
     /**
      * @inheritDoc
+     * @throws InputException
      */
     public function historicalSync(ApiPageInterface $page): SynchronizerInterface
     {
@@ -85,12 +88,8 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         );
 
         // Load products.
-        $collection = $this->collectionFactory->create()->setPage(
-            $page->getPage() - 1,
-            $pageSize
-        );
-
-        $pageCount = $collection->getLastPageNumber();
+        $products = $this->synchronizerHelper->getProducts($page, $pageSize);
+        $pageCount = $this->synchronizerHelper->getPageCount();
 
         // Note: the 'm' prefix is short for 'mapped'.
         $mProducts = [];
@@ -98,9 +97,8 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         $mCrossSellProducts = [];
         $mUpSellProducts = [];
         $mCategories = [];
-
         /** @var Product $product */
-        foreach ($collection as $product) {
+        foreach ($products as $product) {
             $d = $this->mapData($product);
 
             $mProducts = array_merge($mProducts, $d['products']);
@@ -111,8 +109,13 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         }
 
         // Send all the mapped data to the Api.
-        $this->post($mProducts, $mRelatedProducts, $mCrossSellProducts, $mUpSellProducts,
-            $mCategories);
+        $this->post(
+            $mProducts,
+            $mRelatedProducts,
+            $mCrossSellProducts,
+            $mUpSellProducts,
+            $mCategories
+        );
 
         $this->updateHistoricalSyncProgress($page, $pageCount);
 

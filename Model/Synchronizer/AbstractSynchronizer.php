@@ -9,6 +9,7 @@ use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\SynchronizerInterface;
+use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
 abstract class AbstractSynchronizer implements SynchronizerInterface
 {
@@ -64,6 +65,7 @@ abstract class AbstractSynchronizer implements SynchronizerInterface
      * @param ApiPageInterface $page
      * @param int $pageCount
      * @return $this
+     * @throws ApiCredentialsNotSetException
      */
     protected function updateHistoricalSyncProgress(ApiPageInterface $page, int $pageCount)
     {

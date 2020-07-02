@@ -38,7 +38,7 @@ if ($trackingCodeEnabled) {
         print '
 <script>
     (function (d, t) {
-        _mctc = {
+        var _mctc = {
             "onload": function () {
                 this.mctrkDocumentLoad();
             }
@@ -46,7 +46,7 @@ if ($trackingCodeEnabled) {
 
         var s = d.getElementsByTagName(t)[0], js = d.createElement(t);
 
-        js.async = 1;
+        js.async = true;
         js.src = "https://interface.mailcampaigns.nl/w/' . $apiKey . '/' . base64_encode(json_encode($postData)) . '";
         s.parentNode.insertBefore(js, s);
     })(document, "script");

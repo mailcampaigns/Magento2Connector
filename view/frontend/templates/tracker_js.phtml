@@ -77,7 +77,7 @@ if ($trackingCodeEnabled) {
 
             // Create a new javascript element.
             var js = d.createElement(t);
-            js.async = 1;
+            js.async = true;
             js.src = `https://interface.mailcampaigns.nl/w/${apiKey}/${reqData}`;
 
             // Add element to the DOM.

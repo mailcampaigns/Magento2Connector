@@ -4,12 +4,11 @@ namespace MailCampaigns\Magento2Connector\Cron;
 
 use Exception;
 use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Cron\Model\Schedule;
-use Magento\Framework\Data\Collection;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface;
+use MailCampaigns\Magento2Connector\Api\ProductSynchronizerHelperInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 use MailCampaigns\Magento2Connector\Model\ApiStatus;
 
@@ -21,19 +20,20 @@ class ProductCron extends AbstractCron
     protected $synchronizer;
 
     /**
-     * @var CollectionFactory
+     * @var ProductSynchronizerHelperInterface
      */
-    protected $collectionFactory;
+    protected $synchronizerHelper;
 
     public function __construct(
         ApiHelperInterface $apiHelper,
         LogHelperInterface $logHelper,
         ProductSynchronizerInterface $synchronizer,
-        CollectionFactory $collectionFactory
+        ProductSynchronizerHelperInterface $synchronizerHelper
     ) {
         parent::__construct($apiHelper, $logHelper);
+
         $this->synchronizer = $synchronizer;
-        $this->collectionFactory = $collectionFactory;
+        $this->synchronizerHelper = $synchronizerHelper;
     }
 
     /**
@@ -43,33 +43,12 @@ class ProductCron extends AbstractCron
     {
         try {
             $syncStartTs = $this->apiStatusHelper->getSyncStart(ApiStatus::TYPE_PRODUCT_CRON);
-            $syncStartStr = gmdate('Y-m-d H:i:s', $syncStartTs);
+            $products = $this->synchronizerHelper->getProductsToSynchronize($syncStartTs);
 
             $this->apiStatusHelper->updateStatus(ApiStatus::TYPE_PRODUCT_CRON);
 
-            // Synchronize updated products.
-            $productsUpdated = $this->collectionFactory->create()
-                ->addFieldToSelect('*')
-                ->addFieldToFilter('updated_at', ['gteq' => $syncStartStr])
-                ->setOrder('updated_at', Collection::SORT_ORDER_DESC);
-
             /** @var Product $product */
-            foreach ($productsUpdated as $product) {
-                $storeIds = $product->getStoreIds();
-
-                foreach ($storeIds as $storeId) {
-                    $this->synchronizer->synchronize($product, $storeId);
-                }
-            }
-
-            // Synchronize new products.
-            $productsNew = $this->collectionFactory->create()
-                ->addFieldToSelect('*')
-                ->addFieldToFilter('created_at', ['gteq' => $syncStartStr])
-                ->setOrder('created_at', Collection::SORT_ORDER_DESC);
-
-            /** @var Product $product */
-            foreach ($productsNew as $product) {
+            foreach ($products as $product) {
                 $storeIds = $product->getStoreIds();
 
                 foreach ($storeIds as $storeId) {

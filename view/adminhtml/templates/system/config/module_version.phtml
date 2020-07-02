@@ -51,7 +51,7 @@ use MailCampaigns\Magento2Connector\Block\Adminhtml\System\Config\ModuleVersion;
             updateVisibility();
 
             // Gets triggered when user changes the value of `logging enabled` dropdown.
-            $(selDevelopmentArea).on('change', selEnabledInput, function (e) {
+            $(selDevelopmentArea).on('change', selEnabledInput, function () {
                 updateVisibility();
             })
 

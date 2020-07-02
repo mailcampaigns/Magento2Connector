@@ -28,6 +28,7 @@
     <preference for="MailCampaigns\Magento2Connector\Api\LoggerProviderInterface" type="MailCampaigns\Magento2Connector\Helper\LoggerProvider"/>
     <preference for="MailCampaigns\Magento2Connector\Api\OrderSynchronizerInterface" type="MailCampaigns\Magento2Connector\Model\Synchronizer\OrderSynchronizer"/>
     <preference for="MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface" type="MailCampaigns\Magento2Connector\Model\Synchronizer\ProductSynchronizer"/>
+    <preference for="MailCampaigns\Magento2Connector\Api\ProductSynchronizerHelperInterface" type="MailCampaigns\Magento2Connector\Model\Synchronizer\ProductSynchronizerHelper"/>
     <preference for="MailCampaigns\Magento2Connector\Api\QuoteSynchronizerInterface" type="MailCampaigns\Magento2Connector\Model\Synchronizer\QuoteSynchronizer"/>
     <preference for="MailCampaigns\Magento2Connector\Api\SubscriberManagementInterface" type="MailCampaigns\Magento2Connector\Model\SubscriberManagement"/>
     <preference for="MailCampaigns\Magento2Connector\Api\SubscriberSynchronizerInterface" type="MailCampaigns\Magento2Connector\Model\Synchronizer\SubscriberSynchronizer"/>

@@ -3,13 +3,14 @@
 namespace MailCampaigns\Magento2Connector\CustomerData;
 
 use Magento\Customer\CustomerData\SectionSourceInterface;
+use Magento\Customer\Model\Session;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Model\Logger;
 
 class CustomerId implements SectionSourceInterface
 {
     /**
-     * @var \Magento\Customer\Model\Session
+     * @var Session
      */
     protected $_customerSession;
 
@@ -19,12 +20,13 @@ class CustomerId implements SectionSourceInterface
     protected $logger;
 
     /**
-     * @param \Magento\Customer\Model\Session $customerSession
+     * @param Session $customerSession
      * @param LogHelperInterface $logHelper
      */
-    public function __construct(\Magento\Customer\Model\Session $customerSession,
-                                LogHelperInterface $logHelper)
-    {
+    public function __construct(
+        Session $customerSession,
+        LogHelperInterface $logHelper
+    ) {
         $this->logger = $logHelper->getLogger();
         $this->setCustomerSession($customerSession);
     }
@@ -39,7 +41,7 @@ class CustomerId implements SectionSourceInterface
         try {
             $session = $this->getCustomerSession();
 
-            if (!$session instanceof \Magento\Customer\Model\Session) {
+            if (!$session instanceof Session) {
                 $this->logger->debug('Customer session not found.');
                 return [];
             }
@@ -56,8 +58,10 @@ class CustomerId implements SectionSourceInterface
             throw $e;
         }
 
-        $this->logger->debug(sprintf('Loaded customer id (%d) from session.',
-            $customerId));
+        $this->logger->debug(sprintf(
+            'Loaded customer id (%d) from session.',
+            $customerId
+        ));
 
         return [
             'customerId' => $customerId
@@ -65,7 +69,7 @@ class CustomerId implements SectionSourceInterface
     }
 
     /**
-     * @return \Magento\Customer\Model\Session
+     * @return Session
      */
     public function getCustomerSession()
     {
@@ -73,7 +77,7 @@ class CustomerId implements SectionSourceInterface
     }
 
     /**
-     * @param \Magento\Customer\Model\Session $customerSession
+     * @param Session $customerSession
      */
     public function setCustomerSession($customerSession)
     {
