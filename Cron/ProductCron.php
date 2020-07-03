@@ -52,6 +52,9 @@ class ProductCron extends AbstractCron
                 $storeIds = $product->getStoreIds();
 
                 foreach ($storeIds as $storeId) {
+                    // Load product data of a specific store.
+                    $product = $this->synchronizerHelper->getProduct($product->getId(), $storeId);
+
                     $this->synchronizer->synchronize($product, $storeId);
                 }
             }

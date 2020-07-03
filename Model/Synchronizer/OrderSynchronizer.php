@@ -145,6 +145,8 @@ class OrderSynchronizer extends AbstractSynchronizer implements OrderSynchronize
             'order_name' => $order->getIncrementId(),
             'order_status' => $order->getStatus(),
             'order_total' => $order->getGrandTotal(),
+            'tax_amount' => $order->getTaxAmount(),
+            'order_total_excl_tax' => $order->getGrandTotal() - $order->getTaxAmount(),
             'customer_id' => $order->getCustomerId(),
             'coupon_code' => $order->getCouponCode(),
             'quote_id' => $order->getQuoteId(),

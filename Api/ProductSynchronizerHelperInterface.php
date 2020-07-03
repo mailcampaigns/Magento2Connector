@@ -16,6 +16,13 @@ interface ProductSynchronizerHelperInterface
     public function getProducts(ApiPageInterface $page, int $pageSize): array;
 
     /**
+     * @param int $id
+     * @param int $storeId
+     * @return ProductInterface
+     */
+    public function getProduct(int $id, int $storeId): ProductInterface;
+
+    /**
      * Returns number of pages for last 'getProducts' call.
      *
      * @return int

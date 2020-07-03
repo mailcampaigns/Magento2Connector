@@ -97,25 +97,29 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         $mCrossSellProducts = [];
         $mUpSellProducts = [];
         $mCategories = [];
+
         /** @var Product $product */
         foreach ($products as $product) {
-            $d = $this->mapData($product);
+            // Load product data of a specific store.
+            $product = $this->synchronizerHelper->getProduct($product->getId(), $page->getStoreId());
+
+            $d = $this->mapData($product, $page->getStoreId());
 
             $mProducts = array_merge($mProducts, $d['products']);
             $mRelatedProducts = array_merge($mRelatedProducts, $d['related_products']);
             $mCrossSellProducts = array_merge($mCrossSellProducts, $d['cross_sell_products']);
             $mUpSellProducts = array_merge($mUpSellProducts, $d['up_sell_products']);
             $mCategories = array_merge($mCategories, $d['categories']);
-        }
 
-        // Send all the mapped data to the Api.
-        $this->post(
-            $mProducts,
-            $mRelatedProducts,
-            $mCrossSellProducts,
-            $mUpSellProducts,
-            $mCategories
-        );
+            // Send all the mapped data to the Api.
+            $this->post(
+                $mProducts,
+                $mRelatedProducts,
+                $mCrossSellProducts,
+                $mUpSellProducts,
+                $mCategories
+            );
+        }
 
         $this->updateHistoricalSyncProgress($page, $pageCount);
 
@@ -308,7 +312,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         }
 
         // store id
-        $mProduct['store_id'] = $product->getStoreID();
+        $mProduct['store_id'] = $storeId;
 
         // get related products
         $mRelatedProducts = [];

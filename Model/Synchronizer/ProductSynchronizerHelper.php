@@ -2,6 +2,7 @@
 
 namespace MailCampaigns\Magento2Connector\Model\Synchronizer;
 
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Api\Filter;
 use Magento\Framework\Api\Search\FilterGroup;
@@ -55,6 +56,14 @@ class ProductSynchronizerHelper implements ProductSynchronizerHelperInterface
     /**
      * @inheritDoc
      */
+    public function getProduct(int $id, int $storeId): ProductInterface
+    {
+        return $this->productRepository->getById($id, false, $storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getPageCount(): int
     {
         return $this->pageCount ?: 0;
@@ -93,5 +102,10 @@ class ProductSynchronizerHelper implements ProductSynchronizerHelperInterface
         return $this->productRepository
             ->getList($searchCriteria)
             ->getItems();
+    }
+
+    public function getById(int $id): ProductInterface
+    {
+        return $this->productRepository->getById($id);
     }
 }
