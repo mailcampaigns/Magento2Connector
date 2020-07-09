@@ -5,9 +5,9 @@ namespace MailCampaigns\Magento2Connector\Model\Synchronizer;
 use InvalidArgumentException;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Model\AbstractModel;
+use Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Store\Model\ScopeInterface;
-use MailCampaigns\Magento2Connector\Model\ResourceModel\Subscriber\CollectionFactory;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
@@ -65,6 +65,7 @@ class SubscriberSynchronizer extends AbstractSynchronizer implements SubscriberS
 
         // Load subscribers.
         $collection = $this->collectionFactory->create()
+            ->addFieldToSelect('*')
             ->setPageSize($pageSize)
             ->setCurPage($page->getPage() - 1);
 
@@ -73,7 +74,7 @@ class SubscriberSynchronizer extends AbstractSynchronizer implements SubscriberS
 
         /** @var Subscriber $subscriber */
         foreach ($collection as $subscriber) {
-            $mappedSubscribers[] = $subscriber->toArray();
+            $mappedSubscribers[] = $subscriber->getData();
         }
 
         $this->apiHelper->updateSubscribers($mappedSubscribers, $page->getStoreId());

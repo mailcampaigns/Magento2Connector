@@ -3,10 +3,10 @@
 namespace MailCampaigns\Magento2Connector\Observer\Configuration;
 
 use Exception;
-use Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Event\Observer as EventObserver;
 use Magento\Framework\Message;
+use Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory;
 use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
@@ -42,7 +42,7 @@ class MailingListHistoricalSyncConfigObserver extends AbstractHistoricalSyncConf
             }
 
             $collectionName = 'newsletter/subscriber_collection';
-            $collection = $this->collectionFactory->create();
+            $collection = $this->collectionFactory->create()->addFieldToSelect('*');
             $pageSizeCnfPath = 'mailcampaigns_historical_sync/general/import_mailing_list_amount';
 
             // Delete page records locally and send command to drop tables on remote. Then
