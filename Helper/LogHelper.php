@@ -9,6 +9,10 @@ use MailCampaigns\Magento2Connector\Api\LoggerProviderInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Model\Logger;
 
+/**
+ * Class LogHelper
+ * @package MailCampaigns\Magento2Connector\Helper
+ */
 class LogHelper implements LogHelperInterface
 {
     /**
@@ -31,6 +35,12 @@ class LogHelper implements LogHelperInterface
      */
     protected $config;
 
+    /**
+     * LogHelper constructor.
+     * @param StoreManagerInterface $storeManager
+     * @param ScopeConfigInterface $config
+     * @param LoggerProviderInterface $loggerProvider
+     */
     public function __construct(
         StoreManagerInterface $storeManager,
         ScopeConfigInterface $config,
@@ -54,10 +64,9 @@ class LogHelper implements LogHelperInterface
      */
     public function isLoggingEnabled(): bool
     {
-        return $this->config->getValue(
+        return $this->config->isSetFlag(
             'mailcampaigns_api/development/logging_enabled',
-            ScopeInterface::SCOPE_STORE,
-            $this->storeManager->getDefaultStoreView()->getId()
+            ScopeInterface::SCOPE_STORE
         );
     }
 
@@ -66,11 +75,12 @@ class LogHelper implements LogHelperInterface
      */
     public function getCurrentLoggingLevel(): int
     {
-        return $this->config->getValue(
+        $logLevel = $this->config->getValue(
             'mailcampaigns_api/development/logging_level',
-            ScopeInterface::SCOPE_STORE,
-            $this->storeManager->getDefaultStoreView()->getId()
+            ScopeInterface::SCOPE_STORE
         );
+
+        return $logLevel != null ? $logLevel : 0;
     }
 
     /**
