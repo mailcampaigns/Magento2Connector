@@ -64,7 +64,7 @@ class CustomerSynchronizer extends AbstractSynchronizer implements CustomerSynch
 
         // Load customers.
         $collection = $this->collectionFactory->create()->setPage(
-            $page->getPage() - 1,
+            $page->getPage(),
             $pageSize
         );
 
