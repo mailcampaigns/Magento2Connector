@@ -29,17 +29,15 @@ class Logger extends Monolog
     ) {
         parent::__construct($name, $handlers, $processors);
 
-        $this->cnfLoggingEnabled = $config->getValue(
+        $this->cnfLoggingEnabled = $config->isSetFlag(
             'mailcampaigns_api/development/logging_enabled',
-            ScopeInterface::SCOPE_STORE,
-            $storeManager->getDefaultStoreView()->getId()
+            ScopeInterface::SCOPE_STORE
         );
 
         // Read logging level setting from config.
         $this->cnfLoggingLevel = $config->getValue(
             'mailcampaigns_api/development/logging_level',
-            ScopeInterface::SCOPE_STORE,
-            $storeManager->getDefaultStoreView()->getId()
+            ScopeInterface::SCOPE_STORE
         );
     }
 

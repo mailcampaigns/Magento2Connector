@@ -10,7 +10,7 @@
             <resource>MailCampaigns_Magento2Connector::config</resource>
             <group id="info" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>MailCampaigns Connector</label>
-                <comment><![CDATA[<span style="display: none">De connector is succesvol geïnstalleerd! Je kunt alle instellingen vinden onder `store view`.</span>]]></comment>
+                <comment><![CDATA[<span style="display: none">De connector is succesvol geïnstalleerd! Je kunt alle instellingen vinden onder `scope`.</span>]]></comment>
                 <field id="module_version" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Module Versie</label>
                     <frontend_model>MailCampaigns\Magento2Connector\Block\Adminhtml\System\Config\ModuleVersion</frontend_model>

@@ -60,6 +60,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
 
         // Send the mapped data to the Api.
         $this->post(
+            $storeId,
             $d['products'],
             $d['related_products'],
             $d['cross_sell_products'],
@@ -113,6 +114,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
 
             // Send all the mapped data to the Api.
             $this->post(
+                $page->getStoreId(),
                 $mProducts,
                 $mRelatedProducts,
                 $mCrossSellProducts,
@@ -180,7 +182,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         );
 
         // Get Special Price Incl Tax
-        $mProduct['special_price'] = $this->taxHelper->getTaxPrice(
+        $specialPrice = $this->taxHelper->getTaxPrice(
             $product,
             $mProduct['special_price'],
             true,
@@ -191,6 +193,8 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             null,
             true
         );
+
+        $mProduct['special_price'] = $specialPrice > 0 ? $specialPrice : null;
 
         // get lowest tier price / staffel
         $mProduct['lowest_tier_price'] = $product->getTierPrice();
@@ -224,7 +228,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                 /** @var Product $childProduct */
                 $childProduct = $objectManager->create(Product::class)->load($childProductId);
 
-                $mProduct['special_price'] = $this->taxHelper->getTaxPrice(
+                $specialPriceChild = $this->taxHelper->getTaxPrice(
                     $childProduct,
                     $childProduct->getSpecialPrice(),
                     true,
@@ -235,6 +239,8 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                     null,
                     true
                 );
+
+                $mProduct['special_price'] = $specialPriceChild > 0 ? $specialPriceChild : null;
 
                 break;
             }
@@ -380,6 +386,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
     /**
      * Post mapped data to the Api.
      *
+     * @param int $storeId
      * @param array $products
      * @param array $relatedProducts
      * @param array $crossSellProducts
@@ -389,13 +396,14 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
      * @throws Exception|ApiCredentialsNotSetException
      */
     protected function post(
+        int $storeId,
         array $products,
         array $relatedProducts,
         array $crossSellProducts,
         array $upSellProducts,
         array $categories
     ): self {
-        $apiClient = $this->apiHelper->getClient();
+        $apiClient = $this->apiHelper->getClient()->setStoreId($storeId);
 
         if (count($products) > 0) {
             $apiClient->call('update_magento_products', $products);

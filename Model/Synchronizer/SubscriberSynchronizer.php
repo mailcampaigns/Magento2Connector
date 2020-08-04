@@ -40,8 +40,7 @@ class SubscriberSynchronizer extends AbstractSynchronizer implements SubscriberS
             throw new InvalidArgumentException('Expected Subscriber model instance.');
         }
 
-        $this->apiHelper->getClient()
-            ->setStoreId($storeId)
+        $this->apiHelper->getClient()->setStoreId($storeId)
             ->call('update_magento_mailing_list', [$model->toArray()]);
 
         return $this;

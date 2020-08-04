@@ -25,7 +25,7 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
     protected const API_BASE_URI = 'https://api.mailcampaigns.nl/api/v1.1/rest';
 
     /**
-     * @var int
+     * @var int|null
      */
     protected $storeId;
 
@@ -59,7 +59,7 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
      */
     public function getStoreId(): ?int
     {
-        return $this->storeId ?: $this->storeManager->getDefaultStoreView()->getId();
+        return $this->storeId;
     }
 
     /**
