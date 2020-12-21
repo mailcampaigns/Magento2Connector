@@ -45,7 +45,7 @@ class OrderObserver extends AbstractObserver
             /** @var Order $order */
             $order = $observer->getEvent()->getDataByKey('order');
 
-            $this->orderSynchronizer->synchronize($order, $storeId);
+            $this->orderSynchronizer->synchronize($order, $storeId, true);
         } catch (ApiCredentialsNotSetException $e) {
             // Just add a debug message to the filelog.
             $this->logger->addDebug($e->getMessage());

@@ -45,7 +45,7 @@ class QuoteObserver extends AbstractObserver
             /** @var Quote $quote */
             $quote = $observer->getEvent()->getDataByKey('quote');
 
-            $this->quoteSynchronizer->synchronize($quote, $storeId);
+            $this->quoteSynchronizer->synchronize($quote, $storeId, true);
         } catch (ApiCredentialsNotSetException $e) {
             // Just add a debug message to the filelog.
             $this->logger->addDebug($e->getMessage());

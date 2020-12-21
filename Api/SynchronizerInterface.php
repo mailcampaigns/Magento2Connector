@@ -10,10 +10,11 @@ interface SynchronizerInterface
     /**
      * @param AbstractModel $model
      * @param int|null $storeId
+     * @param bool $useShortTimeout Will use a short timout for connection(s) when set to true.
      * @return $this
      * @throws ApiCredentialsNotSetException
      */
-    public function synchronize(AbstractModel $model, ?int $storeId = null): self;
+    public function synchronize(AbstractModel $model, ?int $storeId = null, bool $useShortTimeout = false): self;
 
     /**
      * @param ApiPageInterface $page

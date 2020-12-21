@@ -41,7 +41,7 @@ abstract class AbstractSynchronizer implements SynchronizerInterface
     /**
      * @inheritDoc
      */
-    abstract public function synchronize(AbstractModel $model, ?int $storeId = null): SynchronizerInterface;
+    abstract public function synchronize(AbstractModel $model, ?int $storeId = null, bool $useShortTimeout = false): SynchronizerInterface;
 
     /**
      * @inheritDoc

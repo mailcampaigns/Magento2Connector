@@ -49,7 +49,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
     /**
      * @inheritDoc
      */
-    public function synchronize(AbstractModel $model, ?int $storeId = null): SynchronizerInterface
+    public function synchronize(AbstractModel $model, ?int $storeId = null, bool $useShortTimeout = false): SynchronizerInterface
     {
         if (!$model instanceof Product) {
             throw new InvalidArgumentException('Expected Product model instance.');

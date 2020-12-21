@@ -45,7 +45,7 @@ class CustomerObserver extends AbstractObserver
             /** @var Customer $customer */
             $customer = $observer->getEvent()->getDataByKey('customer');
 
-            $this->customerSynchronizer->synchronize($customer, $storeId);
+            $this->customerSynchronizer->synchronize($customer, $storeId, true);
         } catch (ApiCredentialsNotSetException $e) {
             // Just add a debug message to the filelog.
             $this->logger->addDebug($e->getMessage());

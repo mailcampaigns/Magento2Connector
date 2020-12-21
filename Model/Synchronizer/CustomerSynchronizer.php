@@ -35,13 +35,13 @@ class CustomerSynchronizer extends AbstractSynchronizer implements CustomerSynch
     /**
      * @inheritDoc
      */
-    public function synchronize(AbstractModel $model, ?int $storeId = null): SynchronizerInterface
+    public function synchronize(AbstractModel $model, ?int $storeId = null, bool $useShortTimeout = false): SynchronizerInterface
     {
         if (!$model instanceof Customer) {
             throw new InvalidArgumentException('Expected Customer model instance.');
         }
 
-        $this->apiHelper->updateCustomers([$this->mapCustomer($model)], $storeId);
+        $this->apiHelper->updateCustomers([$this->mapCustomer($model)], $storeId, $useShortTimeout);
 
         return $this;
     }

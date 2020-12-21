@@ -22,7 +22,7 @@ interface ApiClientInterface
      * @param string $function Name of the function that will be called.
      * @param array $filters This array contains the payload/data to be sent.
      * @param bool $isQueueable When true, will add to queue when not successful.
-     * @param int|null $timeout Custom request timeout in seconds (optional).
+     * @param bool $useShortTimeout Will use a short timout for connection(s) when set to true.
      * @return array The returned data from the Api.
      * @throws Exception|ApiCredentialsNotSetException
      */
@@ -30,7 +30,7 @@ interface ApiClientInterface
         string $function,
         array $filters,
         bool $isQueueable = true,
-        ?int $timeout = null
+        bool $useShortTimeout = false
     ): array;
 
     /**
