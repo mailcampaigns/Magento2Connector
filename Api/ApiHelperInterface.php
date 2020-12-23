@@ -46,10 +46,11 @@ interface ApiHelperInterface
     /**
      * @param array $data
      * @param int|null $storeId
+     * @param bool $useShortTimeout Will use a short timout for connection(s) when set to true.
      * @return $this
      * @throws ApiCredentialsNotSetException
      */
-    public function updateCustomers(array $data, ?int $storeId = null): self;
+    public function updateCustomers(array $data, ?int $storeId = null, bool $useShortTimeout = false): self;
 
     /**
      * @param array $data

@@ -34,14 +34,14 @@ class SubscriberSynchronizer extends AbstractSynchronizer implements SubscriberS
     /**
      * @inheritDoc
      */
-    public function synchronize(AbstractModel $model, ?int $storeId = null): SynchronizerInterface
+    public function synchronize(AbstractModel $model, ?int $storeId = null, bool $useShortTimeout = false): SynchronizerInterface
     {
         if (!$model instanceof Subscriber) {
             throw new InvalidArgumentException('Expected Subscriber model instance.');
         }
 
         $this->apiHelper->getClient()->setStoreId($storeId)
-            ->call('update_magento_mailing_list', [$model->toArray()]);
+            ->call('update_magento_mailing_list', [$model->toArray()], true, $useShortTimeout);
 
         return $this;
     }

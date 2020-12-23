@@ -44,7 +44,7 @@ class OrderSynchronizer extends AbstractSynchronizer implements OrderSynchronize
     /**
      * @inheritDoc
      */
-    public function synchronize(AbstractModel $model, ?int $storeId = null): SynchronizerInterface
+    public function synchronize(AbstractModel $model, ?int $storeId = null, bool $useShortTimeout = false): SynchronizerInterface
     {
         if (!$model instanceof Order) {
             throw new InvalidArgumentException('Expected Order model instance.');
@@ -56,9 +56,9 @@ class OrderSynchronizer extends AbstractSynchronizer implements OrderSynchronize
 
         $apiClient = $this->apiHelper->getClient()->setStoreId($storeId);
 
-        $apiClient->call('update_magento_orders', $mappedOrder);
-        $apiClient->call('update_magento_order_products', $mappedOrderItems);
-        $apiClient->call('update_magento_categories', $mappedCategories);
+        $apiClient->call('update_magento_orders', $mappedOrder, true, $useShortTimeout);
+        $apiClient->call('update_magento_order_products', $mappedOrderItems, true, $useShortTimeout);
+        $apiClient->call('update_magento_categories', $mappedCategories, true, $useShortTimeout);
 
         return $this;
     }

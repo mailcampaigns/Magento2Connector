@@ -19,6 +19,13 @@ use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 class ApiClient extends AbstractHelper implements ApiClientInterface
 {
     /**
+     * Number of seconds after which the Api connection will timeout when short
+     * timeout mode is used.
+     * @var int
+     */
+    public const SHORT_TIMEOUT = 2;
+
+    /**
      * MailCampaigns API base Uri.
      * @var string
      */
@@ -78,7 +85,7 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
         string $function,
         array $filters,
         bool $isQueueable = true,
-        ?int $timeout = null
+        bool $useShortTimeout = false
     ): array {
         $content = [];
         $failed = false;
@@ -103,9 +110,9 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
             ]
         ];
 
-        // Add timeout if a value was given.
-        if ($timeout) {
-            $options['http']['timeout'] = $timeout;
+        // Add connection timeout in seconds to the request..
+        if ($useShortTimeout) {
+            $options['http']['timeout'] = self::SHORT_TIMEOUT;
         }
 
         $logMsg = sprintf('Api called `%s`.', $function);
@@ -114,9 +121,11 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
             'content' => $contentJson
         ]);
 
-        // Execute the Api call.
+        // Execute the Api call. Suppress possible errors, they will be logged when
+        // result is false. This is to prevent any webshop processes from possibly
+        // crashing on connection issues with our server.
         // @codingStandardsIgnoreStart
-        $res = file_get_contents(self::API_BASE_URI, false, stream_context_create($options));
+        $res = @file_get_contents(self::API_BASE_URI, false, stream_context_create($options));
         // @codingStandardsIgnoreEnd
 
         // In case something went wrong, log the error and add the call
@@ -197,8 +206,10 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
             return $this;
         }
 
-        $this->_logger->addDebug('Successfully processed queued call, removing from queue..',
-            ['stream_data' => $apiQueue->getStreamData()]);
+        $this->_logger->addDebug(
+            'Successfully processed queued call, removing from queue..',
+            ['stream_data' => $apiQueue->getStreamData()]
+        );
 
         // The call can be removed from the queue now.
         $this->queueHelper->removeFromQueue($apiQueue);

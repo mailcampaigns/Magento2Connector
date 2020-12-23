@@ -14,7 +14,7 @@ class QuoteSynchronizer extends AbstractSynchronizer implements QuoteSynchronize
     /**
      * @inheritDoc
      */
-    public function synchronize(AbstractModel $model, ?int $storeId = null): SynchronizerInterface
+    public function synchronize(AbstractModel $model, ?int $storeId = null, bool $useShortTimeout = false): SynchronizerInterface
     {
         if (!$model instanceof Quote) {
             throw new InvalidArgumentException('Expected Quote model instance.');
@@ -23,19 +23,21 @@ class QuoteSynchronizer extends AbstractSynchronizer implements QuoteSynchronize
         $mappedQuote = $this->mapQuote($model);
 
         $apiClient = $this->apiHelper->getClient()->setStoreId($model->getStoreId());
-        $apiClient->call('update_magento_abandonded_cart_quotes', [$mappedQuote]);
+        $apiClient->call('update_magento_abandonded_cart_quotes', [$mappedQuote], true, $useShortTimeout);
 
-        // Delete quote items (products) first before adding them again.
-        $apiClient->call('delete_magento_abandonded_cart_products', [
+        $filters = [
             'quote_id' => $model->getId(),
             'store_id' => $model->getStoreId()
-        ]);
+        ];
+
+        // Delete quote items (products) first before adding them again.
+        $apiClient->call('delete_magento_abandonded_cart_products', $filters, true, $useShortTimeout);
 
         $mappedItems = $this->mapQuoteItems($model);
 
         // Insert quote items (products).
         if (count($mappedItems) > 0) {
-            $apiClient->call('update_magento_abandonded_cart_products', $mappedItems);
+            $apiClient->call('update_magento_abandonded_cart_products', $mappedItems, true, $useShortTimeout);
         }
 
         return $this;

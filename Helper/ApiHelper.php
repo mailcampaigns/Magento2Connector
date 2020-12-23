@@ -161,7 +161,7 @@ class ApiHelper extends AbstractHelper implements ApiHelperInterface
         // Send settings to Api.
         $this->client
             ->setStoreId($storeId)
-            ->call('save_magento_settings', $settings);
+            ->call('save_magento_settings', $settings, false);
 
         return $this;
     }
@@ -220,11 +220,11 @@ class ApiHelper extends AbstractHelper implements ApiHelperInterface
     /**
      * @inheritDoc
      */
-    public function updateCustomers(array $data, ?int $storeId = null): ApiHelperInterface
+    public function updateCustomers(array $data, ?int $storeId = null, bool $useShortTimeout = false): ApiHelperInterface
     {
         $this->client
             ->setStoreId($storeId)
-            ->call('update_magento_customers', $data);
+            ->call('update_magento_customers', $data, true, $useShortTimeout);
 
         return $this;
     }
@@ -265,7 +265,7 @@ class ApiHelper extends AbstractHelper implements ApiHelperInterface
     public function getUpdates(int $storeId): array
     {
         return $this->client->setStoreId($storeId)
-            ->call("get_magento_updates", ['store_id' => $storeId]);
+            ->call("get_magento_updates", ['store_id' => $storeId], false);
     }
 
     /**
