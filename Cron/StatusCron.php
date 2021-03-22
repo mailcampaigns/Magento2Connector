@@ -56,10 +56,10 @@ class StatusCron extends AbstractCron
     public function execute(Schedule $schedule): void
     {
         try {
-            $this->storeManager->setCurrentStore($store);
             $stores = $this->storeManager->getStores();
-
+            
             foreach ($stores as $store) {
+                $this->storeManager->setCurrentStore($store);
                 $response = $this->apiHelper->getUpdates($store->getId());
 
                 // Make sure the data is valid.
