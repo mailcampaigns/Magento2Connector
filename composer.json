@@ -2,7 +2,7 @@
     "name": "mailcampaigns/magento2-connector",
     "description": "MailCampaigns Magento 2 Connector",
     "type": "magento2-module",
-    "version": "2.2.0-RC11",
+    "version": "2.2.0-RC12",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
