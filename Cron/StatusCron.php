@@ -11,7 +11,6 @@ use Magento\Store\Model\StoreManagerInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
-use MailCampaigns\Magento2Connector\Helper\InvalidApiResponseException;
 
 class StatusCron extends AbstractCron
 {
@@ -57,19 +56,18 @@ class StatusCron extends AbstractCron
     {
         try {
             $stores = $this->storeManager->getStores();
-            
+
             foreach ($stores as $store) {
                 $this->storeManager->setCurrentStore($store);
                 $response = $this->apiHelper->getUpdates($store->getId());
 
-                // Make sure the data is valid.
-                $this->validateApiResponse($response);
-
                 // Get the array containing subscriber data from response.
-                $updates = json_decode($response['message'], true);
+                if (true === isset($response['message'])) {
+                    $updates = json_decode($response['message'], true);
+                }
 
                 // Stop here if there are no updates to process at this moment.
-                if (/*(is_string($updates) && $updates = '[]') || */count($updates) < 1) {
+                if (false === isset($updates) || count($updates) < 1) {
                     continue;
                 }
 
@@ -148,20 +146,5 @@ class StatusCron extends AbstractCron
         }
 
         return 0;
-    }
-
-    /**
-     * @param $update
-     * @return $this
-     * @throws Exception
-     */
-    protected function validateApiResponse($update): self
-    {
-        if (!is_array($update) || !isset($update['success']) || !$update['success'] === '1'
-            || !isset($update['message']) || !is_string($update['message'])) {
-            throw new InvalidApiResponseException('Invalid Api response!');
-        }
-
-        return $this;
     }
 }

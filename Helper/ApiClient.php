@@ -236,10 +236,6 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
             $this->getStoreId()
         );
 
-        if (!$apiKey || !$apiToken) {
-            throw new ApiCredentialsNotSetException('API credentials not set (correctly).');
-        }
-
         $content['api_key'] = $apiKey;
         $content['api_token'] = $apiToken;
 
