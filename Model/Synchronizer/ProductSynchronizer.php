@@ -147,8 +147,17 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             $data = $product->getData($attribute->getAttributeCode());
 
             if (!is_array($data)) {
-                $mProduct[$attribute->getAttributeCode()] = $data;
+                if(in_array($attribute->getFrontendInput(), ["select","boolean"])){
+                    $data = $attribute->getSource()->getOptionText($data);
+                }
+            } else{
+                if($attribute->getAttributeCode() == "quantity_and_stock_status"){
+                    $data = $data["qty"];
+                } else{
+                    $data = json_encode($data);
+                }
             }
+            $mProduct[$attribute->getAttributeCode()] = $data;
         }
 
         // product parent id
