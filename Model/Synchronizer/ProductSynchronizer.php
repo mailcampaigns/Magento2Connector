@@ -8,9 +8,13 @@ use Magento\Catalog\Helper\Data as TaxHelper;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\Product;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
+use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
+use Magento\Eav\Model\Entity\Attribute\Source\Table;
+use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
@@ -143,21 +147,18 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         $mProduct = [];
 
         $attributes = $product->getAttributes();
-        foreach ($attributes as $attribute) {
-            $data = $product->getData($attribute->getAttributeCode());
 
-            if (!is_array($data)) {
-                if(in_array($attribute->getFrontendInput(), ["select","boolean"])){
-                    $data = $attribute->getSource()->getOptionText($data);
-                }
-            } else{
-                if($attribute->getAttributeCode() == "quantity_and_stock_status"){
-                    $data = $data["qty"];
-                } else{
-                    $data = json_encode($data);
-                }
+        foreach ($attributes as $attr) {
+            try {
+                $flatAttrData = $this->flattenAttributeData($product, $attr);
+            } catch (LocalizedException $e) {
+                // In case of an exception, log it and set an empty string as
+                // the value so the whole process won't stop here.
+                $this->logger->addException($e);
+                $flatAttrData = '';
             }
-            $mProduct[$attribute->getAttributeCode()] = $data;
+
+            $mProduct[$attr->getAttributeCode()] = $flatAttrData;
         }
 
         // product parent id
@@ -380,6 +381,57 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             'up_sell_products' => $mUpSellProducts,
             'categories' => $mCategories
         ];
+    }
+
+    /**
+     * Converts product's attribute data to a single useful value.
+     *
+     * @param Product $product
+     * @param AbstractAttribute $attr
+     * @return string|int
+     * @throws LocalizedException
+     */
+    protected function flattenAttributeData(Product $product, AbstractAttribute $attr)
+    {
+        $data = $product->getData($attr->getAttributeCode());
+
+        // Reduce quantity and stock status array to number of items in stock (numeric).
+        if (true === is_array($data) && $attr->getAttributeCode() === 'quantity_and_stock_status') {
+            return $data['qty'];
+        }
+
+        // For select and boolean fields, return the textual version of the value.
+        if (true === in_array($attr->getFrontendInput(), ['select', 'boolean'])) {
+            return $attr->getSource()->getOptionText($data);
+        }
+
+        if (true === isset($data)) {
+            // For multiselect fields, return json encoded array of all selected values
+            if ($attr->getFrontendInput() === 'multiselect') {
+                $arr = [];
+                $selectedValues = explode(',', $data);
+
+                /** @var Table $source */
+                $source = $attr->getSource();
+
+                /** @var Option $option */
+                foreach ($source->getAllOptions(true, true) as $option) {
+                    if (in_array($option['value'], $selectedValues)) {
+                        $arr[] = $option['label'];
+                    }
+                }
+
+                return json_encode($arr);
+            }
+
+            // Encode data to a Json string in case the value is not a string or number.
+            if (false === is_string($data) && false === is_numeric($data)) {
+                return json_encode($data);
+            }
+        }
+
+        // Return as-is (string/number).
+        return $data;
     }
 
     /**
