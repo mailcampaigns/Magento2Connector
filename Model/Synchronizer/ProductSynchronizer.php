@@ -316,16 +316,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         // link
         $mProduct['mc:product_url'] = $product->getProductUrl();
 
-        // Stock Status
-        $mProduct['stock_status'] = $product->getData('quantity_and_stock_status');
-
-        // Stock quantity
-        if ($product->getExtensionAttributes()->getStockItem() != null) {
-            $mProduct['quantity'] = $product->getQty();
-        } else {
-            $mProduct['quantity'] = null;
-        }
-
         // store id
         $mProduct['store_id'] = $storeId;
 
