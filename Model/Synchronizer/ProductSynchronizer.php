@@ -222,9 +222,9 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                 /** @var Product $childProduct */
                 $childProduct = $objectManager->create(Product::class)->load($childProductId);
 
-//                if ($childProduct->getStatus() != Status::STATUS_ENABLED) {
-//                    continue;
-//                }
+                if ($childProduct->getStatus() != Status::STATUS_ENABLED) {
+                    continue;
+                }
 
                 $prices = [
                     'price' => 'getPrice',
