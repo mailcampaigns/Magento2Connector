@@ -211,8 +211,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         $mProduct['lowest_tier_price'] = $product->getTierPrice();
 
         // Set product price/special_price based on the lowest priced child.
-        $this->logger->addInfo(sprintf('Synchronizing a configurable product with SKU \'%s\'.', $product->getSku()));
-        $this->logger->addInfo(sprintf('Has %d child products.', (true == isset($childProductIds[0]) ? count($childProductIds[0]) : 0)));
         if ($mProduct['type_id'] === 'configurable'
             && true == isset($childProductIds[0])
             && count($childProductIds[0]) > 0
@@ -224,15 +222,9 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                 /** @var Product $childProduct */
                 $childProduct = $objectManager->create(Product::class)->load($childProductId);
 
-                if ($childProduct->getStatus() !== Status::STATUS_ENABLED) {
-                    $this->logger->addInfo(sprintf(
-                        'Skip child product with SKU \'%s\' and status \'%s\'.',
-                        $childProduct->getSku(),
-                        $childProduct->getStatus()
-                    ));
-
-                    continue;
-                }
+//                if ($childProduct->getStatus() !== Status::STATUS_ENABLED) {
+//                    continue;
+//                }
 
                 $prices = [
                     'price' => 'getFinalPrice',
@@ -252,14 +244,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                         null,
                         true
                     );
-
-                    $this->logger->addInfo(sprintf(
-                        'Set price for product with SKU \'%s\' with \'%s\' as new value \'%s\' for \'%s\'.',
-                        $product->getSku(),
-                        $childProduct->{$method}(),
-                        $mProduct[$key],
-                        $key
-                    ));
                 }
 
                 break;
