@@ -223,6 +223,12 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                 $childProduct = $objectManager->create(Product::class)->load($childProductId);
 
                 if ($childProduct->getStatus() !== Status::STATUS_ENABLED) {
+                    $this->logger->addDebug(sprintf(
+                        'Skip child product with SKU \'%s\' and status \'%s\'.',
+                        $childProduct->getSku(),
+                        $childProduct->getStatus()
+                    ));
+
                     continue;
                 }
 
@@ -244,6 +250,14 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                         null,
                         true
                     );
+
+                    $this->logger->addDebug(sprintf(
+                        'Set price for product with SKU \'%s\' with \'\' as new value \'%s\' for \'%s\'.',
+                        $product->getSku(),
+                        $childProduct->{$method}(),
+                        $mProduct[$key],
+                        $key
+                    ));
                 }
 
                 break;
