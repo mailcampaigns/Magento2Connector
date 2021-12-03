@@ -7,6 +7,7 @@ use InvalidArgumentException;
 use Magento\Catalog\Helper\Data as TaxHelper;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Eav\Model\Entity\Attribute\Source\Table;
@@ -209,42 +210,43 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         // get lowest tier price / staffel
         $mProduct['lowest_tier_price'] = $product->getTierPrice();
 
-        $priceMethods = [
-            'price' => 'getFinalPrice',
-            'special_price' => 'getSpecialPrice'
-        ];
-
         // Set product price/special_price based on the lowest priced child.
-        foreach ($priceMethods as $key => $method) {
-            if ($mProduct['type_id'] !== 'configurable'
-                || false === empty($mProduct[$key])
-                || true === empty($childProductIds)
-            ) {
-                continue;
-            }
-
+        if ($mProduct['type_id'] === 'configurable'
+            && true == isset($childProductIds[0])
+            && count($childProductIds[0]) > 0
+        ) {
             foreach ($childProductIds[0] as $childProductId) {
                 /** @var Product $childProduct */
                 $childProduct = $objectManager->create(Product::class)->load($childProductId);
 
-                $newPrice = $this->taxHelper->getTaxPrice(
-                    $childProduct,
-                    $childProduct->{$method}(),
-                    true,
-                    null,
-                    null,
-                    null,
-                    $storeId,
-                    null,
-                    true
-                );
-
-                // Only overwrite if it is still empty or higher than the $newPrice value.
-                if (true == empty($mProduct[$key]) || $newPrice < $mProduct[$key]) {
-                    $mProduct[$key] = $newPrice;
+                if ($childProduct->getStatus() !== Status::STATUS_ENABLED) {
+                    continue;
                 }
+
+                $prices = [
+                    'price' => 'getFinalPrice',
+                    'special_price' => 'getSpecialPrice'
+                ];
+
+                foreach ($prices as $key => $method) {
+                    // Only overwrite by the first enabled child product.
+                    $mProduct[$key] = $this->taxHelper->getTaxPrice(
+                        $childProduct,
+                        $childProduct->{$method}(),
+                        true,
+                        null,
+                        null,
+                        null,
+                        $storeId,
+                        null,
+                        true
+                    );
+                }
+
+                break;
             }
         }
+
 
         if (isset($parentProduct)) {
             // als omschrijving niet bestaat bij simple dan van parent pakken
