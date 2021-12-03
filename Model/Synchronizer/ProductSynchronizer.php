@@ -215,6 +215,9 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             && true == isset($childProductIds[0])
             && count($childProductIds[0]) > 0
         ) {
+            $mProduct['price'] = null;
+            $mProduct['special_price'] = null;
+
             foreach ($childProductIds[0] as $childProductId) {
                 /** @var Product $childProduct */
                 $childProduct = $objectManager->create(Product::class)->load($childProductId);
