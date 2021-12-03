@@ -211,8 +211,8 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         $mProduct['lowest_tier_price'] = $product->getTierPrice();
 
         // Set product price/special_price based on the lowest priced child.
-        $this->logger->addDebug(sprintf('Synchronizing a configurable product with SKU \'%s\'.', $product->getSku()));
-        $this->logger->addDebug(sprintf('Has %d child products.', (true == isset($childProductIds[0]) ? count($childProductIds[0]) : 0)));
+        $this->logger->addInfo(sprintf('Synchronizing a configurable product with SKU \'%s\'.', $product->getSku()));
+        $this->logger->addInfo(sprintf('Has %d child products.', (true == isset($childProductIds[0]) ? count($childProductIds[0]) : 0)));
         if ($mProduct['type_id'] === 'configurable'
             && true == isset($childProductIds[0])
             && count($childProductIds[0]) > 0
@@ -225,7 +225,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                 $childProduct = $objectManager->create(Product::class)->load($childProductId);
 
                 if ($childProduct->getStatus() !== Status::STATUS_ENABLED) {
-                    $this->logger->addDebug(sprintf(
+                    $this->logger->addInfo(sprintf(
                         'Skip child product with SKU \'%s\' and status \'%s\'.',
                         $childProduct->getSku(),
                         $childProduct->getStatus()
@@ -253,8 +253,8 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                         true
                     );
 
-                    $this->logger->addDebug(sprintf(
-                        'Set price for product with SKU \'%s\' with \'\' as new value \'%s\' for \'%s\'.',
+                    $this->logger->addInfo(sprintf(
+                        'Set price for product with SKU \'%s\' with \'%s\' as new value \'%s\' for \'%s\'.',
                         $product->getSku(),
                         $childProduct->{$method}(),
                         $mProduct[$key],
