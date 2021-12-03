@@ -250,7 +250,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             }
         }
 
-
         if (isset($parentProduct)) {
             // als omschrijving niet bestaat bij simple dan van parent pakken
             if ($mProduct['description'] == '' && $mProduct['parent_id']
