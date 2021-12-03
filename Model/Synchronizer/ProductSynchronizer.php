@@ -209,38 +209,27 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         // get lowest tier price / staffel
         $mProduct['lowest_tier_price'] = $product->getTierPrice();
 
-        // als price niet bestaat bij configurable dan van child pakken
-        if ($mProduct['price'] == null && !empty($childProductIds) && $mProduct['type_id'] == 'configurable') {
-            foreach ($childProductIds[0] as $childProductId) {
-                /** @var Product $childProduct */
-                $childProduct = $objectManager->create(Product::class)->load($childProductId);
+        $priceMethods = [
+            'price' => 'getFinalPrice',
+            'special_price' => 'getSpecialPrice'
+        ];
 
-                $mProduct['price'] = $this->taxHelper->getTaxPrice(
-                    $childProduct,
-                    $childProduct->getFinalPrice(),
-                    true,
-                    null,
-                    null,
-                    null,
-                    $storeId,
-                    null,
-                    true
-                );
-
-                break;
+        // Set product price/special_price based on the lowest priced child.
+        foreach ($priceMethods as $key => $method) {
+            if ($mProduct['type_id'] !== 'configurable'
+                || false === empty($mProduct[$key])
+                || true === empty($childProductIds)
+            ) {
+                continue;
             }
-        }
 
-        // als special_price niet bestaat bij configurable dan van child pakken
-        if ($mProduct['special_price'] == null && !empty($childProductIds)
-            && $mProduct['type_id'] == 'configurable') {
             foreach ($childProductIds[0] as $childProductId) {
                 /** @var Product $childProduct */
                 $childProduct = $objectManager->create(Product::class)->load($childProductId);
 
-                $specialPriceChild = $this->taxHelper->getTaxPrice(
+                $newPrice = $this->taxHelper->getTaxPrice(
                     $childProduct,
-                    $childProduct->getSpecialPrice(),
+                    $childProduct->{$method}(),
                     true,
                     null,
                     null,
@@ -250,9 +239,10 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                     true
                 );
 
-                $mProduct['special_price'] = $specialPriceChild > 0 ? $specialPriceChild : null;
-
-                break;
+                // Only overwrite if it is still empty or higher than the $newPrice value.
+                if (true == empty($mProduct[$key]) || $newPrice < $mProduct[$key]) {
+                    $mProduct[$key] = $newPrice;
+                }
             }
         }
 
