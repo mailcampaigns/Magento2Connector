@@ -211,6 +211,8 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         $mProduct['lowest_tier_price'] = $product->getTierPrice();
 
         // Set product price/special_price based on the lowest priced child.
+        $this->logger->addDebug(sprintf('Synchronizing a configurable product with SKU \'%s\'.', $product->getSku()));
+        $this->logger->addDebug(sprintf('Has %d child products.', (true == isset($childProductIds[0]) ? count($childProductIds[0]) : 0)));
         if ($mProduct['type_id'] === 'configurable'
             && true == isset($childProductIds[0])
             && count($childProductIds[0]) > 0
