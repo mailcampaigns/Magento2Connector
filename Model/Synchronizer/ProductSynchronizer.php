@@ -7,6 +7,7 @@ use InvalidArgumentException;
 use Magento\Catalog\Helper\Data as TaxHelper;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Eav\Model\Entity\Attribute\Source\Table;
@@ -209,48 +210,41 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         // get lowest tier price / staffel
         $mProduct['lowest_tier_price'] = $product->getTierPrice();
 
-        // als price niet bestaat bij configurable dan van child pakken
-        if ($mProduct['price'] == null && !empty($childProductIds) && $mProduct['type_id'] == 'configurable') {
+        // Set product price/special_price based on the lowest priced child.
+        if ($mProduct['type_id'] === 'configurable'
+            && true == isset($childProductIds[0])
+            && count($childProductIds[0]) > 0
+        ) {
+            $mProduct['price'] = null;
+            $mProduct['special_price'] = null;
+
             foreach ($childProductIds[0] as $childProductId) {
                 /** @var Product $childProduct */
                 $childProduct = $objectManager->create(Product::class)->load($childProductId);
 
-                $mProduct['price'] = $this->taxHelper->getTaxPrice(
-                    $childProduct,
-                    $childProduct->getFinalPrice(),
-                    true,
-                    null,
-                    null,
-                    null,
-                    $storeId,
-                    null,
-                    true
-                );
+                if ($childProduct->getStatus() != Status::STATUS_ENABLED) {
+                    continue;
+                }
 
-                break;
-            }
-        }
+                $prices = [
+                    'price' => 'getPrice',
+                    'special_price' => 'getSpecialPrice'
+                ];
 
-        // als special_price niet bestaat bij configurable dan van child pakken
-        if ($mProduct['special_price'] == null && !empty($childProductIds)
-            && $mProduct['type_id'] == 'configurable') {
-            foreach ($childProductIds[0] as $childProductId) {
-                /** @var Product $childProduct */
-                $childProduct = $objectManager->create(Product::class)->load($childProductId);
-
-                $specialPriceChild = $this->taxHelper->getTaxPrice(
-                    $childProduct,
-                    $childProduct->getSpecialPrice(),
-                    true,
-                    null,
-                    null,
-                    null,
-                    $storeId,
-                    null,
-                    true
-                );
-
-                $mProduct['special_price'] = $specialPriceChild > 0 ? $specialPriceChild : null;
+                foreach ($prices as $key => $method) {
+                    // Only overwrite by the first enabled child product.
+                    $mProduct[$key] = $this->taxHelper->getTaxPrice(
+                        $childProduct,
+                        $childProduct->{$method}(),
+                        true,
+                        null,
+                        null,
+                        null,
+                        $storeId,
+                        null,
+                        true
+                    );
+                }
 
                 break;
             }
