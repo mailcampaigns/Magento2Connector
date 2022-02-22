@@ -232,8 +232,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                 ];
 
                 foreach ($prices as $key => $method) {
-                    // Only overwrite by the first enabled child product.
-                    $mProduct[$key] = $this->taxHelper->getTaxPrice(
+                    $newPrice = $this->taxHelper->getTaxPrice(
                         $childProduct,
                         $childProduct->{$method}(),
                         true,
@@ -244,9 +243,11 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                         null,
                         true
                     );
-                }
 
-                break;
+                    if ($mProduct[$key] === null || $mProduct[$key] > $newPrice) {
+                        $mProduct[$key] = $newPrice;
+                    }
+                }
             }
         }
 
