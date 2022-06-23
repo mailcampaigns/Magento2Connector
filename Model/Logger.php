@@ -44,7 +44,7 @@ class Logger extends Monolog
     /**
      * @inheritDoc
      */
-    public function addRecord($level, $message, array $context = [])
+    public function addRecord(int $level, string $message, array $context = []) : bool
     {
         if (!$this->cnfLoggingEnabled || $this->cnfLoggingLevel <= 0) {
             return false;
