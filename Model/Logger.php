@@ -7,6 +7,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Logger\Monolog;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Monolog\DateTimeImmutable;
 
 class Logger extends Monolog
 {
@@ -44,7 +45,7 @@ class Logger extends Monolog
     /**
      * @inheritDoc
      */
-    public function addRecord(int $level, string $message, array $context = [], ?\Monolog\DateTimeImmutable $datetime = null) : bool
+    public function addRecord(int $level, string $message, array $context = [], DateTimeImmutable $datetime = null) : bool
     {
         if (!$this->cnfLoggingEnabled || $this->cnfLoggingLevel <= 0) {
             return false;
