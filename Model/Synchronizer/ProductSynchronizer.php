@@ -205,7 +205,35 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             true
         );
 
+        // Get Base Price Incl Tax
+        $basePrice = $this->taxHelper->getTaxPrice(
+            $product,
+            $mProduct['base_price'],
+            true,
+            null,
+            null,
+            null,
+            $storeId,
+            null,
+            true
+        );
+
+        // Get Base Special Price Incl Tax
+        $baseSpecialPrice = $this->taxHelper->getTaxPrice(
+            $product,
+            $mProduct['base_special_price'],
+            true,
+            null,
+            null,
+            null,
+            $storeId,
+            null,
+            true
+        );
+
         $mProduct['special_price'] = $specialPrice > 0 ? $specialPrice : null;
+        $mProduct['base_price'] = $basePrice > 0 ? $basePrice : null;
+        $mProduct['base_special_price'] = $baseSpecialPrice > 0 ? $baseSpecialPrice : null;
 
         // get lowest tier price / staffel
         $mProduct['lowest_tier_price'] = $product->getTierPrice();
@@ -217,6 +245,8 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         ) {
             $mProduct['price'] = null;
             $mProduct['special_price'] = null;
+            $mProduct['base_price'] = null;
+            $mProduct['base_special_price'] = null;
 
             foreach ($childProductIds[0] as $childProductId) {
                 /** @var Product $childProduct */
@@ -228,7 +258,9 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
 
                 $prices = [
                     'price' => 'getPrice',
-                    'special_price' => 'getSpecialPrice'
+                    'special_price' => 'getSpecialPrice',
+                    'base_price' => 'getBasePrice',
+                    'base_special_price' => 'getBaseSpecialPrice'
                 ];
 
                 foreach ($prices as $key => $method) {
