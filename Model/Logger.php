@@ -9,7 +9,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Monolog\DateTimeImmutable;
 
-class Logger extends Monolog
+class Logger
 {
     /**
      * @var bool
@@ -21,6 +21,11 @@ class Logger extends Monolog
      */
     protected $cnfLoggingLevel;
 
+    /**
+     * @var Monolog
+     */
+    protected $monologger;
+
     public function __construct(
         $name,
         StoreManagerInterface $storeManager,
@@ -28,7 +33,7 @@ class Logger extends Monolog
         array $handlers = [],
         array $processors = []
     ) {
-        parent::__construct($name, $handlers, $processors);
+        $this->monologger = new Monolog($name, $handlers, $processors);
 
         $this->cnfLoggingEnabled = $config->isSetFlag(
             'mailcampaigns_api/development/logging_enabled',
@@ -51,7 +56,7 @@ class Logger extends Monolog
             return false;
         }
 
-        return $level >= $this->cnfLoggingLevel ? parent::addRecord(
+        return $level >= $this->cnfLoggingLevel ? $this->monologger->addRecord(
             $level,
             $message,
             $context
@@ -66,7 +71,7 @@ class Logger extends Monolog
      */
     public function addException(Exception $e): self
     {
-        $this->addError('Caught exception: ' . $e->getMessage(), [
+        $this->monologger->addError('Caught exception: ' . $e->getMessage(), [
             'file' => $e->getFile(),
             'line' => $e->getLine(),
             'code' => $e->getCode(),
