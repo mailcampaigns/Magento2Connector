@@ -218,8 +218,9 @@ class OrderSynchronizer extends AbstractSynchronizer implements OrderSynchronize
         /** @var Order\Item $item */
         foreach ($items as $item) {
             $itemData = $item->toArray(['order_id', 'product_id', 'qty_ordered',
-                'price', 'name', 'sku']);
+                'price', 'base_price', 'name', 'sku']);
             $itemData['price'] = $item->getPriceInclTax();
+            $itemData['base_price'] = $item->getBasePriceInclTax();
             $itemData['categories'] = $item->getProduct() ? $item->getProduct()->getCategoryIds() : [];
 
             /** @codingStandardsIgnoreStart */
