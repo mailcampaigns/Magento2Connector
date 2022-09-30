@@ -66,7 +66,9 @@ class LogRotationCron extends AbstractCron
 
         $hFileSize = $this->logHelper->humanizeSize($fileSize);
 
-        $this->logger->addDebug('Current log file size: ' . $hFileSize);
+        if (method_exists($this->logger, 'addDebug')) {
+            $this->logger->addDebug('Current log file size: ' . $hFileSize);
+        }
 
         $log = $this->logReader->read($this->startRangeDt->format('Y-m-d H:i:s'))[0];
         $cntDiff = $log['total_line_count'] - $log['line_count'];
@@ -79,7 +81,9 @@ class LogRotationCron extends AbstractCron
 
             // Log the truncation event.
             $msg = 'Truncated log, number of entries removed: ' . $cntDiff;
-            $this->logger->addDebug($msg);
+            if (method_exists($this->logger, 'addDebug')) {
+                $this->logger->addDebug($msg);
+            }
         }
     }
 }

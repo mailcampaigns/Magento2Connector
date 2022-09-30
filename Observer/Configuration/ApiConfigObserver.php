@@ -19,7 +19,9 @@ class ApiConfigObserver extends AbstractObserver
             $this->apiHelper->saveSettings($storeId, $websiteId);
         } catch (ApiCredentialsNotSetException $e) {
             // Just add a debug message to the filelog.
-            $this->logger->addDebug($e->getMessage());
+            if (method_exists($this->logger, 'addDebug')) {
+                $this->logger->addDebug($e->getMessage());
+            }
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);

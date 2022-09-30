@@ -97,7 +97,9 @@ class StatusCron extends AbstractCron
             }
         } catch (ApiCredentialsNotSetException $e) {
             // Just add a debug message to the filelog.
-            $this->logger->addDebug($e->getMessage());
+            if (method_exists($this->logger, 'addDebug')) {
+                $this->logger->addDebug($e->getMessage());
+            }
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);
@@ -120,7 +122,9 @@ class StatusCron extends AbstractCron
             $storeId
         );
 
-        $this->logger->addDebug($logMsg, ['update_data' => $update]);
+        if (method_exists($this->logger, 'addDebug')) {
+            $this->logger->addDebug($logMsg, ['update_data' => $update]);
+        }
 
         return $this;
     }

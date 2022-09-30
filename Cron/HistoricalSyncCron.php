@@ -94,10 +94,14 @@ class HistoricalSyncCron extends AbstractCron
                 $pages = $this->apiPageHelper->getPages();
             } while (!$this->hasTimedOut() && $pages->count() > 0);
 
-            $this->logger->addDebug('Historical sync cron stopping..');
+            if (method_exists($this->logger, 'addDebug')) {
+                $this->logger->addDebug('Historical sync cron stopping..');
+            }
         } catch (ApiCredentialsNotSetException $e) {
             // Just add a debug message to the filelog.
-            $this->logger->addDebug($e->getMessage());
+            if (method_exists($this->logger, 'addDebug')) {
+                $this->logger->addDebug($e->getMessage());
+            }
         } catch (Exception $e) {
             // Log and re-throw the exception.
             $this->logger->addException($e);
@@ -128,13 +132,15 @@ class HistoricalSyncCron extends AbstractCron
 
         $timedOut = $now > ($this->startTime + self::$timeoutInterval);
 
-        $this->logger->addDebug('Cron timeout reached: ' . ($timedOut ? 'yes' : 'no'), [
-            'timeout_interval' => self::$timeoutInterval,
-            'start_time' => $this->startTime,
-            'timeout_at' => $this->startTime + self::$timeoutInterval,
-            'time_left' => $this->startTime + self::$timeoutInterval - $now,
-            'current_time' => $now,
-        ]);
+        if (method_exists($this->logger, 'addDebug')) {
+            $this->logger->addDebug('Cron timeout reached: ' . ($timedOut ? 'yes' : 'no'), [
+                'timeout_interval' => self::$timeoutInterval,
+                'start_time' => $this->startTime,
+                'timeout_at' => $this->startTime + self::$timeoutInterval,
+                'time_left' => $this->startTime + self::$timeoutInterval - $now,
+                'current_time' => $now,
+            ]);
+        }
 
         return $timedOut;
     }
