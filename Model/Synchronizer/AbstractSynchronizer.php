@@ -56,7 +56,9 @@ abstract class AbstractSynchronizer implements SynchronizerInterface
             $page->getTotal()
         );
 
-        $this->logger->addDebug($logMsg);
+        if (method_exists($this->logger, 'addDebug')) {
+            $this->logger->addDebug($logMsg);
+        }
 
         return $this;
     }

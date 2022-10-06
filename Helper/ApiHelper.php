@@ -103,7 +103,9 @@ class ApiHelper extends AbstractHelper implements ApiHelperInterface
             return $this;
         }
 
-        $this->_logger->info(sprintf('Processing %d queued Api calls..', $queueCnt));
+        if (method_exists($this->_logger, 'info')) {
+            $this->_logger->info(sprintf('Processing %d queued Api calls..', $queueCnt));
+        }
 
         /** @var ApiQueue $queuedCall */
         foreach ($queuedCalls as $queuedCall) {
@@ -111,18 +113,22 @@ class ApiHelper extends AbstractHelper implements ApiHelperInterface
 
             // Detect timeout.
             if ((time() - $startTime) > self::$queueTimeout) {
-                $this->_logger->info(sprintf(
-                    'Timeout reached for processing queue, '
-                    . 'stopping (successfully processed %d of %d queued Api calls)..',
-                    $processedCnt,
-                    $queueCnt
-                ));
+                if (method_exists($this->_logger, 'info')) {
+                    $this->_logger->info(sprintf(
+                        'Timeout reached for processing queue, '
+                        . 'stopping (successfully processed %d of %d queued Api calls)..',
+                        $processedCnt,
+                        $queueCnt
+                    ));
+                }
 
                 return $this;
             }
         }
 
-        $this->_logger->info('Finished processing all queued Api calls.');
+        if (method_exists($this->_logger, 'info')) {
+            $this->_logger->info('Finished processing all queued Api calls.');
+        }
 
         return $this;
     }

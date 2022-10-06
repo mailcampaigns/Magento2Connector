@@ -117,9 +117,11 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
 
         $logMsg = sprintf('Api called `%s`.', $function);
 
-        $this->_logger->addDebug($logMsg, [
-            'content' => $contentJson
-        ]);
+        if (method_exists($this->_logger, 'addDebug')) {
+            $this->_logger->addDebug($logMsg, [
+                'content' => $contentJson
+            ]);
+        }
 
         // Execute the Api call. Suppress possible errors, they will be logged when
         // result is false. This is to prevent any webshop processes from possibly
@@ -133,14 +135,17 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
         if (!$res || !is_string($res)) {
             $failed = true;
             $resDecoded = [];
-            $this->_logger->addError('Api call failed (reason unknown).');
+            if (method_exists($this->_logger, 'addError')) {
+                $this->_logger->addError('Api call failed (reason unknown).');
+            }
         } else {
             $resDecoded = json_decode($res, true);
 
             if (isset($errResponse['Error'])) {
                 $failed = true;
 
-                $this->_logger->addError(
+                if (method_exists($this->_logger, 'addError')) {
+                    $this->_logger->addError(
                     sprintf('Api call failed with error message: `%s`.', $resDecoded->Error)
                 );
             }
@@ -206,10 +211,12 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
             return $this;
         }
 
-        $this->_logger->addDebug(
-            'Successfully processed queued call, removing from queue..',
-            ['stream_data' => $apiQueue->getStreamData()]
-        );
+        if (method_exists($this->_logger, 'addDebug')) {
+            $this->_logger->addDebug(
+                'Successfully processed queued call, removing from queue..',
+                ['stream_data' => $apiQueue->getStreamData()]
+            );
+        }
 
         // The call can be removed from the queue now.
         $this->queueHelper->removeFromQueue($apiQueue);

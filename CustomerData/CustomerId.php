@@ -42,14 +42,18 @@ class CustomerId implements SectionSourceInterface
             $session = $this->getCustomerSession();
 
             if (!$session instanceof Session) {
-                $this->logger->debug('Customer session not found.');
+                if (method_exists($this->logger, 'debug')) {
+                    $this->logger->debug('Customer session not found.');
+                }
                 return [];
             }
 
             $customerId = $session->getCustomerId();
 
             if (null === $customerId) {
-                $this->logger->debug('Customer id not set in session.');
+                if (method_exists($this->logger, 'debug')) {
+                    $this->logger->debug('Customer id not set in session.');
+                }
                 return [];
             }
         } catch (\Exception $e) {
@@ -58,10 +62,12 @@ class CustomerId implements SectionSourceInterface
             throw $e;
         }
 
-        $this->logger->debug(sprintf(
-            'Loaded customer id (%d) from session.',
-            $customerId
-        ));
+        if (method_exists($this->logger, 'debug')) {
+            $this->logger->debug(sprintf(
+                'Loaded customer id (%d) from session.',
+                $customerId
+            ));
+        }
 
         return [
             'customerId' => $customerId
