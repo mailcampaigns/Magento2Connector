@@ -146,8 +146,9 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
 
                 if (method_exists($this->_logger, 'addError')) {
                     $this->_logger->addError(
-                    sprintf('Api call failed with error message: `%s`.', $resDecoded->Error)
-                );
+                        sprintf('Api call failed with error message: `%s`.', $resDecoded->Error)
+                    );
+                }
             }
         }
 
