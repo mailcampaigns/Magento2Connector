@@ -18,6 +18,8 @@ use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManagerInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
 use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
@@ -38,17 +40,31 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
      */
     protected $synchronizerHelper;
 
+    /**
+     * @var CurrencyFactory
+     */
+    protected $currencyFactory;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
+
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
         LogHelperInterface $logHelper,
         TaxHelper $taxHelper,
-        ProductSynchronizerHelperInterface $synchronizerHelper
+        ProductSynchronizerHelperInterface $synchronizerHelper,
+        CurrencyFactory $currencyFactory,
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($scopeConfig, $apiHelper, $logHelper);
 
         $this->taxHelper = $taxHelper;
         $this->synchronizerHelper = $synchronizerHelper;
+        $this->currencyFactory = $currencyFactory;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -179,10 +195,18 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             }
         }
 
+        /** @var Store $store */
+        $store = $this->storeManager->getStore($storeId);
+
+        $rate = $this->currencyFactory
+            ->create()
+            ->load('EUR') // Note: Perhaps we need to get this value from the default store view.
+            ->toAnyRate($store->getCurrentCurrencyCode());
+
         // Get Price Incl Tax
         $mProduct['price'] = $this->taxHelper->getTaxPrice(
             $product,
-            $mProduct['price'],
+            ($mProduct['price'] * $rate),
             true,
             null,
             null,
@@ -195,33 +219,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         // Get Special Price Incl Tax
         $specialPrice = $this->taxHelper->getTaxPrice(
             $product,
-            $mProduct['special_price'],
-            true,
-            null,
-            null,
-            null,
-            $storeId,
-            null,
-            true
-        );
-
-        // Get Base Price Incl Tax
-        $basePrice = $this->taxHelper->getTaxPrice(
-            $product,
-            $mProduct['base_price'],
-            true,
-            null,
-            null,
-            null,
-            $storeId,
-            null,
-            true
-        );
-
-        // Get Base Special Price Incl Tax
-        $baseSpecialPrice = $this->taxHelper->getTaxPrice(
-            $product,
-            $mProduct['base_special_price'],
+            ($mProduct['special_price'] * $rate),
             true,
             null,
             null,
@@ -232,8 +230,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         );
 
         $mProduct['special_price'] = $specialPrice > 0 ? $specialPrice : null;
-        $mProduct['base_price'] = $basePrice > 0 ? $basePrice : null;
-        $mProduct['base_special_price'] = $baseSpecialPrice > 0 ? $baseSpecialPrice : null;
 
         // get lowest tier price / staffel
         $mProduct['lowest_tier_price'] = $product->getTierPrice();
@@ -245,8 +241,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
         ) {
             $mProduct['price'] = null;
             $mProduct['special_price'] = null;
-            $mProduct['base_price'] = null;
-            $mProduct['base_special_price'] = null;
 
             foreach ($childProductIds[0] as $childProductId) {
                 /** @var Product $childProduct */
@@ -259,14 +253,12 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
                 $prices = [
                     'price' => 'getPrice',
                     'special_price' => 'getSpecialPrice',
-                    'base_price' => 'getBasePrice',
-                    'base_special_price' => 'getBaseSpecialPrice'
                 ];
 
                 foreach ($prices as $key => $method) {
                     $newPrice = $this->taxHelper->getTaxPrice(
                         $childProduct,
-                        $childProduct->{$method}(),
+                        ($childProduct->{$method}() * $rate),
                         true,
                         null,
                         null,
