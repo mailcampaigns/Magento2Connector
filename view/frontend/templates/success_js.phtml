@@ -1,57 +1,34 @@
 <?php
 
-use Magento\Customer\Model\Session;
-use Magento\Framework\App\Config;
-use Magento\Framework\App\ObjectManager;
-use Magento\Sales\Model\Order;
-use Magento\Store\Model\ScopeInterface;
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$helper = $objectManager->get('\MailCampaigns\Connector\Helper\Data');
 
-$objectManager = ObjectManager::getInstance();
+$mailcampaigns_tracking_code_order_success = $helper->getScopeConfig('mailcampaignstracking/general/tracking_code_order_success');
 
-/** @var Config $config */
-$config = $objectManager->get(Config::class);
+$api_key = $helper->getScopeConfig('mailcampaignsapi/general/api_key');
+$session = $objectManager->create('\Magento\Customer\Model\Session')->getData();
 
-// Get configuration.
-$trackingCodeEnabled = $config->getValue('mailcampaigns_tracking/general/tracking_code_order_success',
-        ScopeInterface::SCOPE_STORE) === '1';
-$apiKey = $config->getValue('mailcampaigns_api/general/api_key', ScopeInterface::SCOPE_STORE);
+if ($mailcampaigns_tracking_code_order_success == 1) {
+    $session = $objectManager->create('\Magento\Checkout\Model\Session')->getData();
+    $last_real_order_id = $objectManager->create('\Magento\Checkout\Model\Session')->getLastRealOrderId();
+    $order_data = $objectManager->create('\Magento\Sales\Model\Order')->loadByIncrementId($last_real_order_id)->getData();
 
-// Get session.
-$session = $objectManager->create(Session::class);
+    if (isset($order_data["entity_id"]) && (int)$order_data["entity_id"] > 0) {
+        $order_id = $order_data["entity_id"];
+        $quote_id = $order_data["quote_id"];
+        $store_id = $order_data["store_id"];
+        $customer_id = $order_data["customer_id"];
 
-if ($trackingCodeEnabled) {
-    $order = $objectManager->create(Order::class);
-    $orderData = $order->loadByIncrementId($session->getLastRealOrderId())->getData();
-    $orderId = isset($orderData['entity_id']) ? (int)$orderData['entity_id'] : 0;
-
-    if ($orderId > 0) {
-        // Build post data.
-        $postData = [
-            'store_id' => $orderData['store_id'],
-            'customer_id' => $orderData['customer_id'],
+        // build post data
+        $postdata = array(
+            'store_id' => $store_id,
+            'customer_id' => $customer_id,
             'visitor_id' => 0,
-            'quote_id' => $orderData['quote_id'],
-            'order_id' => $orderId
-        ];
+            'quote_id' => $quote_id,
+            'order_id' => $order_id
+        );
 
-        /** @codingStandardsIgnoreStart */
-        print '
-<script>
-    (function (d, t) {
-        var _mctc = {
-            "onload": function () {
-                this.mctrkDocumentLoad();
-            }
-        };
-
-        var s = d.getElementsByTagName(t)[0], js = d.createElement(t);
-
-        js.async = true;
-        js.src = "https://interface.mailcampaigns.nl/w/' . $apiKey . '/' . base64_encode(json_encode($postData)) . '";
-        s.parentNode.insertBefore(js, s);
-    })(document, "script");
-</script>
-';
-        /** @codingStandardsIgnoreEnd */
+        // call tracking javascript code
+        print '<script type="text/javascript" src="//interface.mailcampaigns.nl/w/' . $api_key . '/' . base64_encode(json_encode($postdata)) . '"></script>';
     }
 }

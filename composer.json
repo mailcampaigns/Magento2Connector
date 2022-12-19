@@ -1,22 +1,20 @@
 {
-    "name": "mailcampaigns/magento2-connector",
-    "description": "MailCampaigns Magento 2 Connector",
-    "type": "magento2-module",
-    "version": "2.2.0-RC23",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
-    ],
-    "require": {
-        "php": "^7.4|^8.1",
-        "ext-json": "*"
+  "name": "mailcampaigns/magento2connector",
+  "license": "proprietary",
+  "description": "Magento 2 MailCampaigns Connector",
+  "type": "magento2-module",
+  "version": "2.1.5",
+  "minimum-stability": "alpha",
+  "require": {
+    "php": "~5.6.5|>=7.0.0",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "MailCampaigns\\Connector\\": ""
     },
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "MailCampaigns\\Magento2Connector\\": ""
-        }
-    }
+    "files": [
+      "registration.php"
+    ]
+  }
 }
