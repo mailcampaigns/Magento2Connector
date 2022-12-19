@@ -27,7 +27,7 @@ class Logger
     protected $monologger;
 
     public function __construct(
-        $name,
+        string $name,
         StoreManagerInterface $storeManager,
         ScopeConfigInterface $config,
         array $handlers = [],
