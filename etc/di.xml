@@ -7,6 +7,7 @@
     </virtualType>
     <type name="MailCampaigns\Magento2Connector\Model\Logger">
         <arguments>
+            <argument name="name" xsi:type="string">McConnector</argument>
             <argument name="handlers" xsi:type="array">
                 <item name="system" xsi:type="object">MailCampaigns\Magento2Connector\Model\VirtualLoggerHandler</item>
             </argument>
