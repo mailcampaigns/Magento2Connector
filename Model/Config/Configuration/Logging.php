@@ -12,19 +12,10 @@ class Logging implements OptionSourceInterface
      */
     public function toOptionArray()
     {
-        if (method_exists( Logger::getLevels(), 'getLevels')) {
-            $levels = Logger::getLevels();
-        }
+        $levels = Logger::getLevels();
         $options = [];
 
         foreach ($levels as $key => $value) {
-            // Do not include levels more severe than errors in this choice list.
-            if (defined(Logger::ERROR)) {
-                if ($value > Logger::ERROR) {
-                    continue;
-                }
-            }
-
             $options[] = [
                 'value' => $value,
                 'label' => ucfirst(strtolower($key))

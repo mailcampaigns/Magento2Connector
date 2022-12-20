@@ -97,4 +97,9 @@ class Logger
 
         return $trace;
     }
+
+    private static function getLevels()
+    {
+        return Monolog::getLevels();
+    }
 }
