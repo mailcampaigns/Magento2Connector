@@ -81,6 +81,11 @@ class Logger
         return $this;
     }
 
+    public static function getLevels()
+    {
+        return Monolog::getLevels();
+    }
+
     /**
      * Limit the number of steps in the trace.
      *
@@ -96,10 +101,5 @@ class Logger
         }
 
         return $trace;
-    }
-
-    private static function getLevels()
-    {
-        return Monolog::getLevels();
     }
 }
