@@ -15,11 +15,13 @@ class Logging implements OptionSourceInterface
         $levels = Logger::getLevels();
         $options = [];
 
-        foreach ($levels as $key => $value) {
-            $options[] = [
-                'value' => $value,
-                'label' => ucfirst(strtolower($key))
-            ];
+        if(false === empty($levels)){
+            foreach ($levels as $key => $value) {
+                $options[] = [
+                    'value' => $value,
+                    'label' => ucfirst(strtolower($key))
+                ];
+            }
         }
 
         return $options;

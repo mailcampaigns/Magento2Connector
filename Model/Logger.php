@@ -83,7 +83,10 @@ class Logger
 
     public static function getLevels()
     {
-        return Monolog::getLevels();
+        if(method_exists(Monolog::class, 'getLevels')){
+            return Monolog::getLevels();
+        }
+        return [];
     }
 
     /**
