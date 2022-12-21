@@ -3,11 +3,9 @@
 namespace MailCampaigns\Magento2Connector\Model\Synchronizer;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\Logger\Monolog;
 use Magento\Framework\Model\AbstractModel;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\SynchronizerInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
@@ -23,19 +21,12 @@ abstract class AbstractSynchronizer implements SynchronizerInterface
      */
     protected $apiHelper;
 
-    /**
-     * @var Monolog
-     */
-    protected $logger;
-
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper
+        ApiHelperInterface $apiHelper
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->apiHelper = $apiHelper;
-        $this->logger = $logHelper->getLogger();
     }
 
     /**
@@ -48,18 +39,6 @@ abstract class AbstractSynchronizer implements SynchronizerInterface
      */
     public function historicalSync(ApiPageInterface $page): SynchronizerInterface
     {
-        // Add an entry to the log.
-        $logMsg = sprintf(
-            'Starting bulk import for `%s` [page %d/%d]',
-            $page->getCollection(),
-            $page->getPage(),
-            $page->getTotal()
-        );
-
-        if (method_exists($this->logger, 'addDebug')) {
-            $this->logger->addDebug($logMsg);
-        }
-
         return $this;
     }
 

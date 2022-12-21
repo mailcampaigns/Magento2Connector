@@ -8,7 +8,6 @@ use Magento\Framework\Event\Observer as EventObserver;
 use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\OrderSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
@@ -22,10 +21,9 @@ class OrderObserver extends AbstractObserver
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
         OrderSynchronizerInterface $orderSynchronizer
     ) {
-        parent::__construct($scopeConfig, $apiHelper, $logHelper);
+        parent::__construct($scopeConfig, $apiHelper);
         $this->orderSynchronizer = $orderSynchronizer;
     }
 
@@ -47,13 +45,7 @@ class OrderObserver extends AbstractObserver
 
             $this->orderSynchronizer->synchronize($order, $storeId, true);
         } catch (ApiCredentialsNotSetException $e) {
-            // Just add a debug message to the filelog.
-            if (method_exists($this->logger, 'addDebug')) {
-                $this->logger->addDebug($e->getMessage());
-            }
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
             throw $e;
         }
     }

@@ -6,7 +6,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Event\Observer as EventObserver;
 use Magento\Framework\Message;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+
 use MailCampaigns\Magento2Connector\Observer\AbstractObserver;
 
 abstract class AbstractHistoricalSyncConfigObserver extends AbstractObserver
@@ -19,10 +19,10 @@ abstract class AbstractHistoricalSyncConfigObserver extends AbstractObserver
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
+
         Message\ManagerInterface $messageManager
     ) {
-        parent::__construct($scopeConfig, $apiHelper, $logHelper);
+        parent::__construct($scopeConfig, $apiHelper);
         $this->messageManager = $messageManager;
     }
 

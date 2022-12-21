@@ -13,7 +13,7 @@ use Magento\Sales\Model\ResourceModel\Order\CollectionFactory;
 use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+
 use MailCampaigns\Magento2Connector\Api\OrderSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\SynchronizerInterface;
 
@@ -32,11 +32,11 @@ class OrderSynchronizer extends AbstractSynchronizer implements OrderSynchronize
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
+
         CategoryRepositoryInterface $categoryRepo,
         CollectionFactory $orderCollectionFactory
     ) {
-        parent::__construct($scopeConfig, $apiHelper, $logHelper);
+        parent::__construct($scopeConfig, $apiHelper);
         $this->categoryRepo = $categoryRepo;
         $this->orderCollectionFactory = $orderCollectionFactory;
     }

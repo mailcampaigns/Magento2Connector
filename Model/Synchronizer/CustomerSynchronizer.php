@@ -12,7 +12,7 @@ use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
 use MailCampaigns\Magento2Connector\Api\CustomerSynchronizerInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+
 use MailCampaigns\Magento2Connector\Api\SynchronizerInterface;
 
 class CustomerSynchronizer extends AbstractSynchronizer implements CustomerSynchronizerInterface
@@ -25,10 +25,10 @@ class CustomerSynchronizer extends AbstractSynchronizer implements CustomerSynch
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
+
         CollectionFactory $collectionFactory
     ) {
-        parent::__construct($scopeConfig, $apiHelper, $logHelper);
+        parent::__construct($scopeConfig, $apiHelper);
         $this->collectionFactory = $collectionFactory;
     }
 

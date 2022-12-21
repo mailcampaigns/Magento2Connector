@@ -4,7 +4,7 @@ namespace MailCampaigns\Magento2Connector\Model\ResourceModel;
 
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\Model\ResourceModel\Db\Context;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+
 use MailCampaigns\Magento2Connector\Model\ResourceModel;
 
 class ApiQueue extends AbstractDb
@@ -24,13 +24,11 @@ class ApiQueue extends AbstractDb
      */
     public function __construct(
         Context $context,
-        LogHelperInterface $logHelper,
         ResourceModel\ApiQueue\CollectionFactory $collectionFactory,
         ResourceModel\ApiStatus $apiStatusResourceModel,
         $connectionName = null
     ) {
         parent::__construct($context, $connectionName);
-        $this->_logger = $logHelper->getLogger();
         $this->collectionFactory = $collectionFactory;
         $this->apiStatusResourceModel = $apiStatusResourceModel;
     }

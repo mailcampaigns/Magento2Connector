@@ -8,7 +8,6 @@ use Magento\Framework\Data\Collection;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\OrderSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 use MailCampaigns\Magento2Connector\Model\ApiStatus;
@@ -27,11 +26,10 @@ class OrderCron extends AbstractCron
 
     public function __construct(
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
         OrderSynchronizerInterface $synchronizer,
         CollectionFactory $collectionFactory
     ) {
-        parent::__construct($apiHelper, $logHelper);
+        parent::__construct($apiHelper);
         $this->synchronizer = $synchronizer;
         $this->collectionFactory = $collectionFactory;
     }
@@ -57,13 +55,7 @@ class OrderCron extends AbstractCron
                 $this->synchronizer->synchronize($order, $order->getStoreId());
             }
         } catch (ApiCredentialsNotSetException $e) {
-            // Just add a debug message to the filelog.
-            if (method_exists($this->logger, 'addDebug')) {
-                $this->logger->addDebug($e->getMessage());
-            }
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
             throw $e;
         }
     }

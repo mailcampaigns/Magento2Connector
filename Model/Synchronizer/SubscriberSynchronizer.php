@@ -10,7 +10,7 @@ use Magento\Newsletter\Model\Subscriber;
 use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+
 use MailCampaigns\Magento2Connector\Api\SubscriberSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\SynchronizerInterface;
 
@@ -24,10 +24,10 @@ class SubscriberSynchronizer extends AbstractSynchronizer implements SubscriberS
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
+
         CollectionFactory $collectionFactory
     ) {
-        parent::__construct($scopeConfig, $apiHelper, $logHelper);
+        parent::__construct($scopeConfig, $apiHelper);
         $this->collectionFactory = $collectionFactory;
     }
 

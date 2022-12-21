@@ -7,13 +7,11 @@ use LogicException;
 use Magento\Cron\Model\Schedule;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\CustomerSynchronizerInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\OrderSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\SubscriberSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 use MailCampaigns\Magento2Connector\Model\ApiPage;
-use MailCampaigns\Magento2Connector\Model\Logger;
 
 class HistoricalSyncCron extends AbstractCron
 {
@@ -28,24 +26,18 @@ class HistoricalSyncCron extends AbstractCron
     protected static $timeoutInterval = 55;
 
     /**
-     * @var Logger
-     */
-    protected $logger;
-
-    /**
      * @var array|CustomerSynchronizerInterface[]
      */
     protected $synchronizers;
 
     public function __construct(
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
         CustomerSynchronizerInterface $customerSynchronizer,
         SubscriberSynchronizerInterface $subscriberSynchronizer,
         ProductSynchronizerInterface $productSynchronizer,
         OrderSynchronizerInterface $orderSynchronizer
     ) {
-        parent::__construct($apiHelper, $logHelper);
+        parent::__construct($apiHelper);
 
         $this->synchronizers = [
             'customer/customer' => $customerSynchronizer,
@@ -93,18 +85,8 @@ class HistoricalSyncCron extends AbstractCron
 
                 $pages = $this->apiPageHelper->getPages();
             } while (!$this->hasTimedOut() && $pages->count() > 0);
-
-            if (method_exists($this->logger, 'addDebug')) {
-                $this->logger->addDebug('Historical sync cron stopping..');
-            }
         } catch (ApiCredentialsNotSetException $e) {
-            // Just add a debug message to the filelog.
-            if (method_exists($this->logger, 'addDebug')) {
-                $this->logger->addDebug($e->getMessage());
-            }
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
             throw $e;
         }
     }
@@ -131,16 +113,6 @@ class HistoricalSyncCron extends AbstractCron
         $now = time();
 
         $timedOut = $now > ($this->startTime + self::$timeoutInterval);
-
-        if (method_exists($this->logger, 'addDebug')) {
-            $this->logger->addDebug('Cron timeout reached: ' . ($timedOut ? 'yes' : 'no'), [
-                'timeout_interval' => self::$timeoutInterval,
-                'start_time' => $this->startTime,
-                'timeout_at' => $this->startTime + self::$timeoutInterval,
-                'time_left' => $this->startTime + self::$timeoutInterval - $now,
-                'current_time' => $now,
-            ]);
-        }
 
         return $timedOut;
     }
