@@ -81,6 +81,14 @@ class Logger
         return $this;
     }
 
+    public static function getLevels()
+    {
+        if(method_exists(Monolog::class, 'getLevels')){
+            return Monolog::getLevels();
+        }
+        return [];
+    }
+
     /**
      * Limit the number of steps in the trace.
      *
