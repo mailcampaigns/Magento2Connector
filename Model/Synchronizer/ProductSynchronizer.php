@@ -200,7 +200,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
 
         $rate = $this->currencyFactory
             ->create()
-            ->load('EUR') // Note: Perhaps we need to get this value from the default store view.
+            ->load($store->getBaseCurrencyCode())
             ->toAnyRate($store->getCurrentCurrencyCode());
 
         // Get Price Incl Tax
