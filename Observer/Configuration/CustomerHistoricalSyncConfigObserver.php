@@ -9,7 +9,7 @@ use Magento\Framework\Event\Observer as EventObserver;
 use Magento\Framework\Message;
 use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
+
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
 class CustomerHistoricalSyncConfigObserver extends AbstractHistoricalSyncConfigObserver
@@ -22,11 +22,11 @@ class CustomerHistoricalSyncConfigObserver extends AbstractHistoricalSyncConfigO
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
+
         CollectionFactory $collectionFactory,
         Message\ManagerInterface $messageManager
     ) {
-        parent::__construct($scopeConfig, $apiHelper, $logHelper, $messageManager);
+        parent::__construct($scopeConfig, $apiHelper, $messageManager);
         $this->collectionFactory = $collectionFactory;
     }
 
@@ -56,13 +56,9 @@ class CustomerHistoricalSyncConfigObserver extends AbstractHistoricalSyncConfigO
 
             $this->messageManager->addNoticeMessage('De bulk import van klant gegevens wordt gestart.');
         } catch (ApiCredentialsNotSetException $e) {
-            // Just add a debug message to the filelog.
-            if (method_exists($this->logger, 'addDebug')) {
-                $this->logger->addDebug($e->getMessage());
-            }
+
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
+
             throw $e;
         }
     }

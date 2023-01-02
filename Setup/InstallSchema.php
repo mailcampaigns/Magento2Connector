@@ -7,22 +7,10 @@ use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Setup\InstallSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
-use MailCampaigns\Magento2Connector\Model\Logger;
 use Zend_Db_Exception;
 
 class InstallSchema implements InstallSchemaInterface
 {
-    /**
-     * @var Logger
-     */
-    protected $logger;
-
-    public function __construct(LogHelperInterface $logHelper)
-    {
-        $this->logger = $logHelper->getLogger();
-    }
-
     /**
      * @inheritDoc
      */
@@ -39,8 +27,7 @@ class InstallSchema implements InstallSchemaInterface
 
             $installer->endSetup();
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
+
             throw $e;
         }
     }

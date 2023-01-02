@@ -11,7 +11,6 @@ use Magento\Store\Model\StoreManagerInterface;
 use MailCampaigns\Magento2Connector\Api\ApiClientInterface;
 use MailCampaigns\Magento2Connector\Api\ApiQueueHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiQueueInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 
 /**
  * MailCampaigns Api Client.
@@ -51,12 +50,10 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
      */
     public function __construct(
         Context $context,
-        LogHelperInterface $logHelper,
         ApiQueueHelperInterface $queueHelper,
         StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
-        $this->_logger = $logHelper->getLogger();
         $this->queueHelper = $queueHelper;
         $this->storeManager = $storeManager;
     }
@@ -115,40 +112,22 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
             $options['http']['timeout'] = self::SHORT_TIMEOUT;
         }
 
-        $logMsg = sprintf('Api called `%s`.', $function);
-
-        if (method_exists($this->_logger, 'addDebug')) {
-            $this->_logger->addDebug($logMsg, [
-                'content' => $contentJson
-            ]);
-        }
-
-        // Execute the Api call. Suppress possible errors, they will be logged when
-        // result is false. This is to prevent any webshop processes from possibly
+        // Execute the Api call. Suppress possible errors to prevent any webshop processes from possibly
         // crashing on connection issues with our server.
         // @codingStandardsIgnoreStart
         $res = @file_get_contents(self::API_BASE_URI, false, stream_context_create($options));
         // @codingStandardsIgnoreEnd
 
-        // In case something went wrong, log the error and add the call
+        // In case something went wrong, add the call
         // to the queue to be tried again later on.
         if (!$res || !is_string($res)) {
             $failed = true;
             $resDecoded = [];
-            if (method_exists($this->_logger, 'addError')) {
-                $this->_logger->addError('Api call failed (reason unknown).');
-            }
         } else {
             $resDecoded = json_decode($res, true);
 
             if (isset($errResponse['Error'])) {
                 $failed = true;
-
-                if (method_exists($this->_logger, 'addError')) {
-                    $this->_logger->addError(
-                        sprintf('Api call failed with error message: `%s`.', $resDecoded->Error)
-                    );
-                }
             }
         }
 
@@ -205,18 +184,7 @@ class ApiClient extends AbstractHelper implements ApiClientInterface
             // again over and over.
             $this->queueHelper->save($apiQueue->setHasError(true));
 
-            // Log the error.
-            $message = sprintf('Failed to process queued call (%s).', $e->getMessage());
-            $this->_logger->error($message, ['stream_data' => $apiQueue->getStreamData()]);
-
             return $this;
-        }
-
-        if (method_exists($this->_logger, 'addDebug')) {
-            $this->_logger->addDebug(
-                'Successfully processed queued call, removing from queue..',
-                ['stream_data' => $apiQueue->getStreamData()]
-            );
         }
 
         // The call can be removed from the queue now.

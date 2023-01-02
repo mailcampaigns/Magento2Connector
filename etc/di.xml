@@ -1,31 +1,11 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <virtualType name="MailCampaigns\Magento2Connector\Model\VirtualLoggerHandler" type="Magento\Framework\Logger\Handler\Base">
-        <arguments>
-            <argument name="fileName" xsi:type="string">/var/log/mailcampaigns.log</argument>
-        </arguments>
-    </virtualType>
-    <type name="MailCampaigns\Magento2Connector\Model\Logger">
-        <arguments>
-            <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">MailCampaigns\Magento2Connector\Model\VirtualLoggerHandler</item>
-            </argument>
-        </arguments>
-    </type>
-    <type name="MailCampaigns\Magento2Connector\Helper\LoggerProvider">
-        <arguments>
-            <argument name="logger" xsi:type="object">MailCampaigns\Magento2Connector\Model\Logger</argument>
-        </arguments>
-    </type>
     <preference for="MailCampaigns\Magento2Connector\Api\ApiClientInterface" type="MailCampaigns\Magento2Connector\Helper\ApiClient"/>
     <preference for="MailCampaigns\Magento2Connector\Api\ApiHelperInterface" type="MailCampaigns\Magento2Connector\Helper\ApiHelper"/>
     <preference for="MailCampaigns\Magento2Connector\Api\ApiPageHelperInterface" type="MailCampaigns\Magento2Connector\Helper\ApiPageHelper"/>
     <preference for="MailCampaigns\Magento2Connector\Api\ApiQueueHelperInterface" type="MailCampaigns\Magento2Connector\Helper\ApiQueueHelper"/>
     <preference for="MailCampaigns\Magento2Connector\Api\ApiStatusHelperInterface" type="MailCampaigns\Magento2Connector\Helper\ApiStatusHelper"/>
     <preference for="MailCampaigns\Magento2Connector\Api\CustomerSynchronizerInterface" type="MailCampaigns\Magento2Connector\Model\Synchronizer\CustomerSynchronizer"/>
-    <preference for="MailCampaigns\Magento2Connector\Api\LogHelperInterface" type="MailCampaigns\Magento2Connector\Helper\LogHelper"/>
-    <preference for="MailCampaigns\Magento2Connector\Api\LogReaderInterface" type="MailCampaigns\Magento2Connector\Model\LogReader"/>
-    <preference for="MailCampaigns\Magento2Connector\Api\LoggerProviderInterface" type="MailCampaigns\Magento2Connector\Helper\LoggerProvider"/>
     <preference for="MailCampaigns\Magento2Connector\Api\OrderSynchronizerInterface" type="MailCampaigns\Magento2Connector\Model\Synchronizer\OrderSynchronizer"/>
     <preference for="MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface" type="MailCampaigns\Magento2Connector\Model\Synchronizer\ProductSynchronizer"/>
     <preference for="MailCampaigns\Magento2Connector\Api\ProductSynchronizerHelperInterface" type="MailCampaigns\Magento2Connector\Model\Synchronizer\ProductSynchronizerHelper"/>

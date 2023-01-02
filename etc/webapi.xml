@@ -12,10 +12,4 @@
             <resource ref="Magento_Backend::admin"/>
         </resources>
     </route>
-    <route url="/V1/development/logs" method="GET">
-        <service class="MailCampaigns\Magento2Connector\Api\LogReaderInterface" method="read"/>
-        <resources>
-            <resource ref="Magento_Backend::admin"/>
-        </resources>
-    </route>
 </routes>

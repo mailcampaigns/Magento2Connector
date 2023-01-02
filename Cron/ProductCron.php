@@ -6,7 +6,6 @@ use Exception;
 use Magento\Catalog\Model\Product;
 use Magento\Cron\Model\Schedule;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerHelperInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
@@ -26,11 +25,10 @@ class ProductCron extends AbstractCron
 
     public function __construct(
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
         ProductSynchronizerInterface $synchronizer,
         ProductSynchronizerHelperInterface $synchronizerHelper
     ) {
-        parent::__construct($apiHelper, $logHelper);
+        parent::__construct($apiHelper);
 
         $this->synchronizer = $synchronizer;
         $this->synchronizerHelper = $synchronizerHelper;
@@ -59,14 +57,7 @@ class ProductCron extends AbstractCron
                 }
             }
         } catch (ApiCredentialsNotSetException $e) {
-            // Just add a debug message to the filelog.
-            if (method_exists($this->logger, 'addDebug')) {
-                $this->logger->addDebug($e->getMessage());
-            }
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
-
             throw $e;
         }
     }

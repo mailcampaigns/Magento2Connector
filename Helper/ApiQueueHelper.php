@@ -97,10 +97,6 @@ class ApiQueueHelper extends AbstractHelper implements ApiQueueHelperInterface
         // Save the new entry.
         $this->resourceModel->save($apiQueue);
 
-        $this->_logger->info('Added Api request to queue.', [
-            'stream_data' => $apiQueue->getStreamData()
-        ]);
-
         return $this;
     }
 

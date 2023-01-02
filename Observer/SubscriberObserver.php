@@ -8,7 +8,6 @@ use Magento\Framework\Event\Observer;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Store\Model\ScopeInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\SubscriberSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
@@ -22,10 +21,9 @@ class SubscriberObserver extends AbstractObserver
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
         SubscriberSynchronizerInterface $subscriberSynchronizer
     ) {
-        parent::__construct($scopeConfig, $apiHelper, $logHelper);
+        parent::__construct($scopeConfig, $apiHelper);
         $this->subscriberSynchronizer = $subscriberSynchronizer;
     }
 
@@ -47,13 +45,7 @@ class SubscriberObserver extends AbstractObserver
 
             $this->subscriberSynchronizer->synchronize($subscriber, $storeId);
         } catch (ApiCredentialsNotSetException $e) {
-            // Just add a debug message to the filelog.
-            if (method_exists($this->logger, 'addDebug')) {
-                $this->logger->addDebug($e->getMessage());
-            }
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
             throw $e;
         }
     }
