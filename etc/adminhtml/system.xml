@@ -29,18 +29,6 @@
                     <comment>Een 25-karakter string zoals te zien in Integraties > Software koppelingen > Magento 2 > API Token.</comment>
                 </field>
             </group>
-            <group id="development" translate="label" type="text" sortOrder="30" showInDefault="0" showInWebsite="0" showInStore="1">
-                <label>Technische Ondersteuning</label>
-                <comment>Hiermee geef je de technische afdeling van MailCampaigns de mogelijkheid om meer inzicht te krijgen in eventuele technische problemen die de connector ondervindt.</comment>
-                <field id="logging_enabled" translate="label" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
-                    <label>Ingeschakeld</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="logging_level" translate="label" type="select" sortOrder="20" showInDefault="0" showInWebsite="0" showInStore="1">
-                    <label>Log Niveau</label>
-                    <source_model>MailCampaigns\Magento2Connector\Model\Config\Configuration\Logging</source_model>
-                </field>
-            </group>
         </section>
         <section id="mailcampaigns_realtime_sync" translate="label" type="text" sortOrder="200" showInDefault="0" showInWebsite="0" showInStore="1">
             <label>Realtime Synchronisatie</label>

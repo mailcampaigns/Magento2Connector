@@ -9,7 +9,6 @@ use Magento\Newsletter\Model\Subscriber;
 use Magento\Newsletter\Model\SubscriberFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 
 class StatusCron extends AbstractCron
@@ -36,13 +35,12 @@ class StatusCron extends AbstractCron
 
     public function __construct(
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
         StoreManagerInterface $storeManager,
         SubscriberResourceModel $subscriberResourceModel,
         SubscriberFactory $subscriberFactory,
         Subscriber $subscriber
     ) {
-        parent::__construct($apiHelper, $logHelper);
+        parent::__construct($apiHelper);
         $this->storeManager = $storeManager;
         $this->subscriberResourceModel = $subscriberResourceModel;
         $this->subscriberFactory = $subscriberFactory;
@@ -71,9 +69,6 @@ class StatusCron extends AbstractCron
                     continue;
                 }
 
-                // Add log entry for debugging purposes.
-                $this->logUpdate($store->getId(), $updates);
-
                 foreach ($updates as $update) {
                     // Gather the needed data to create or update a subscriber.
                     $email = $update['E-mail'];
@@ -96,37 +91,9 @@ class StatusCron extends AbstractCron
                 }
             }
         } catch (ApiCredentialsNotSetException $e) {
-            // Just add a debug message to the filelog.
-            if (method_exists($this->logger, 'addDebug')) {
-                $this->logger->addDebug($e->getMessage());
-            }
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
             throw $e;
         }
-    }
-
-    /**
-     * Adds a log entry describing the update.
-     *
-     * @param int $storeId
-     * @param array $update
-     * @return $this
-     */
-    protected function logUpdate(int $storeId, array $update): self
-    {
-        $logMsg = sprintf(
-            'Received status update for %d subscriber(s) (store #%d).',
-            count($update),
-            $storeId
-        );
-
-        if (method_exists($this->logger, 'addDebug')) {
-            $this->logger->addDebug($logMsg, ['update_data' => $update]);
-        }
-
-        return $this;
     }
 
     /**

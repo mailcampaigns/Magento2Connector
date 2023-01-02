@@ -23,7 +23,6 @@ use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\SynchronizerInterface;
@@ -42,11 +41,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
     protected $synchronizerHelper;
 
     /**
-     * @var CurrencyFactory
-     */
-    protected $currencyFactory;
-
-    /**
      * @var StoreManagerInterface
      */
     protected $storeManager;
@@ -54,17 +48,14 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
         TaxHelper $taxHelper,
         ProductSynchronizerHelperInterface $synchronizerHelper,
-        CurrencyFactory $currencyFactory,
         StoreManagerInterface $storeManager
     ) {
-        parent::__construct($scopeConfig, $apiHelper, $logHelper);
+        parent::__construct($scopeConfig, $apiHelper);
 
         $this->taxHelper = $taxHelper;
         $this->synchronizerHelper = $synchronizerHelper;
-        $this->currencyFactory = $currencyFactory;
         $this->storeManager = $storeManager;
     }
 
@@ -170,9 +161,8 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
             try {
                 $flatAttrData = $this->flattenAttributeData($product, $attr);
             } catch (LocalizedException $e) {
-                // In case of an exception, log it and set an empty string as
+                // In case of an exception, set an empty string as
                 // the value so the whole process won't stop here.
-                $this->logger->addException($e);
                 $flatAttrData = '';
             }
 
@@ -198,11 +188,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
 
         /** @var Store $store */
         $store = $this->storeManager->getStore($storeId);
-
-        $rate = $this->currencyFactory
-            ->create()
-            ->load('EUR') // Note: Perhaps we need to get this value from the default store view.
-            ->toAnyRate($store->getCurrentCurrencyCode());
+        $rate = $store->getCurrentCurrencyRate();
 
         // Get Price Incl Tax
         $mProduct['price'] = $this->taxHelper->getTaxPrice(

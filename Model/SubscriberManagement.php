@@ -15,7 +15,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\ObjectManager\FactoryInterface;
 use Magento\Framework\Validator\EmailAddress;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use Magento\Newsletter\Model\ResourceModel\Subscriber as SubscriberResourceModel;
 use Magento\Newsletter\Model\ResourceModel\Subscriber\Collection;
 use Magento\Newsletter\Model\Subscriber;
@@ -90,11 +89,6 @@ class SubscriberManagement implements SubscriberManagementInterface
      */
     protected $_connection;
 
-    /**
-     * @var Logger
-     */
-    protected $logger;
-
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
@@ -103,8 +97,7 @@ class SubscriberManagement implements SubscriberManagementInterface
         Collection $subscriberCollection,
         Session $customerSession,
         AccountManagementInterface $customerAccountManagement,
-        SubscriberFactory $subscriberFactory,
-        LogHelperInterface $logHelper
+        SubscriberFactory $subscriberFactory
     ) {
         $this->_objectManager = $context->getObjectManager();
         $this->_storeManager = $storeManager;
@@ -114,7 +107,6 @@ class SubscriberManagement implements SubscriberManagementInterface
         $this->_customerSession = $customerSession;
         $this->customerAccountManagement = $customerAccountManagement;
         $this->_subscriberFactory = $subscriberFactory;
-        $this->logger = $logHelper->getLogger();
     }
 
     /**
@@ -153,8 +145,6 @@ class SubscriberManagement implements SubscriberManagementInterface
 
             return $result;
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
             throw $e;
         }
     }
@@ -213,8 +203,6 @@ class SubscriberManagement implements SubscriberManagementInterface
 
             return $subscribers->getData();
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
             throw $e;
         }
     }

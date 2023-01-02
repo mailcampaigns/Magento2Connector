@@ -6,7 +6,6 @@ use Exception;
 use Magento\Cron\Model\Schedule;
 use Magento\Quote\Model\Quote;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Api\QuoteSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Helper\ApiCredentialsNotSetException;
 use MailCampaigns\Magento2Connector\Model\ApiStatus;
@@ -26,11 +25,10 @@ class QuoteCron extends AbstractCron
 
     public function __construct(
         ApiHelperInterface $apiHelper,
-        LogHelperInterface $logHelper,
         QuoteSynchronizerInterface $synchronizer,
         ResourceModel\Quote $quoteResourceModel
     ) {
-        parent::__construct($apiHelper, $logHelper);
+        parent::__construct($apiHelper);
         $this->synchronizer = $synchronizer;
         $this->quoteResourceModel = $quoteResourceModel;
     }
@@ -55,13 +53,7 @@ class QuoteCron extends AbstractCron
                 $this->synchronizer->synchronize($quote, $quote->getStoreId());
             }
         } catch (ApiCredentialsNotSetException $e) {
-            // Just add a debug message to the filelog.
-            if (method_exists($this->logger, 'addDebug')) {
-                $this->logger->addDebug($e->getMessage());
-            }
         } catch (Exception $e) {
-            // Log and re-throw the exception.
-            $this->logger->addException($e);
             throw $e;
         }
     }

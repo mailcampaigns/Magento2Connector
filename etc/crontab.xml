@@ -19,8 +19,5 @@
         <job name="mailcampaigns_product_cron" instance="MailCampaigns\Magento2Connector\Cron\ProductCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>
-        <job name="mailcampaigns_log_rotation_cron" instance="MailCampaigns\Magento2Connector\Cron\LogRotationCron" method="execute">
-            <schedule>* * * * *</schedule>
-        </job>
     </group>
 </config>

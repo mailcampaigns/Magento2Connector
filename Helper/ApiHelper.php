@@ -14,7 +14,6 @@ use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiQueueHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiStatusHelperInterface;
-use MailCampaigns\Magento2Connector\Api\LogHelperInterface;
 use MailCampaigns\Magento2Connector\Model\ApiQueue;
 
 class ApiHelper extends AbstractHelper implements ApiHelperInterface
@@ -61,11 +60,6 @@ class ApiHelper extends AbstractHelper implements ApiHelperInterface
     protected $pageHelper;
 
     /**
-     * @var LogHelperInterface
-     */
-    protected $logHelper;
-
-    /**
      * @inheritDoc
      */
     public function __construct(
@@ -75,18 +69,15 @@ class ApiHelper extends AbstractHelper implements ApiHelperInterface
         ApiClientInterface $client,
         ApiQueueHelperInterface $queueHelper,
         ApiStatusHelperInterface $statusHelper,
-        ApiPageHelperInterface $pageHelper,
-        LogHelperInterface $logHelper
+        ApiPageHelperInterface $pageHelper
     ) {
         parent::__construct($context);
         $this->storeManager = $storeManager;
         $this->moduleList = $moduleList;
-        $this->_logger = $logHelper->getLogger();
         $this->client = $client;
         $this->queueHelper = $queueHelper;
         $this->statusHelper = $statusHelper;
         $this->pageHelper = $pageHelper;
-        $this->logHelper = $logHelper;
     }
 
     /**
@@ -103,31 +94,14 @@ class ApiHelper extends AbstractHelper implements ApiHelperInterface
             return $this;
         }
 
-        if (method_exists($this->_logger, 'info')) {
-            $this->_logger->info(sprintf('Processing %d queued Api calls..', $queueCnt));
-        }
-
         /** @var ApiQueue $queuedCall */
         foreach ($queuedCalls as $queuedCall) {
             $this->client->processQueuedCall($queuedCall);
 
             // Detect timeout.
             if ((time() - $startTime) > self::$queueTimeout) {
-                if (method_exists($this->_logger, 'info')) {
-                    $this->_logger->info(sprintf(
-                        'Timeout reached for processing queue, '
-                        . 'stopping (successfully processed %d of %d queued Api calls)..',
-                        $processedCnt,
-                        $queueCnt
-                    ));
-                }
-
                 return $this;
             }
-        }
-
-        if (method_exists($this->_logger, 'info')) {
-            $this->_logger->info('Finished processing all queued Api calls.');
         }
 
         return $this;
@@ -161,8 +135,6 @@ class ApiHelper extends AbstractHelper implements ApiHelperInterface
         $settings['website_id'] = $websiteId;
         $settings['version'] = $this->getModuleVersion();
         $settings['url'] = $this->_request->getDistroBaseUrl();
-        $settings['logging_enabled'] = $this->logHelper->isLoggingEnabled();
-        $settings['logging_level'] = $this->logHelper->getCurrentLoggingLevel();
 
         // Send settings to Api.
         $this->client
