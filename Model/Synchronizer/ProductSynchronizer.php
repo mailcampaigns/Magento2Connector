@@ -23,7 +23,6 @@ use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use MailCampaigns\Magento2Connector\Api\ApiHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ApiPageInterface;
-
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerHelperInterface;
 use MailCampaigns\Magento2Connector\Api\ProductSynchronizerInterface;
 use MailCampaigns\Magento2Connector\Api\SynchronizerInterface;
@@ -42,11 +41,6 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
     protected $synchronizerHelper;
 
     /**
-     * @var CurrencyFactory
-     */
-    protected $currencyFactory;
-
-    /**
      * @var StoreManagerInterface
      */
     protected $storeManager;
@@ -54,17 +48,14 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ApiHelperInterface $apiHelper,
-
         TaxHelper $taxHelper,
         ProductSynchronizerHelperInterface $synchronizerHelper,
-        CurrencyFactory $currencyFactory,
         StoreManagerInterface $storeManager
     ) {
         parent::__construct($scopeConfig, $apiHelper);
 
         $this->taxHelper = $taxHelper;
         $this->synchronizerHelper = $synchronizerHelper;
-        $this->currencyFactory = $currencyFactory;
         $this->storeManager = $storeManager;
     }
 
@@ -197,11 +188,7 @@ class ProductSynchronizer extends AbstractSynchronizer implements ProductSynchro
 
         /** @var Store $store */
         $store = $this->storeManager->getStore($storeId);
-
-        $rate = $this->currencyFactory
-            ->create()
-            ->load($store->getBaseCurrencyCode())
-            ->toAnyRate($store->getCurrentCurrencyCode());
+        $rate = $store->getCurrentCurrencyRate();
 
         // Get Price Incl Tax
         $mProduct['price'] = $this->taxHelper->getTaxPrice(
